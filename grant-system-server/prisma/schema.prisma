@@ -1,0 +1,396 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  role      Role     @default(STUDENT)  // User role (Admin, Student, Supervisor, Sponsor)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isActive             Boolean   @default(true)
+  emailConfirmed Boolean @default(false)
+  personalInfo PersonalInfo?
+  applications Application[] @relation("UserApplications")
+  reviewedApps Application[] @relation("Review")
+  tickets        Ticket[]
+  tasks          Task[]
+  messages       Message[]
+  groups           Group[]           @relation("GroupStudents")
+  supervisedGroups Group[]           @relation("GroupSupervisors")
+  userGrants      UserGrant[]  // Link to UserGrant model
+  viewGrants   Grant[] @relation("GrantViewAccess")
+  sentMessages     DirectMessage[]   @relation("SentMessages")
+  receivedMessages DirectMessage[]   @relation("ReceivedMessages")
+  notifications  Notification[]
+}
+
+model PersonalInfo {
+  id           Int        @id @default(autoincrement())
+  basicInfo    BasicInfo? @relation(fields: [id], references: [id], map: "BasicInfo_FK")
+  contactInfo  ContactInfo? @relation(fields: [id], references: [id], map: "ContactInfo_FK")
+  studyInfo    StudyInformation? @relation(fields: [id], references: [id], map: "StudyInfo_FK")
+  userId       Int  @unique
+  user         User       @relation(fields: [userId], references: [id])
+}
+
+
+model BasicInfo {
+  id              Int      @id @default(autoincrement())
+  personalInfo PersonalInfo?
+  name            String
+  fatherName      String
+  familyName      String
+  nationality     String
+  residenceCountry String
+  passport        String?
+  gender          String?
+  birthDate       DateTime?
+  hasDisability   Boolean?
+  disability      String?
+}
+
+model ContactInfo {
+  id        Int      @id @default(autoincrement())
+  personalInfo PersonalInfo?
+  phone     String
+  email     String
+  whatsapp  String?
+  facebook  String?
+  instagram String?
+  twitter   String?
+}
+
+model StudyInformation {
+  id           Int      @id @default(autoincrement())
+  personalInfo PersonalInfo?
+  programType  String
+  university   String
+  college      String
+  department   String
+  year         Int
+  studentIdNo  String
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  content   String   // Notification content
+  type      NotificationType  // Enum for different notification types
+  isRead    Boolean  @default(false) // To track if the user has read the notification
+  userId    Int
+  createdAt DateTime @default(now())
+
+  user      User @relation(fields: [userId], references: [id])
+}
+
+model Application {
+  id              Int      @id @default(autoincrement())
+  studentId       Int
+  supervisorId    Int?
+  status          ApplicationStatus @default(PENDING)
+  supportingFiles SupportingFiles?
+  rejectReason    String?
+  scholarshipInfo ScholarshipInfo?   // Scholarship request details
+  academicPerformance AcademicPerformance? // Academic performance info
+  residenceInfo   ResidenceInformation?    // Student residence details
+  siblings        Sibling[]   // Siblings details
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  student         User   @relation("UserApplications", fields: [studentId], references: [id])
+  supervisor      User?  @relation("Review", fields: [supervisorId], references: [id])
+
+  updates         File[]
+  userGrants      UserGrant[]  // Link to UserGrant model
+}
+
+model Grant {
+  id          Int      @id @default(autoincrement())
+  name        String   // Name of the grant (e.g., "Grant Alpha")
+  type        GrantType  // Enum to specify the type (sponsor or other types)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userGrants  UserGrant[]  // Link to the UserGrant model
+  viewAccessUsers User[] @relation("GrantViewAccess")
+}
+
+model UserGrant {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  grantId     Int
+  applicationId Int   // Reference to the application the user applied with
+  payments    Payment[]  // Payments related to this specific user-grant link
+  createdAt   DateTime @default(now())
+
+  // Relations
+  user        User       @relation(fields: [userId], references: [id])
+  grant       Grant      @relation(fields: [grantId], references: [id])
+  application Application @relation(fields: [applicationId], references: [id])
+}
+model Payment {
+  id        Int      @id @default(autoincrement())
+  userGrantId Int    // Link to the UserGrant model, not directly to Grant
+  amount    Float    // Payment amount
+  dueDate   DateTime // Payment due date
+  paidAt    DateTime? // Payment completion date
+  status    PaymentStatus @default(PENDING) // Payment status
+  createdAt DateTime @default(now())
+
+  // Relation with UserGrant
+  userGrant  UserGrant @relation(fields: [userGrantId], references: [id])
+
+  // Optional relation to Invoice
+  invoice   Invoice?
+}
+
+model Invoice {
+  id            Int      @id @default(autoincrement())
+  invoiceNumber String   @unique // Unique identifier for the invoice
+  paymentId     Int      @unique // Ensuring that the relation is one-to-one
+  dueDate       DateTime // Date by which the payment must be completed
+  status        PaymentStatus @default(PENDING) // Invoice status based on payment
+  amount        Float    // Total amount for the invoice
+  paidAt        DateTime? // Date when the payment is completed
+  createdAt     DateTime  @default(now())
+
+  // Relation with Payment
+  payment       Payment   @relation(fields: [paymentId], references: [id])
+}
+
+model SupportingFiles {
+  id            Int      @id @default(autoincrement())
+
+  personalId    File?    @relation(name: "PersonalIdFile", fields: [id], references: [id], map: "PersonalId_FK")
+  studentDoc    File?    @relation(name: "StudentDocFile", fields: [id], references: [id], map: "StudentDoc_FK")
+  medicalReport File?    @relation(name: "MedicalReportFile", fields: [id], references: [id], map: "MedicalReport_FK")
+  personalPhoto File?    @relation(name: "PersonalPhotoFile", fields: [id], references: [id], map: "PersonalPhoto_FK")
+  proofOfAddress File?   @relation(name: "ProofOfAddressFile", fields: [id], references: [id], map: "ProofOfAddress_FK")
+
+  applicationId Int      @unique  // One-to-one relation
+  application   Application @relation(fields: [applicationId], references: [id])
+}
+
+
+model ResidenceInformation {
+  id          Int      @id @default(autoincrement())
+  residenceType ResidenceType  // Living with family, private housing, dormitory
+  fatherStatus ParentStatus?  // Alive, deceased, etc.
+  fatherIncome  Float?
+  motherStatus ParentStatus?  // Alive, deceased, etc.
+  motherIncome  Float?
+  familyIncome  Float?
+  city String?
+  country String?
+  address      String?
+  applicationId    Int      @unique  // Mark this field as unique to ensure a one-to-one relationship
+  application      Application @relation(fields: [applicationId], references: [id])
+}
+model AcademicPerformance {
+  id          Int      @id @default(autoincrement())
+  gpaType     GpaType  // Cumulative GPA, Percentage, etc.
+  gpaValue    Float?
+  transcriptId Int?     @unique // Mark transcriptId as unique for one-to-one relationship
+  transcript  File?     @relation(fields: [transcriptId], references: [id]) // Academic transcript file
+
+  applicationId    Int      @unique  // Mark this field as unique to ensure a one-to-one relationship
+  application      Application @relation(fields: [applicationId], references: [id])
+}
+
+model ScholarshipInfo {
+  id               Int      @id @default(autoincrement())
+  supportType      SupportType
+  annualTuitionFee Float?
+  providedAmount   Float?
+  requestedAmount  Float?
+
+  applicationId    Int      @unique  // Mark this field as unique to ensure a one-to-one relationship
+  application      Application @relation(fields: [applicationId], references: [id])
+}
+
+model Sibling {
+  id         Int      @id @default(autoincrement())
+  userId     Int      // Links to the student user
+  name       String   // Sibling's name
+  relation   String   // Relationship (e.g., brother, sister)
+  education  String   // Education details (university, college, etc.)
+  sourceOfStudy StudySource // Enum for the source of the sibling's study coverage
+  grantSource String? // Source of grant (if the study is funded)
+  grantAmount Float?  // Grant amount for the sibling
+  document    File[]   // Linked files (e.g., student document)
+  createdAt  DateTime @default(now())
+  applicationId Int     // Foreign key to the Application model
+  application   Application @relation(fields: [applicationId], references: [id]) // Reference to the Application
+}
+
+
+model Ticket {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  status    TicketStatus @default(OPEN)
+  createdAt DateTime @default(now())
+
+  userId    Int
+  user      User @relation(fields: [userId], references: [id])
+  messages  Message[]
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  ticketId  Int
+  content   String
+  senderId  Int
+  createdAt DateTime @default(now())
+
+  ticket    Ticket @relation(fields: [ticketId], references: [id])
+  sender    User   @relation(fields: [senderId], references: [id])
+}
+
+model DirectMessage {
+  id          Int      @id @default(autoincrement())
+  content     String
+  senderId    Int
+  receiverId  Int
+  createdAt   DateTime @default(now())
+
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id])
+  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+}
+
+model Group {
+  id          Int      @id @default(autoincrement())
+  name        String   // Group name
+  createdAt   DateTime @default(now())
+  students    User[]   @relation("GroupStudents")  // Students in the group
+  supervisors User[]   @relation("GroupSupervisors")
+}
+model Task {
+  id          Int      @id @default(autoincrement())
+  description String   // Task description
+  status      TaskStatus @default(PENDING)  // Task status
+  supervisorId Int
+  supervisor  User     @relation(fields: [supervisorId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model FAQ {
+  id        Int      @id @default(autoincrement())
+  question  String   // FAQ question
+  answer    String   // FAQ answer
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model File {
+  id          Int      @id @default(autoincrement())
+  fileType    FileType @default(OTHER)  // Enum to categorize the type of file
+  title       String?  // Optional title of the file
+  description String?  // Optional description of the file
+  url         String   // File URL or path
+  createdAt   DateTime @default(now())  // Timestamp of when the file was created
+
+  // Relations to SupportingFiles
+  personalIdFile    SupportingFiles? @relation(name: "PersonalIdFile")
+  studentDocFile    SupportingFiles? @relation(name: "StudentDocFile")
+  medicalReportFile SupportingFiles? @relation(name: "MedicalReportFile")
+  personalPhotoFile SupportingFiles? @relation(name: "PersonalPhotoFile")
+  proofOfAddressFile SupportingFiles? @relation(name: "ProofOfAddressFile")
+
+  siblingId    Int?
+  sibling      Sibling? @relation(fields: [siblingId], references: [id])
+
+  applicationId Int?
+  application  Application? @relation(fields: [applicationId], references: [id])
+
+  academicPerformance AcademicPerformance? // No need to specify fields or references here
+
+}
+
+enum FileType {
+  ID // This will represent a group for ID documents like passport, photo, proof of address
+  ACADEMIC // This will represent all academic documents like transcripts and student records
+  MEDICAL // This will represent medical reports and related documents
+  SUPPORTING // This will represent all supporting documents
+  OTHER // This will represent any other files
+}
+
+enum Role {
+ADMIN
+SUPERVISOR
+STUDENT
+SPONSOR
+DONOR
+}
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum StudentType {
+  NEW
+  CURRENT
+}
+
+enum TicketStatus {
+  OPEN
+  CLOSED
+}
+
+enum NotificationType {
+  APPLICATION
+  TICKET
+  MESSAGE
+  APPLICATION_APPROVED
+  APPLICATION_REJECTED
+  TASK_ASSIGNED
+  TASK_COMPLETED
+  PAYMENT_DUE
+  PAYMENT_COMPLETED
+}
+
+enum StudySource {
+  SELF_FUNDED
+  SCHOLARSHIP
+}
+
+enum ResidenceType {
+  FAMILY
+  PRIVATE_HOUSING
+  DORMITORY
+}
+
+enum ParentStatus {
+  ALIVE
+  DECEASED
+  MISSING
+}
+enum SupportType {
+  FULL_SCHOLARSHIP
+  PARTIAL_SCHOLARSHIP
+  TUITION_ONLY
+  PERSONAL_EXPENSES
+}
+enum GpaType {
+  GPA_4
+  PERCENTAGE
+}
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+}
+enum GrantType {
+  SPONSOR
+  OTHER
+}
