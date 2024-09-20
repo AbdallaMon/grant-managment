@@ -4,9 +4,12 @@ CREATE TABLE `User` (
     `role` ENUM('ADMIN', 'SUPERVISOR', 'STUDENT', 'SPONSOR', 'DONOR') NOT NULL DEFAULT 'STUDENT',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
+    `email` VARCHAR(191) NULL,
+    `password` VARCHAR(64) NULL,
     `isActive` BOOLEAN NOT NULL DEFAULT true,
     `emailConfirmed` BOOLEAN NOT NULL DEFAULT false,
 
+    UNIQUE INDEX `User_email_key`(`email`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -40,7 +43,6 @@ CREATE TABLE `BasicInfo` (
 CREATE TABLE `ContactInfo` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `phone` VARCHAR(191) NOT NULL,
-    `email` VARCHAR(191) NOT NULL,
     `whatsapp` VARCHAR(191) NULL,
     `facebook` VARCHAR(191) NULL,
     `instagram` VARCHAR(191) NULL,
