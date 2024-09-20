@@ -53,6 +53,61 @@ export function logoutUser() {
     };
 }
 
+export const createUser = async (userData) => {
+    const { basicInfo,contactInfo,studyInformation} = userData;
+const {email,password,confirmPassword}=basicInfo
+    delete  basicInfo.email;
+    delete  basicInfo.password;
+    delete  basicInfo.confirmPassword;
+
+    if (password.length < 6) {
+        throw new Error('كلمة المرور يجب أن تكون على الأقل 6 أحرف');
+    }
+    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+    if (!passwordPattern.test(password)) {
+        throw new Error('يجب أن تحتوي كلمة المرور على حرف كبير وحرف صغير ورقم وأن تكون 8 أحرف على الأقل');
+    }
+    if(password!==confirmPassword){
+        throw new Error('كلمة المرور ليست متطابقة مع تاكيد كلمة المرور');
+    }
+    // تشفير كلمة المرور
+
+    const hashedPassword = bcrypt.hashSync(password, 8);
+
+    const user = await prisma.user.create({
+        data: {
+            email,
+            password: hashedPassword,
+            role: "STUDENT",
+            personalInfo: {
+                create: {
+                    basicInfo: {
+                        create: basicInfo,
+                    },
+                    contactInfo: {
+                        create: contactInfo,
+                    },
+                    studyInfo: {
+                        create: studyInformation,
+                    },
+                },
+            },
+        },
+    });
+
+    // Generate confirmation token
+    const token = jwt.sign({ userId: user.id }, SECRET_KEY, { expiresIn: '24h' });
+
+    // Send confirmation email
+    const confirmationLink = `${process.env.ORIGIN}/confirm/${token}`;
+    const emailHtml = `
+        <p>يرجى تأكيد بريدك الإلكتروني بالنقر على الرابط التالي:</p>
+        <a href="${confirmationLink}">تأكيد البريد الإلكتروني</a>
+    `;
+    await sendEmail(email, 'تأكيد البريد الإلكتروني', emailHtml);
+
+    return user;
+};
 export const requestPasswordReset = async (email) => {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {

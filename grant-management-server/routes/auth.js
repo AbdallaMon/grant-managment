@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import {loginUser, logoutUser, requestPasswordReset, resetPassword} from '../services/authServices.js';
-import {verifyToken} from "../services/utility.js";
+import {createUser, loginUser, logoutUser, requestPasswordReset, resetPassword} from '../services/authServices.js';
+import {handlePrismaError, verifyToken} from "../services/utility.js";
 
 const router = Router();
 
@@ -24,7 +24,23 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ status: 500, message: `خطأ: ${error.message}` });
     }
 });
+router.post('/register', async (req, res) => {
+    try {
+        const user = await createUser(req.body);
 
+        res.status(200).json({
+            status: 200,
+            message: "تم تسجيل الحساب بنجاح، يرجى التحقق من بريدك الإلكتروني لتأكيد حسابك",
+            user,
+        });
+    } catch (error) {
+        if (error.code === 'P2002' && error.meta?.target?.includes('email')) {
+            res.status(400).json({ status: 400, message: "هذا البريد الإلكتروني مسجل بالفعل" });
+        } else {
+                handlePrismaError(res, error);
+        }
+    }
+});
 // Logout Route
 router.post('/logout', (req, res) => {
     try {
