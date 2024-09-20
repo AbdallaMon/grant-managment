@@ -38,9 +38,10 @@ export async function loginUser(email, password) {
     }
 
  const token=   jwt.sign({
-        userId: user.id,
-        userRole: user.role,
-        accountStatus: user.isActive
+     id: user.id,
+       role: user.role,
+        accountStatus: user.isActive,
+     emailConfirmed:user.emailConfirmed
     }, SECRET_KEY, { expiresIn: '4h' });
 
     return {  user,token };
@@ -59,7 +60,15 @@ const {email,password,confirmPassword}=basicInfo
     delete  basicInfo.email;
     delete  basicInfo.password;
     delete  basicInfo.confirmPassword;
+    if (basicInfo.birthDate) {
+        basicInfo.birthDate = new Date(basicInfo.birthDate);
+    }
+    if(basicInfo.hasDisability==="no"){
+        basicInfo.hasDisability=false
+    }else{
+        basicInfo.hasDisability=true
 
+    }
     if (password.length < 6) {
         throw new Error('كلمة المرور يجب أن تكون على الأقل 6 أحرف');
     }
@@ -96,10 +105,10 @@ const {email,password,confirmPassword}=basicInfo
     });
 
     // Generate confirmation token
-    const token = jwt.sign({ userId: user.id }, SECRET_KEY, { expiresIn: '24h' });
+    const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: '24h' });
 
     // Send confirmation email
-    const confirmationLink = `${process.env.ORIGIN}/confirm/${token}`;
+    const confirmationLink = `${process.env.ORIGIN}/confirm?token=${token}`;
     const emailHtml = `
         <p>يرجى تأكيد بريدك الإلكتروني بالنقر على الرابط التالي:</p>
         <a href="${confirmationLink}">تأكيد البريد الإلكتروني</a>
@@ -114,7 +123,7 @@ export const requestPasswordReset = async (email) => {
         throw new Error('لا يوجد مستخدم بهذا البريد الإلكتروني');
     }
 
-    const token = jwt.sign({ userId: user.id }, SECRET_KEY, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: '1h' });
     const resetLink = `${process.env.ORIGIN}/reset?token=${token}`;
 
     const emailSubject = 'طلب إعادة تعيين كلمة المرور';
@@ -138,10 +147,34 @@ export const resetPassword = async (token, newPassword) => {
     const hashedPassword = await bcrypt.hash(newPassword, 8);
 
     await prisma.user.update({
-        where: { id: decoded.userId },
+        where: { id: decoded.id },
         data: { password: hashedPassword },
     });
 
     return 'تم إعادة تعيين كلمة المرور بنجاح، يرجى تسجيل الدخول';
+};
+
+export const confirmEmail = async (token) => {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    if (!decoded) {
+        throw new Error('رابط إعادة تعيين كلمة المرور غير صالح أو منتهي');
+    }
+    const user=await prisma.user.update({
+        where: { id: decoded.userId },
+        data: { emailConfirmed: true },
+    });
+  const loginToken=jwt.sign({
+        id: user.id,
+        role: user.role,
+        accountStatus: user.isActive,
+        emailConfirmed:user.emailConfirmed
+    }, SECRET_KEY, { expiresIn: '4h' });
+    const loginUser={
+    id: user.id,
+    role: user.role,
+    accountStatus: user.isActive,
+    emailConfirmed:user.emailConfirmed
+}
+    return {message:'تم تاكيد حسابك بنجاح , جاري اعادة توجيهك ',loginUser,loginToken}
 };
 

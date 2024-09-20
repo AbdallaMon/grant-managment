@@ -20,7 +20,6 @@ export default function LoginPage() {
               false,
               "جاري تسجيل الدخول",
         );
-        console.log(response, "response")
         if (response.status === 200) {
             setIsLoggedIn(true)
             setUser(response.user)

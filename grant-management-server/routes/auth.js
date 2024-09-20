@@ -1,5 +1,12 @@
 import { Router } from 'express';
-import {createUser, loginUser, logoutUser, requestPasswordReset, resetPassword} from '../services/authServices.js';
+import {
+    confirmEmail,
+    createUser,
+    loginUser,
+    logoutUser,
+    requestPasswordReset,
+    resetPassword
+} from '../services/authServices.js';
 import {handlePrismaError, verifyToken} from "../services/utility.js";
 
 const router = Router();
@@ -63,10 +70,10 @@ router.get('/status', (req, res) => {
         res.status(200).json({
             message: "المستخدم مصدق عليه",
             user: {
-                id: decoded.userId,
-                role: decoded.userRole,
-                centerId: decoded.centerId,
+                id: decoded.id,
+                role: decoded.role,
                 emailConfirmed: decoded.emailConfirmed,
+                accountStatus:decoded.accountStatus
             },
             auth: true,
         });
@@ -98,6 +105,20 @@ router.post('/reset/:token', async (req, res) => {
         res.status(200).json({ status: 200, message });
     } catch (error) {
         res.status(500).json({ status: 500, message: `خطأ: ${error.message}` });
+    }
+});
+router.post('/confirm/:token', async (req, res) => {
+    const { token } = req.params;
+    try {
+        const confirm = await confirmEmail(token);
+        res.cookie('token', confirm.loginToken, {
+            httpOnly: true,
+            secure: true,
+            path: '/',
+        });
+        res.status(200).json({ status: 200, message:confirm.message,user:confirm.loginUser });
+    } catch (error) {
+        handlePrismaError(res, error);
     }
 });
 export default router;

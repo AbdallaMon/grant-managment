@@ -73,7 +73,7 @@ model StudyInformation {
   university   String
   college      String
   department   String
-  year         Int
+  year         String
   studentIdNo  String
 }
 

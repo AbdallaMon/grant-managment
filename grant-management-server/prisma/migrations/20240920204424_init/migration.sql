@@ -58,7 +58,7 @@ CREATE TABLE `StudyInformation` (
     `university` VARCHAR(191) NOT NULL,
     `college` VARCHAR(191) NOT NULL,
     `department` VARCHAR(191) NOT NULL,
-    `year` INTEGER NOT NULL,
+    `year` VARCHAR(191) NOT NULL,
     `studentIdNo` VARCHAR(191) NOT NULL,
 
     PRIMARY KEY (`id`)

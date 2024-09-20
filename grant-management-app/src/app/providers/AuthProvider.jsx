@@ -28,6 +28,7 @@ export default function AuthProvider({children}) {
                 setUser({
                     role: null,
                     emailConfirmed: null,
+                    accountStatus: null,
                 })
             } finally {
                 setValidatingAuth(false)

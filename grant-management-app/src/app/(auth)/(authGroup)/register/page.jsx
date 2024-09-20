@@ -25,6 +25,7 @@ import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import ResidenceAndNationalitySelectors
     from "@/app/UiComponents/formComponents/MUIInputs/ResidenceAndNationalitySelectors";
+import DisabilityInput from "@/app/UiComponents/formComponents/MUIInputs/DisabilityInput";
 
 const locales = ["ar"];
 
@@ -137,9 +138,11 @@ const stepInputs = [
             },
         },
         {
-            data: {id: "country", type: "country", country: {defaultValue: null}, city: {defaultValue: null}},
+            data: {id: "country", type: "country",},
         },
-
+        {
+            data: {id: "hasDisability", type: "disability",},
+        },
     ],
     [
         {
@@ -159,6 +162,10 @@ const stepInputs = [
         {
             data: {id: "college", label: "الكلية", type: "text", required: true},
             pattern: {required: {value: true, message: "اسم الكلية مطلوب"}},
+        },
+        {
+            data: {id: "department", label: "القسم", type: "text", required: true},
+            pattern: {required: {value: true, message: "اسم القسم مطلوب"}},
         },
         {
             data: {id: "year", label: "السنة الدراسية", type: "number", required: true},
@@ -197,13 +204,15 @@ export default function RegisterForm() {
     const {control, setValue, handleSubmit, register, trigger, formState: {errors}, watch} = useForm();
 
     const onSubmit = async (data) => {
-
         if (activeStep < steps.length - 1) {
             const sectionData = {}
             stepInputs[activeStep].forEach((input) => {
                 if (input.data.id === "country") {
                     sectionData.residenceCountry = data.residenceCountry
                     sectionData.nationality = data.nationality
+                } else if (input.data.id === "hasDisability") {
+                    sectionData.hasDisability = data.hasDisability
+                    sectionData.disability = data.disability
                 } else {
                     sectionData[input.data.id] = data[input.data.id]
                 }
@@ -212,10 +221,8 @@ export default function RegisterForm() {
             setActiveStep((prevStep) => prevStep + 1);
         } else {
             const response = await handleRequestSubmit(formData, setLoading, "auth/register", false, "جاري انشاء الحساب")
-            console.log(response, "response")
             if (response.status === 200) {
-
-                setMessage("تم إرسال البيانات بنجاح!");
+                setMessage(response.message);
             }
         }
     };
@@ -236,7 +243,7 @@ export default function RegisterForm() {
                           bgcolor: "background.default",
                           borderRadius: 2
                       }}>
-                          <Stepper activeStep={activeStep} alternativeLabel>
+                          <Stepper activeStep={activeStep} alternativeLabel sx={{mb: 5}}>
                               {steps.map((step) => (
                                     <Step key={step}>
                                         <StepLabel>{step}</StepLabel>
@@ -253,7 +260,6 @@ export default function RegisterForm() {
                           {!message && (
                                 <>
                                     <form onSubmit={handleSubmit(onSubmit)}>
-                                        <Typography variant="h5" sx={{mt: 2}}>{steps[activeStep]}</Typography>
                                         <Grid container spacing={2}>
                                             {activeStep < stepInputs.length && stepInputs[activeStep].map((input) => (
                                                   input.data.type === "SelectField" ? (
@@ -304,86 +310,91 @@ export default function RegisterForm() {
                                                                   errors={errors}
                                                             />
                                                         </Grid>
-                                                  ) : input.data.type === "country" ?
-                                                        <ResidenceAndNationalitySelectors errors={errors}
-                                                                                          control={control}
-                                                                                          setValue={setValue}
-                                                                                          register={register}
+                                                  ) : input.data.type === "disability" ?
+                                                        <DisabilityInput errors={errors}
+                                                                         control={control}
+                                                                         watch={watch}
                                                         /> :
-
-                                                        input.data.type === "password" ?
-                                                              <Grid size={{
-                                                                  xs: 12,
-                                                                  md: 6
-                                                              }}>
-                                                                  <Controller
-                                                                        name={input.data.id}
-                                                                        control={control}
-                                                                        rules={{
-                                                                            required: input.pattern?.required.message,
-                                                                            pattern: {
-                                                                                value: input.pattern?.pattern?.value,
-                                                                                message: input.pattern?.pattern?.message,
-                                                                            }
-                                                                        }}
-                                                                        render={({field}) => (
-                                                                              <InputField
-                                                                                    input={input}
-                                                                                    register={register}
-                                                                                    errors={errors}
-                                                                                    watch={watch}
-                                                                                    trigger={trigger}
-                                                                                    variant="outlined"
-
-                                                                              />
-                                                                        )}
-                                                                  />
-                                                              </Grid>
-                                                              : input.data.type === "phone" ?
+                                                        input.data.type === "country" ?
+                                                              <ResidenceAndNationalitySelectors errors={errors}
+                                                                                                control={control}
+                                                                                                setValue={setValue}
+                                                                                                register={register}
+                                                              /> :
+                                                              input.data.type === "password" ?
                                                                     <Grid size={{
                                                                         xs: 12,
                                                                         md: 6
                                                                     }}>
-                                                                        <PhoneInput
-                                                                              name={"phone"}
+                                                                        <Controller
+                                                                              name={input.data.id}
                                                                               control={control}
-                                                                              input={input}
+                                                                              rules={{
+                                                                                  required: input.pattern?.required.message,
+                                                                                  pattern: {
+                                                                                      value: input.pattern?.pattern?.value,
+                                                                                      message: input.pattern?.pattern?.message,
+                                                                                  }
+                                                                              }}
+                                                                              render={({field}) => (
+                                                                                    <InputField
+                                                                                          input={input}
+                                                                                          register={register}
+                                                                                          errors={errors}
+                                                                                          watch={watch}
+                                                                                          trigger={trigger}
+                                                                                          variant="outlined"
+
+                                                                                    />
+                                                                              )}
                                                                         />
                                                                     </Grid>
-                                                                    :
-                                                                    (
+                                                                    : input.data.type === "phone" ?
                                                                           <Grid size={{
                                                                               xs: 12,
                                                                               md: 6
                                                                           }}>
-                                                                              <Controller
-                                                                                    name={input.data.id}
+                                                                              <PhoneInput
+                                                                                    name={"phone"}
                                                                                     control={control}
-                                                                                    rules={{
-                                                                                        required: input.pattern?.required.message,
-                                                                                        pattern: {
-                                                                                            value: input.pattern?.pattern?.value,
-                                                                                            message: input.pattern?.pattern?.message,
-                                                                                        }
-                                                                                    }}
-                                                                                    render={({field}) => (
-                                                                                          <TextField
-                                                                                                {...field}
-                                                                                                label={input.data.label}
-                                                                                                fullWidth
-                                                                                                margin="none"
-                                                                                                error={!!errors[input.data.id]}
-                                                                                                helperText={errors[input.data.id] && errors[input.data.id].message}
-                                                                                                sx={{
-                                                                                                    bgcolor: 'background.default',
-
-                                                                                                }}
-
-                                                                                          />
-                                                                                    )}
+                                                                                    input={input}
                                                                               />
                                                                           </Grid>
-                                                                    )
+                                                                          :
+                                                                          (
+                                                                                <Grid size={{
+                                                                                    xs: 12,
+                                                                                    md: 6
+                                                                                }}>
+                                                                                    <Controller
+                                                                                          name={input.data.id}
+                                                                                          control={control}
+                                                                                          rules={{
+                                                                                              required: input.pattern?.required.message,
+                                                                                              pattern: {
+                                                                                                  value: input.pattern?.pattern?.value,
+                                                                                                  message: input.pattern?.pattern?.message,
+                                                                                              }
+                                                                                          }}
+                                                                                          render={({field}) => (
+                                                                                                <TextField
+                                                                                                      {...field}
+                                                                                                      label={input.data.label}
+                                                                                                      fullWidth
+                                                                                                      type={input.data.type}
+                                                                                                      margin="none"
+                                                                                                      error={!!errors[input.data.id]}
+                                                                                                      helperText={errors[input.data.id] && errors[input.data.id].message}
+                                                                                                      sx={{
+                                                                                                          bgcolor: 'background.default',
+
+                                                                                                      }}
+
+                                                                                                />
+                                                                                          )}
+                                                                                    />
+                                                                                </Grid>
+                                                                          )
                                             ))}
                                         </Grid>
                                         {activeStep === steps.length - 1 && (
@@ -423,25 +434,35 @@ function Review({stepsIds, steps, data, inputs}) {
                                   <>
                                       {item.data.type !== "password" && item.data.type !== "confirmPassword" &&
                                             <>
-                                                {item.id === "country" ?
-                                                      <>
-                                                          <Grid size={6} key={item.data.id}>
-                                                              <Typography
-                                                                    variant="body1"><strong>بلد
-                                                                  الاقامة:</strong> {data.basicInfo.residenceCountry}
-                                                              </Typography>
-                                                              <Typography
-                                                                    variant="body1"><strong>المدينة:</strong> {data.basicInfo.nationality}
-                                                              </Typography>
-                                                          </Grid>
-                                                      </>
-                                                      :
-                                                      <Grid size={{xs: 12, md: 6}} key={item.data.id}>
-                                                          <Typography
-                                                                variant="body1"><strong>{item.data.label}:</strong> {data[step][item.data.id]}
-                                                          </Typography>
-                                                      </Grid>
-                                                }
+
+                                                <Grid size={{xs: 12, md: 6}} key={item.data.id}>
+                                                    <Typography
+                                                          variant="body1"><strong>{item.data.label}:</strong> {data[step][item.data.id]}
+                                                    </Typography>
+                                                </Grid>
+                                            </>
+                                      }
+                                      {index === 0 &&
+                                            <>
+                                                <Grid size={6} key={item.data.id}>
+                                                    <Typography
+                                                          variant="body1"><strong>بلد
+                                                        الاقامة:</strong> {data.basicInfo.residenceCountry}
+                                                    </Typography>
+                                                    <Typography
+                                                          variant="body1"><strong>المدينة:</strong> {data.basicInfo.nationality}
+                                                    </Typography>
+                                                </Grid>
+                                                <Grid size={6} key={item.data.id}>
+                                                    <Typography
+                                                          variant="body1"><strong> لدية اعاقة؟
+                                                        :</strong> {data.basicInfo.hasDisability}
+                                                    </Typography>
+                                                    <Typography
+                                                          variant="body1"><strong>تفاصيل
+                                                        الاعاقة:</strong> {data.basicInfo.disability}
+                                                    </Typography>
+                                                </Grid>
                                             </>
                                       }
                                   </>
