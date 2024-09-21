@@ -3,30 +3,32 @@ import {createTheme, ThemeProvider} from "@mui/material";
 import {CacheProvider} from "@emotion/react";
 import createCache from "@emotion/cache";
 import rtlPlugin from "stylis-plugin-rtl";
+import colors from "@/app/helpers/colors";
 
 
 const theme = createTheme({
     direction: "rtl",
     palette: {
         primary: {
-            main: "#7c5e24",
-            contrastText: "#ffffff",
+            main: colors.primary,
+            contrastText: colors.body,
+            dark: colors.primaryAlt
         },
         secondary: {
-            main: "#332d2d",
-            contrastText: "#ffffff",
+            main: colors.secondary,
+            contrastText: colors.body,
         },
         tertiary: {
-            main: "#384155",
-            contrastText: "#ffffff",
+            main: colors.heading,
+            contrastText: colors.body,
         },
         background: {
-            default: "#f7f7f7",
-            paper: "#ffffff",
+            default: colors.bgPrimary,
+            paper: colors.paperBg,
         },
         text: {
-            primary: "#332d2d",
-            secondary: "#384155",
+            primary: colors.primary,
+            secondary: colors.heading,
         },
     },
     typography: {

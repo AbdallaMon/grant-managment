@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import {initialPageLimit} from "@/app/helpers/constants";
 import {getData} from "@/app/helpers/functions/getData";
 
@@ -16,6 +16,7 @@ export default function useDataFetcher(url, noArr, initialFilters = {}) {
     const [printMode, setPrintMode] = useState(false);
     const [render, setRender] = useState(false);
     const [others, setOthers] = useState(""); //add this line
+    const [error, setError] = useState(null)
     useEffect(() => {
         async function fetchData() {
             if (printMode) return;
@@ -29,9 +30,14 @@ export default function useDataFetcher(url, noArr, initialFilters = {}) {
                 sort,
                 others,
             });
-            setData(res.data);
-            setTotalPages(res.totalPages);
-            setTotal(res.total);
+            if (res.status !== 200) {
+                setError(res.message)
+            } else {
+                setData(res.data);
+                setTotalPages(res.totalPages);
+                setTotal(res.total);
+                setError(null)
+            }
         }
 
         fetchData();
@@ -45,7 +51,7 @@ export default function useDataFetcher(url, noArr, initialFilters = {}) {
         setPage,
         limit,
         setLimit,
-        totalPages,filters,
+        totalPages, filters,
         setFilters,
         setSearch,
         search,
@@ -57,6 +63,7 @@ export default function useDataFetcher(url, noArr, initialFilters = {}) {
         setRender,
         setOthers,
         others,
+        error, setError
     };
 }
 

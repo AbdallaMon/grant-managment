@@ -160,7 +160,7 @@ export const confirmEmail = async (token) => {
         throw new Error('رابط إعادة تعيين كلمة المرور غير صالح أو منتهي');
     }
     const user=await prisma.user.update({
-        where: { id: decoded.userId },
+        where: { id: decoded.id },
         data: { emailConfirmed: true },
     });
   const loginToken=jwt.sign({

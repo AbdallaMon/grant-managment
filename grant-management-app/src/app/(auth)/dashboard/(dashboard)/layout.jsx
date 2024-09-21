@@ -30,7 +30,6 @@ export default function Layout({supervisor, admin, student, sponsor}) {
 
         fetchData();
     }, [validatingAuth]);
-    console.log(user, "user")
     if (!user || !user.role) return null;
     const role = user?.role;
     return (

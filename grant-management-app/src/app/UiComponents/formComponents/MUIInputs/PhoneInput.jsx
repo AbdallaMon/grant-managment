@@ -24,7 +24,7 @@ export default function PhoneInput({control, input}) {
                                 fullWidth={true}
                                 value={value ?? ''}
                                 margin="dense"
-
+                                defaultCountry="EG"
                                 label={input.data.label}
                                 id={input.id}
                                 defaultValue={input.data.defaultValue}

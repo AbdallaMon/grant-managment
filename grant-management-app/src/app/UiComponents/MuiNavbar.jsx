@@ -1,181 +1,181 @@
 "use client";
-import {AppBar, Toolbar, Box, Typography, IconButton, Menu, MenuItem, Container, Button} from "@mui/material";
+
+import React, {useEffect, useState} from "react";
+import {
+    AppBar,
+    Toolbar,
+    Box,
+    IconButton,
+    Button,
+    Drawer,
+    List,
+    ListItem,
+    ListItemText,
+    useMediaQuery,
+    useTheme,
+} from "@mui/material";
+import {FaBars, FaBell, FaEnvelope} from "react-icons/fa"; // Add icons for notifications and messages
 import Link from "next/link";
-import {useState} from "react";
-import {FaUserCircle, FaBars} from "react-icons/fa";
-import LogoutButton from "@/app/UiComponents/Buttons/LogoutBtn";
-import useMediaQuery from '@mui/material/useMediaQuery';
-import {useAuth} from "@/app/providers/AuthProvider";
+import {useAuth} from "@/app/providers/AuthProvider"; // Assuming you have an AuthProvider
+import LogoutButton from "@/app/UiComponents/Buttons/LogoutBtn"; // Logout button component
+
+// Define role-based navigation structure in Arabic
+const roleBasedLinks = {
+    ADMIN: [
+        {name: "لوحة التحكم", route: "dashboard"},
+        {name: "المستخدمين", route: "users"},
+        {name: "المشرفين", route: "supervisors"},
+        {name: "المتبرعين والرعاة", route: "donors-sponsors"},
+        {name: "المنح الدراسية", route: "grants"},
+        {name: "التطبيقات", route: "applications"},
+    ],
+    SUPERVISOR: [
+        {name: "لوحة التحكم", route: "dashboard"},
+        {name: "المجموعات", route: "groups"},
+        {name: "الطلاب", route: "students"},
+        {name: "طلبات المراجعة", route: "applications-review"},
+        {name: "المنح الدراسية", route: "grants"},
+    ],
+    STUDENT: [
+        {name: "لوحة التحكم", route: "dashboard"},
+        {name: "المنح الدراسية", route: "grants"},
+        {name: "الملف الشخصي", route: "profile"},
+    ],
+    SPONSOR: [
+        {name: "لوحة التحكم", route: "dashboard"},
+    ],
+    DONOR: [
+        {name: "لوحة التحكم", route: "dashboard"},
+    ],
+};
+
+// Separated component for Notifications and Messages
+function NotificationsAndMessages({role, isLoggedIn}) {
+    if (role === "SPONSOR" || role === "DONOR" || !isLoggedIn) return null;
+
+    return (
+          <Box sx={{display: "flex", alignItems: "center"}}>
+              <IconButton component={Link} href="/dashboard/messages" aria-label="Messages" sx={{mx: 1}}
+                          color="primary">
+
+                  <FaEnvelope size={20}/>
+              </IconButton>
+              <IconButton component={Link} href="/dashboard/notifications" aria-label="Notifications" sx={{mx: 1}}
+                          color="primary">
+                  <FaBell size={20}/>
+              </IconButton>
+          </Box>
+    );
+}
 
 export default function Navbar() {
-    const {isLoggedIn, user: {data}} = useAuth();
-    const [anchorEl, setAnchorEl] = useState(null);
-    const [menuAnchorEl, setMenuAnchorEl] = useState(null);
-    const [open, setOpen] = useState(false);
-    const isMobile = useMediaQuery('(max-width:600px)');
+    const {isLoggedIn, user: {role} = {}} = useAuth(); // Assuming useAuth provides user data
+    const isSmallMedia = useMediaQuery("(max-width:767px)");
+    const theme = useTheme();
 
-    const handleMenu = (event) => {
-        setAnchorEl(event.currentTarget);
-        setOpen(!open);
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const [links, setLinks] = useState([]);
+
+    // Manage links based on role
+    useEffect(() => {
+        if (isLoggedIn) {
+            setLinks(roleBasedLinks[role] || []);
+        } else {
+            setLinks([]);
+        }
+    }, [isLoggedIn, role]);
+
+    const toggleDrawer = (open) => {
+        setDrawerOpen(open);
     };
 
-    const handleMenuClose = () => {
-        setAnchorEl(null);
-        setOpen(false);
-    };
-
-    const handleLinksMenu = (event) => {
-        setMenuAnchorEl(event.currentTarget);
-    };
-
-    const handleLinksMenuClose = () => {
-        setMenuAnchorEl(null);
+    const renderLinks = (links) => {
+        return links.map((link) => (
+              <Button
+                    key={link.route}
+                    component={Link}
+                    href={`/dashboard/${link.route === "dashboard" ? "" : link.route}`}
+                    sx={{mx: 2}}
+              >
+                  {link.name}
+              </Button>
+        ));
     };
 
     return (
           <Box sx={{flexGrow: 1}}>
-              <AppBar position="absolute" sx={{zIndex: 10, backgroundColor: "background.default"}}>
-                  <Container maxWidth="xl">
-                      <Toolbar>
+              <AppBar position="fixed" sx={{backgroundColor: theme.palette.background.paper}}>
+                  <Toolbar>
+                      {isSmallMedia ? (
+                            <>
+                                <IconButton
+                                      edge="start"
+                                      color="primary"
+                                      aria-label="menu"
+                                      onClick={() => toggleDrawer(true)}
+                                >
+                                    <FaBars/>
+                                </IconButton>
+                                <NotificationsAndMessages role={role} isLoggedIn={isLoggedIn}/>
+
+                                <Drawer
+                                      anchor="left"
+                                      open={drawerOpen}
+                                      onClose={() => toggleDrawer(false)}
+                                      sx={{
+                                          "& .MuiPaper-root": {
+                                              backgroundColor: theme.palette.background.paper,
+                                          },
+                                      }}
+                                >
+                                    <Box sx={{width: 250}}>
+                                        <List>
+                                            {isLoggedIn ? (
+                                                  links.map((link, index) => (
+                                                        <ListItem
+                                                              button
+                                                              key={index}
+                                                              component={Link}
+                                                              href={`/dashboard/${link.route === "dashboard" ? "" : link.route}`}
+                                                        >
+                                                            <ListItemText primary={link.name}/>
+                                                        </ListItem>
+                                                  ))
+                                            ) : (
+                                                  <ListItem button component={Link} href="/login">
+                                                      <ListItemText primary="تسجيل الدخول"/>
+                                                  </ListItem>
+                                            )}
+                                        </List>
+                                    </Box>
+                                </Drawer>
+                            </>
+                      ) : (
+                            <>
+                                <NotificationsAndMessages role={role}
+                                                          isLoggedIn={isLoggedIn}/>
+
+                                <Box sx={{flexGrow: 1, display: "flex", justifyContent: "center"}}>
+                                    {renderLinks(links)}
+                                </Box>
+                            </>
+                      )}
+
+                      <Box sx={{ml: "auto"}}>
                           {isLoggedIn ? (
-                                data.role === "STUDENT" ? (
-                                      <>
-                                          {isMobile ? (
-                                                <Box display="flex" alignItems="center" sx={{flexGrow: 1}}>
-                                                    <IconButton
-                                                          size="large"
-                                                          aria-label="menu"
-                                                          aria-controls="links-menu-appbar"
-                                                          aria-haspopup="true"
-                                                          onClick={handleLinksMenu}
-                                                          color="primary"
-                                                    >
-                                                        <FaBars/>
-                                                    </IconButton>
-                                                    <Menu
-                                                          id="links-menu-appbar"
-                                                          anchorEl={menuAnchorEl}
-                                                          anchorOrigin={{
-                                                              vertical: 'top',
-                                                              horizontal: 'left',
-                                                          }}
-                                                          keepMounted
-                                                          transformOrigin={{
-                                                              vertical: 'top',
-                                                              horizontal: 'left',
-                                                          }}
-                                                          open={Boolean(menuAnchorEl)}
-                                                          onClose={handleLinksMenuClose}
-                                                    >
-                                                        <MenuItem onClick={handleLinksMenuClose}>
-                                                            <Link href="/dashboard">
-                                                                <Button color="primary">Dashboard</Button>
-                                                            </Link>
-                                                        </MenuItem>
-                                                        <MenuItem onClick={handleLinksMenuClose}>
-                                                            <Link href="/dashboard/attendance">
-                                                                <Button color="primary">Attendance</Button>
-                                                            </Link>
-                                                        </MenuItem>
-                                                        <MenuItem onClick={handleLinksMenuClose}>
-                                                            <Link href="/dashboard/calendar">
-                                                                <Button color="primary">Calendar</Button>
-                                                            </Link>
-                                                        </MenuItem>
-                                                        <MenuItem onClick={handleLinksMenuClose}>
-                                                            <Link href="/dashboard/profile">
-                                                                <Button color="primary">Profile</Button>
-                                                            </Link>
-                                                        </MenuItem>
-                                                    </Menu>
-                                                    <Box sx={{
-                                                        flexGrow: 1,
-                                                        display: "flex",
-                                                        justifyContent: "flex-end"
-                                                    }}>
-                                                        <LogoutButton fit={true}/>
-                                                    </Box>
-                                                </Box>
-                                          ) : (
-                                                <Box display="flex" alignItems="center" gap={2} sx={{flexGrow: 1}}>
-                                                    <Link href="/dashboard">
-                                                        <Button color="primary">Dashboard</Button>
-                                                    </Link>
-                                                    <Link href="/dashboard/attendance">
-                                                        <Button color="primary">Attendance</Button>
-                                                    </Link>
-                                                    <Link href="/dashboard/calendar">
-                                                        <Button color="primary">Calendar</Button>
-                                                    </Link>
-                                                    <Link href="/dashboard/profile">
-                                                        <Button color="primary">Profile</Button>
-                                                    </Link>
-                                                    <Box sx={{
-                                                        flexGrow: 1,
-                                                        display: "flex",
-                                                        justifyContent: "flex-end"
-                                                    }}>
-                                                        <LogoutButton fit={true}/>
-                                                    </Box>
-                                                </Box>
-                                          )}
-                                      </>
-                                ) : (
-                                      <div className={"flex justify-between w-full"}>
-                                          <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
-                                          </Typography>
-                                          <IconButton
-                                                size="large"
-                                                aria-label="account of current user"
-                                                aria-controls="menu-appbar"
-                                                aria-haspopup="true"
-                                                onClick={(event) => handleMenu(event)}
-                                                color="primary"
-                                          >
-                                              <FaUserCircle/>
-                                          </IconButton>
-                                          {anchorEl && open && (
-                                                <Menu
-                                                      id="menu-appbar"
-                                                      anchorEl={anchorEl}
-                                                      anchorOrigin={{
-                                                          vertical: 'top',
-                                                          horizontal: 'right',
-                                                      }}
-                                                      keepMounted
-                                                      transformOrigin={{
-                                                          vertical: 'top',
-                                                          horizontal: 'right',
-                                                      }}
-                                                      open={Boolean(anchorEl)}
-                                                      onClose={handleMenuClose}
-                                                >
-                                                    <MenuItem>
-                                                        <Link href="/dashboard"
-                                                              className={"mr-4 flex gap-1 items-center"}>
-                                                            <FaUserCircle/> Dashboard
-                                                        </Link>
-                                                    </MenuItem>
-                                                    <MenuItem>
-                                                        <LogoutButton/>
-                                                    </MenuItem>
-                                                </Menu>
-                                          )}
-                                      </div>
-                                )
+                                <LogoutButton/>
                           ) : (
-                                <div className={"flex justify-between w-full"}>
-                                    <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
-                                    </Typography>
-                                    <Button variant="contained" color="tertiary">
-                                        <Link href="/login" className={"flex"}>
-                                            Login
-                                        </Link>
-                                    </Button>
-                                </div>
+                                <Button
+                                      component={Link}
+                                      href="/login"
+                                      color="secondary"
+                                      variant="contained"
+                                >
+                                    تسجيل الدخول
+                                </Button>
                           )}
-                      </Toolbar>
-                  </Container>
+                      </Box>
+                  </Toolbar>
               </AppBar>
           </Box>
     );

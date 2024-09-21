@@ -1,5 +1,5 @@
 "use client";
-import React, {useState} from "react";
+import React, {Fragment, useState} from "react";
 import {Controller, useForm} from "react-hook-form";
 import {
     Box,
@@ -31,8 +31,8 @@ const locales = ["ar"];
 
 const steps = [
     "المعلومات الأساسية",
-    "معلومات الاتصال",
     "المعلومات الدراسية",
+    "معلومات الاتصال",
     "مراجعة البيانات"
 
 ]
@@ -42,25 +42,24 @@ const stepInputs = [
         {
             data: {id: "name", label: "اسمك", type: "text", required: true},
             pattern: {
-                required: {value: true, message: "الاسم  مطلوب"},
-                pattern: {value: /^\S+$/, message: "الاسم  يجب أن يكون كلمة واحدة فقط"}
+                required: {value: true, message: "الاسم مطلوب"},
+                pattern: {value: /^[^\s]+(?:\s)?$/, message: "الاسم يجب أن يكون كلمة واحدة فقط"}
             },
         },
         {
             data: {id: "fatherName", label: "اسم الأب", type: "text", required: true},
             pattern: {
                 required: {value: true, message: "اسم الأب مطلوب"},
-                pattern: {value: /^\S+$/, message: "اسم الأب يجب أن يكون كلمة واحدة فقط"}
+                pattern: {value: /^[^\s]+(?:\s)?$/, message: "اسم الأب يجب أن يكون كلمة واحدة فقط"}
             },
         },
         {
             data: {id: "familyName", label: "اسم العائلة", type: "text", required: true},
             pattern: {
                 required: {value: true, message: "اسم العائلة مطلوب"},
-                pattern: {value: /^\S+$/, message: "اسم العائلة يجب أن يكون كلمة واحدة فقط"}
+                pattern: {value: /^[^\s]+(?:\s)?$/, message: "اسم العائلة يجب أن يكون كلمة واحدة فقط"}
             },
         },
-
         {
             data: {
                 id: "gender",
@@ -141,6 +140,12 @@ const stepInputs = [
             data: {id: "country", type: "country",},
         },
         {
+            data: {id: "passport", label: "رقم جواز السفر/الهوية", type: "number", required: true},
+            pattern: {
+                required: {value: true, message: "اسم رقم جواز السفر/الهوي مطلوب"},
+            },
+        },
+        {
             data: {id: "hasDisability", type: "disability",},
         },
     ],
@@ -172,7 +177,7 @@ const stepInputs = [
             pattern: {required: {value: true, message: "السنة الدراسية مطلوبة"}},
         },
         {
-            data: {id: "studentIdNo", label: "رقم الطالب الجامعي", type: "text", required: true},
+            data: {id: "studentIdNo", label: "رقم الطالب الجامعي", type: "number", required: true},
             pattern: {required: {value: true, message: "رقم الطالب الجامعي مطلوب"}},
         },
 
@@ -208,8 +213,8 @@ export default function RegisterForm() {
             const sectionData = {}
             stepInputs[activeStep].forEach((input) => {
                 if (input.data.id === "country") {
-                    sectionData.residenceCountry = data.residenceCountry
-                    sectionData.nationality = data.nationality
+                    sectionData.residenceCountry = data.residenceCountry.country
+                    sectionData.nationality = data.nationality.country
                 } else if (input.data.id === "hasDisability") {
                     sectionData.hasDisability = data.hasDisability
                     sectionData.disability = data.disability
@@ -218,6 +223,8 @@ export default function RegisterForm() {
                 }
             })
             setFormData((prevData) => ({...prevData, [stepsIds[activeStep]]: sectionData}));
+
+            // setFormData((prevData) => ({...prevData, [stepsIds[activeStep]]: sectionData}));
             setActiveStep((prevStep) => prevStep + 1);
         } else {
             const response = await handleRequestSubmit(formData, setLoading, "auth/register", false, "جاري انشاء الحساب")
@@ -234,15 +241,24 @@ export default function RegisterForm() {
 
     return (
           <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={locales}>
-              <Box sx={{width: "100%", minHeight: "100vh", bgcolor: "background.paper", pt: 4}}>
+              <Box sx={{width: "100%", minHeight: "100vh", py: 4}}>
                   <Container maxWidth="md" sx={{p: 0}}>
                       <Box sx={{
                           width: "100%",
-                          mt: 4,
+                          my: 3,
                           p: {xs: 2, md: 4},
                           bgcolor: "background.default",
                           borderRadius: 2
                       }}>
+                          <Typography
+                                color="primary"
+                                variant="h4" sx={{
+                              mb: 2,
+                              textAlign: "center",
+                              fontWeight: "bold"
+                          }}>
+                              تسجيل حساب جديد
+                          </Typography>
                           <Stepper activeStep={activeStep} alternativeLabel sx={{mb: 5}}>
                               {steps.map((step) => (
                                     <Step key={step}>
@@ -268,7 +284,6 @@ export default function RegisterForm() {
                                                             md: 6
                                                         }} key={input.data.id}>
                                                             <Controller
-                                                                  key={input.data.id}
                                                                   name={input.data.id}
                                                                   control={control}
                                                                   rules={{
@@ -302,7 +317,9 @@ export default function RegisterForm() {
                                                         <Grid size={{
                                                             xs: 12,
                                                             md: 6
-                                                        }}>
+                                                        }}
+                                                              key={input.data.id}
+                                                        >
                                                             <MuiDatePicker
                                                                   key={input.data.id}
                                                                   input={input}
@@ -311,21 +328,35 @@ export default function RegisterForm() {
                                                             />
                                                         </Grid>
                                                   ) : input.data.type === "disability" ?
-                                                        <DisabilityInput errors={errors}
-                                                                         control={control}
-                                                                         watch={watch}
-                                                        /> :
+                                                        <Grid size={{
+                                                            xs: 12,
+                                                            md: 6
+                                                        }}
+                                                              key={input.data.id}
+                                                        >
+                                                            <DisabilityInput errors={errors}
+                                                                             control={control}
+                                                                             watch={watch}
+                                                            />
+                                                        </Grid>
+                                                        :
                                                         input.data.type === "country" ?
-                                                              <ResidenceAndNationalitySelectors errors={errors}
-                                                                                                control={control}
-                                                                                                setValue={setValue}
-                                                                                                register={register}
-                                                              /> :
+                                                              <Grid size={12} key={input.data.id}
+                                                              >
+                                                                  <ResidenceAndNationalitySelectors errors={errors}
+                                                                                                    control={control}
+                                                                                                    setValue={setValue}
+                                                                                                    register={register}
+                                                                  />
+                                                              </Grid>
+                                                              :
                                                               input.data.type === "password" ?
                                                                     <Grid size={{
                                                                         xs: 12,
                                                                         md: 6
-                                                                    }}>
+                                                                    }}
+                                                                          key={input.data.id}
+                                                                    >
                                                                         <Controller
                                                                               name={input.data.id}
                                                                               control={control}
@@ -353,7 +384,9 @@ export default function RegisterForm() {
                                                                           <Grid size={{
                                                                               xs: 12,
                                                                               md: 6
-                                                                          }}>
+                                                                          }}
+                                                                                key={input.data.id}
+                                                                          >
                                                                               <PhoneInput
                                                                                     name={"phone"}
                                                                                     control={control}
@@ -365,8 +398,11 @@ export default function RegisterForm() {
                                                                                 <Grid size={{
                                                                                     xs: 12,
                                                                                     md: 6
-                                                                                }}>
+                                                                                }}
+                                                                                      key={input.data.id}
+                                                                                >
                                                                                     <Controller
+
                                                                                           name={input.data.id}
                                                                                           control={control}
                                                                                           rules={{
@@ -381,6 +417,7 @@ export default function RegisterForm() {
                                                                                                       {...field}
                                                                                                       label={input.data.label}
                                                                                                       fullWidth
+
                                                                                                       type={input.data.type}
                                                                                                       margin="none"
                                                                                                       error={!!errors[input.data.id]}
@@ -432,9 +469,8 @@ function Review({stepsIds, steps, data, inputs}) {
                         <Grid container spacing={2}>
                             {inputs[index].map((item) => (
                                   <>
-                                      {item.data.type !== "password" && item.data.type !== "confirmPassword" &&
+                                      {item.data.type !== "password" && item.data.type !== "confirmPassword" && item.data.type !== "disability" && item.data.type !== "country" &&
                                             <>
-
                                                 <Grid size={{xs: 12, md: 6}} key={item.data.id}>
                                                     <Typography
                                                           variant="body1"><strong>{item.data.label}:</strong> {data[step][item.data.id]}
@@ -442,32 +478,33 @@ function Review({stepsIds, steps, data, inputs}) {
                                                 </Grid>
                                             </>
                                       }
-                                      {index === 0 &&
-                                            <>
-                                                <Grid size={6} key={item.data.id}>
-                                                    <Typography
-                                                          variant="body1"><strong>بلد
-                                                        الاقامة:</strong> {data.basicInfo.residenceCountry}
-                                                    </Typography>
-                                                    <Typography
-                                                          variant="body1"><strong>المدينة:</strong> {data.basicInfo.nationality}
-                                                    </Typography>
-                                                </Grid>
-                                                <Grid size={6} key={item.data.id}>
-                                                    <Typography
-                                                          variant="body1"><strong> لدية اعاقة؟
-                                                        :</strong> {data.basicInfo.hasDisability}
-                                                    </Typography>
-                                                    <Typography
-                                                          variant="body1"><strong>تفاصيل
-                                                        الاعاقة:</strong> {data.basicInfo.disability}
-                                                    </Typography>
-                                                </Grid>
-                                            </>
-                                      }
+
                                   </>
 
                             ))}
+                            {index === 0 &&
+                                  <>
+                                      <Grid size={6}>
+                                          <Typography
+                                                variant="body1"><strong>بلد
+                                              الاقامة:</strong> {data.basicInfo.residenceCountry}
+                                          </Typography>
+                                          <Typography
+                                                variant="body1"><strong>المدينة:</strong> {data.basicInfo.nationality}
+                                          </Typography>
+                                      </Grid>
+                                      <Grid size={6}>
+                                          <Typography
+                                                variant="body1"><strong> لدية اعاقة؟
+                                              :</strong> {data.basicInfo.hasDisability === "yes" ? "نعم" : "لا"}
+                                          </Typography>
+                                          <Typography
+                                                variant="body1"><strong>تفاصيل
+                                              الاعاقة:</strong> {data.basicInfo.disability}
+                                          </Typography>
+                                      </Grid>
+                                  </>
+                            }
                         </Grid>
                     </Box>
               ))}

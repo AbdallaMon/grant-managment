@@ -11,15 +11,18 @@ export async function getData({
     try {
         setLoading(true);
         const response = await fetch(
-              `${process.env.NEXT_PUBCLI_URL}/${url}?page=${page}&limit=${limit}&filters=${JSON.stringify(filters)}&search=${search}&sort=${JSON.stringify(sort)}&${others}`,
+              `${process.env.NEXT_PUBLIC_URL}/${url}?page=${page}&limit=${limit}&filters=${JSON.stringify(filters)}&search=${search}&sort=${JSON.stringify(sort)}&${others}`,
               {
                   headers: {
                       "Content-Type": "application/json",
                   },
-                  method: "GET",
+                  credentials: 'include',
               },
         );
-        return await response.json();
+        const status = response.status;
+        const result = await response.json()
+        result.status = status;
+        return result;
     } catch (e) {
         console.log(e);
     } finally {

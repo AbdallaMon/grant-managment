@@ -1,4 +1,4 @@
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import {Controller} from "react-hook-form";
 import Autocomplete from "@mui/material/Autocomplete";
 import {CircularProgress, TextField, useMediaQuery} from "@mui/material";
@@ -8,7 +8,6 @@ export default function ResidenceAndNationalitySelectors({control, setValue, err
     const [countries, setCountries] = useState([]);
     const [loadingCountries, setLoadingCountries] = useState(false);
 
-    const isLargeScreen = useMediaQuery('(min-width:600px)');
 
     useEffect(() => {
         const fetchCountries = async () => {
@@ -28,18 +27,19 @@ export default function ResidenceAndNationalitySelectors({control, setValue, err
 
     // Function to handle residence country change
     const handleResidenceCountryChange = (event, value) => {
-        setValue("residenceCountry", value ? value.country : ""); // Reset value if country is deselected
+        setValue("residenceCountry", value);
     };
 
     // Function to handle nationality change
     const handleNationalityChange = (event, value) => {
-        setValue("nationality", value ? value.country : ""); // Reset value if nationality is deselected
+        setValue("nationality", value);
     };
 
     return (
+
+
           <Grid container spacing={2}>
-              {/* Residence Country Selector */}
-              <Grid item xs={12} sm={6}>
+              <Grid size={{xs: 12, md: 6}}>
                   <Controller
                         name={"residenceCountry"}
                         control={control}
@@ -75,7 +75,7 @@ export default function ResidenceAndNationalitySelectors({control, setValue, err
               </Grid>
 
               {/* Nationality Selector */}
-              <Grid item xs={12} sm={6}>
+              <Grid size={{xs: 12, md: 6}}>
                   <Controller
                         name={"nationality"}
                         control={control}

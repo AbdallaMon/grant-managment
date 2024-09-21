@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import Prisma from "../prisma/prisma.js";
 const SECRET_KEY = process.env.SECRET_KEY;
 
 export function verifyToken(token) {
@@ -68,3 +67,31 @@ export function handlePrismaError(res, error) {
     // Send response to the client
     return res.status(response.status).json({ message: response.message });
 }
+export const verifyTokenAndHandleAuthorization = (req, res, next,role) => {
+
+    const token = req.cookies.token
+    if (!token) {
+        return res.status(401).json({ message: 'يجب عليك تسجيل الدخول اولا' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, SECRET_KEY);
+
+        if (decoded.role !== role) {
+            return res.status(403).json({ message: 'غير مصرح لك بالوصول' });
+        }
+
+        req.user = decoded;
+        next();
+    } catch (error) {
+        console.log("error in middleware",error)
+        return res.status(401).json({ message: 'انتهت جلسة تسجيل الدخول' });
+    }
+};
+export const getPagination = (req) => {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+
+    return { page, limit, skip };
+};

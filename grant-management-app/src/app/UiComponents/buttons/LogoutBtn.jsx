@@ -21,7 +21,10 @@ export default function LogoutButton({fit}) {
         );
         if (logout?.status === 200) {
             setIsLoggedIn(false)
-            setUser(null)
+            setUser({
+                role: null,
+
+            })
             router.push("/login");
         }
     }
@@ -34,7 +37,8 @@ export default function LogoutButton({fit}) {
                 sx={{
                     width: fit ? "fit-content" : "100%",
                 }}
-                color="secondary"
+                color="error"
+                variant="outlined"
 
           > <FaSignOutAlt/>
               Logout

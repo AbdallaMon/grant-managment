@@ -1,5 +1,5 @@
-export const initialPageLimit=12
-export const totalLimitPages=[1, 20, 50, 100]
+export const initialPageLimit = 1
+export const totalLimitPages = [1, 20, 50, 100]
 
 export const simpleModalStyle = {
     position: "absolute",

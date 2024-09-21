@@ -12,7 +12,7 @@ export default function DisabilityInput({watch, errors, control,}) {
     return (
           <>
 
-              <FormControl fullWidth margin="dense">
+              <FormControl fullWidth margin="none">
                   <InputLabel id="hasDisabilityLabel">هل لديك إعاقة؟</InputLabel>
                   <Controller
                         name="hasDisability"

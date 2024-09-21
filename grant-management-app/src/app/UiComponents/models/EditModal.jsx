@@ -1,14 +1,17 @@
-import React from 'react';
-import {Box, Fade, Modal} from '@mui/material';
+import React, {useState} from 'react';
+import {Box, Button, Fade, Modal} from '@mui/material';
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import {simpleModalStyle} from "@/app/helpers/constants";
 import {Form} from "@/app/UiComponents/formComponents/forms/Form";
 
-const EditModal = ({open, handleClose, item, inputs, setData, href, checkChanges = false}) => {
+const EditModal = ({editButtonText, handleClose, item, inputs, setData, href, checkChanges = false}) => {
     const {setLoading} = useToastContext()
+    const [open, setOpen] = useState(false)
 
-
+    const handleEditOpen = () => {
+        setOpen(true);
+    };
     const onSubmit = async (formData) => {
         let dataToSubmit = formData;
         if (checkChanges) {
@@ -19,10 +22,15 @@ const EditModal = ({open, handleClose, item, inputs, setData, href, checkChanges
                 }
             }
         }
-        const result = await handleRequestSubmit(dataToSubmit, setLoading, `${href}/${item.id}`, false, "Updating...", null, "PUT");
+        const result = await handleRequestSubmit(dataToSubmit, setLoading, `${href}/${item.id}`, false, "جاري التعديل", null, "PUT");
         if (result.status === 200) {
-            setData((prevData) => prevData.map((dataItem) => dataItem.id === result.data.id ? result.data : dataItem));
-            handleClose();
+            if (setData) {
+                setData((prevData) => prevData.map((dataItem) => dataItem.id === result.data.id ? result.data : dataItem));
+            }
+            if (handleClose) {
+                handleClose();
+            }
+            setOpen(false)
         }
     };
     const prefilledInputs = inputs.map(input => ({
@@ -32,7 +40,16 @@ const EditModal = ({open, handleClose, item, inputs, setData, href, checkChanges
             defaultValue: item[input.data.id] ?? input.data.defaultValue,
         }
     }));
-
+    if (!open) return (
+          <Button
+                variant="contained"
+                color="primary"
+                onClick={() => handleEditOpen(item)}
+                sx={{textTransform: 'none'}}
+          >
+              {editButtonText}
+          </Button>
+    )
     return (
           <>
 
@@ -49,14 +66,11 @@ const EditModal = ({open, handleClose, item, inputs, setData, href, checkChanges
                                     ...input,
                                     data: {
                                         ...input.data,
-                                        // options: options[input.data.id],
                                         defaultValue: input.data.parentId ? item[input.data.parentId]?.id : item[input.data.id]
                                     }
-
-
                                 }))}
-                                formTitle={`Edit ${item.title || item.name || item.id}`}
-                                btnText="Save Changes"
+                                formTitle={`تعديل ${item.title || item.name || item.id}`}
+                                btnText="حفظ التغيرات"
                           >
                           </Form>
 
