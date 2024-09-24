@@ -1,5 +1,110 @@
 import jwt from "jsonwebtoken";
 const SECRET_KEY = process.env.SECRET_KEY;
+import multer from 'multer';
+import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import axios from "axios";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+export const deleteFiles = (fileUrls) => {
+    return new Promise((resolve, reject) => {
+        const baseUploadPath = path.join(__dirname, '../uploads/');
+        let deletedFiles = [];
+        let failedFiles = [];
+
+        fileUrls.forEach(url => {
+            try {
+                // Extract file name from the URL
+                const fileName = url.split('/').pop();
+                const filePath = path.join(baseUploadPath, fileName);
+
+                // Check if file exists
+                if (fs.existsSync(filePath)) {
+                    // Delete the file
+                    fs.unlinkSync(filePath);
+                    deletedFiles.push(fileName);
+                } else {
+                    failedFiles.push(fileName);
+                }
+            } catch (error) {
+                failedFiles.push(fileName);
+            }
+        });
+
+        if (failedFiles.length > 0) {
+            reject({
+                message: "بعض الملفات لم يتم العثور عليها أو لم يتم حذفها",
+                failedFiles,
+            });
+        } else {
+            resolve({
+                message: "تم حذف الملفات بنجاح",
+                deletedFiles,
+            });
+        }
+    });
+};
+const storage = multer.diskStorage({
+
+    destination: (req, file, cb) => {
+        const uploadPath = path.join(__dirname, '../uploads/');
+        if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+        }
+        cb(null, uploadPath);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = uuidv4() + path.extname(file.originalname);
+        cb(null, uniqueSuffix);
+    }
+});
+
+// Set up multer for multiple files, allow up to 10 files
+const upload = multer({ storage }).any();
+// Function to handle file upload
+export const uploadFiles = (req, res) => {
+    return new Promise((resolve, reject) => {
+        upload(req, res, (err) => {
+            if (err) {
+                reject(err);
+            } else {
+                if (!req.files || req.files.length === 0) {
+                    return reject(new Error('No files uploaded.'));
+                }
+                const fileUrls = {};
+
+                req.files.forEach(file => {
+                    const fieldName = file.fieldname; // e.g., 'file_transiction'
+                    const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${file.filename}`;
+
+                    if (fieldName) {
+                        fileUrls[fieldName] = fileUrl;
+                    }
+                });
+
+                resolve(fileUrls);
+            }
+        });
+    });
+};
+export const verifyTokenUsingReq = (req, res, next) => {
+    const token = req.cookies.token
+
+    if (!token) {
+        return res.status(403).json({ message: 'No token provided, access denied' });
+    }
+
+    try {
+        const decoded = jwt.verify(token,SECRET_KEY);
+        req.user = decoded;
+        next();
+    } catch (error) {
+        return res.status(401).json({ message: 'Invalid token' });
+    }
+};
 
 export function verifyToken(token) {
     try {
@@ -95,3 +200,18 @@ export const getPagination = (req) => {
 
     return { page, limit, skip };
 };
+export async function deleteListOfFiles(files){
+    try {
+        const deleteUrl = `${process.env.SERVER}/delete-files`;
+        const response = await axios.post(deleteUrl, {
+            fileUrls: files
+        });
+        if (response.status === 200) {
+            console.log(`Old file ${files} deleted successfully`);
+        } else {
+            console.log(`Failed to delete old file: ${files}`);
+        }
+    } catch (error) {
+        console.error(`Error while deleting old file :`, error.message);
+    }
+}

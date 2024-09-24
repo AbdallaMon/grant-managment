@@ -40,8 +40,21 @@ export default function CountryCitySelector({control, errors, input, setValue}) 
         const fetchCities = async () => {
             if (!country) return;
             setLoadingCities(true);
+            const raw = JSON.stringify({
+                country: country
+            });
+            const requestOptions = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Set the correct content type
+                },
+                body: raw,
+                redirect: 'follow'
+            };
+            const req = await fetch("https://countriesnow.space/api/v0.1/countries/cities", requestOptions);
+            const result = await req.json();
             try {
-                setCities(country.cities);
+                setCities(result.data);
             } catch (error) {
                 console.error('Error fetching cities:', error);
             } finally {
@@ -53,8 +66,8 @@ export default function CountryCitySelector({control, errors, input, setValue}) 
 
     const handleCountryChange = (event, value) => {
         setCountry(value);
-        setValue("country", value.country)
-        setCity('');
+        setValue("country", value)
+        setValue("city", "")
     };
     const handleCityChange = (event, value) => {
         setCity(value);
@@ -63,82 +76,80 @@ export default function CountryCitySelector({control, errors, input, setValue}) 
     };
 
     return (
-          <Grid size={12}>
-              <Grid container spacing={2}>
-                  <Grid size={6}>
-                      <Controller
-                            name={"country"}
-                            control={control}
-                            rules={{required: "من فضلك اختر دولتك"}}
-                            render={({field}) => (
-                                  <Autocomplete
-                                        {...field}
-                                        options={countries}
-                                        getOptionLabel={(option) => option.country}
-                                        onChange={handleCountryChange}
-                                        renderInput={(params) => (
-                                              <TextField
-                                                    {...params}
-                                                    label="الدولة"
-                                                    error={!!errors.country}
-                                                    sx={{bgcolor: 'background.default'}}
-                                                    helperText={errors.country ? errors.country.message : ''}
-                                                    InputProps={{
-                                                        ...params.InputProps,
-                                                        endAdornment: (
-                                                              <>
-                                                                  {loadingCountries ?
-                                                                        <CircularProgress color="inherit"
-                                                                                          size={20}/> : null}
-                                                                  {params.InputProps.endAdornment}
-                                                              </>
-                                                        ),
-                                                    }}
-                                              />
-                                        )}
-                                  />
-                            )}
-                      />
-                  </Grid>
-                  <Grid size={6}>
-                      <Controller
-                            name={"city"}
-                            control={control}
-                            rules={{required: "من فضلك اختر مدينتك"}}
-                            render={({field}) => (
-                                  <Autocomplete
-                                        {...field}
-                                        options={cities}
-                                        getOptionLabel={(option) => option} // Ensure this matches your city data structure
-                                        onChange={handleCityChange}
-                                        sx={{
-                                            width: "100%"
-                                        }}
-                                        renderInput={(params) => (
-                                              <TextField
-                                                    {...params}
-                                                    label="المدينة"
-                                                    sx={{bgcolor: 'background.default'}}
-                                                    error={!!errors.city}
-                                                    helperText={errors.city ? errors.city.message : ''}
-                                                    InputProps={{
-                                                        ...params.InputProps,
-                                                        endAdornment: (
-                                                              <>
-                                                                  {loadingCities ?
-                                                                        <CircularProgress color="inherit"
-                                                                                          size={20}/> : null}
-                                                                  {params.InputProps.endAdornment}
-                                                              </>
-                                                        ),
-                                                    }}
-                                                    disabled={!country}
-                                              />
-                                        )}
-                                  />
-                            )}
-                      />
-                  </Grid>
+          <Grid container spacing={2}>
+              <Grid item size={{xs: 12, md: 6}}>
+                  <Controller
+                        name={"country"}
+                        control={control}
+                        rules={{required: "من فضلك اختر دولتك"}}
+                        render={({field}) => (
+                              <Autocomplete
+                                    {...field}
+                                    options={countries.map((option) => option.country)}
+                                    getOptionLabel={(option) => option}
+                                    onChange={handleCountryChange}
+                                    renderInput={(params) => (
+                                          <TextField
+                                                {...params}
+                                                label="الدولة"
+                                                variant={"filled"}
+                                                error={!!errors.country}
+                                                sx={{bgcolor: "background.default"}}
+                                                helperText={errors.country ? errors.country.message : ""}
+                                                InputProps={{
+                                                    ...params.InputProps,
+                                                    endAdornment: (
+                                                          <>
+                                                              {loadingCountries ? <CircularProgress color="inherit"
+                                                                                                    size={20}/> : null}
+                                                              {params.InputProps.endAdornment}
+                                                          </>
+                                                    ),
+                                                }}
+                                          />
+                                    )}
+                              />
+                        )}
+                  />
+              </Grid>
+
+              <Grid item size={{xs: 12, md: 6}}>
+                  <Controller
+                        name={"city"}
+                        control={control}
+                        rules={{required: "من فضلك اختر مدينتك"}}
+                        render={({field}) => (
+                              <Autocomplete
+                                    {...field}
+                                    options={cities}
+                                    variant={"filled"}
+                                    getOptionLabel={(option) => option}
+                                    onChange={handleCityChange}
+                                    sx={{width: "100%"}}
+                                    renderInput={(params) => (
+                                          <TextField
+                                                {...params}
+                                                label="المدينة"
+                                                sx={{bgcolor: "background.default"}}
+                                                error={!!errors.city}
+                                                variant={"filled"}
+                                                helperText={errors.city ? errors.city.message : ""}
+                                                InputProps={{
+                                                    ...params.InputProps,
+                                                    endAdornment: (
+                                                          <>
+                                                              {loadingCities ? <CircularProgress color="inherit"
+                                                                                                 size={20}/> : null}
+                                                              {params.InputProps.endAdornment}
+                                                          </>
+                                                    ),
+                                                }}
+                                                disabled={!country}
+                                          />
+                                    )}
+                              />
+                        )}
+                  />
               </Grid>
           </Grid>
     );

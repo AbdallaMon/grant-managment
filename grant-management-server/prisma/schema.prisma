@@ -78,6 +78,10 @@ enum SupportType {
   PERSONAL_EXPENSES
 }
 
+enum StudyType{
+  NEW_STUDENT
+  CURRENT_STUDENT
+}
 enum GpaType {
   GPA_4
   PERCENTAGE
@@ -91,7 +95,7 @@ enum PaymentStatus {
 
 enum GrantType {
   SPONSOR
-  OTHER
+  INDIVIDUAL
 }
 
 enum FileType {
@@ -194,12 +198,14 @@ model Application {
   studentId         Int
   supervisorId      Int?
   status            ApplicationStatus @default(PENDING)
-  supportingFiles   SupportingFiles?
   rejectReason      String?
   scholarshipInfo   ScholarshipInfo?
   academicPerformance AcademicPerformance?
   residenceInfo     ResidenceInformation?
+  supportingFiles   SupportingFiles?
   siblings          Sibling[]
+  commitment        String?
+  scholarshipTerms  String?
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
 
@@ -214,11 +220,11 @@ model Application {
 
 model SupportingFiles {
   id               Int                @id @default(autoincrement())
-  personalId       File?              @relation(name: "PersonalIdFile", fields: [id], references: [id], map: "PersonalId_FK")
-  studentDoc       File?              @relation(name: "StudentDocFile", fields: [id], references: [id], map: "StudentDoc_FK")
-  medicalReport    File?              @relation(name: "MedicalReportFile", fields: [id], references: [id], map: "MedicalReport_FK")
-  personalPhoto    File?              @relation(name: "PersonalPhotoFile", fields: [id], references: [id], map: "PersonalPhoto_FK")
-  proofOfAddress   File?              @relation(name: "ProofOfAddressFile", fields: [id], references: [id], map: "ProofOfAddress_FK")
+  personalId       String?
+  studentDoc      String?
+  medicalReport    String?
+  personalPhoto    String?
+  proofOfAddress   String?
   applicationId    Int                @unique
 
   application      Application        @relation(fields: [applicationId], references: [id])
@@ -253,12 +259,11 @@ model ResidenceInformation {
 
 model AcademicPerformance {
   id               Int                @id @default(autoincrement())
+  typeOfStudy StudyType
   gpaType          GpaType
   gpaValue         Float?
-  transcriptId     Int?               @unique
-  transcript       File?              @relation(fields: [transcriptId], references: [id])
+  transcript       String?
   applicationId    Int                @unique
-
   application      Application        @relation(fields: [applicationId], references: [id])
 }
 
@@ -271,10 +276,9 @@ model Sibling {
   sourceOfStudy    StudySource
   grantSource      String?
   grantAmount      Float?
-  document         File[]
+  document         String?
   createdAt        DateTime           @default(now())
   applicationId    Int
-
   application      Application        @relation(fields: [applicationId], references: [id])
 }
 
@@ -284,6 +288,7 @@ model Grant {
   id               Int                @id @default(autoincrement())
   name             String
   type             GrantType
+  amount           Float
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   userGrants       UserGrant[]
@@ -435,17 +440,7 @@ model File {
   url              String
   createdAt        DateTime           @default(now())
 
-  personalIdFile    SupportingFiles?  @relation(name: "PersonalIdFile")
-  studentDocFile    SupportingFiles?  @relation(name: "StudentDocFile")
-  medicalReportFile SupportingFiles?  @relation(name: "MedicalReportFile")
-  personalPhotoFile SupportingFiles?  @relation(name: "PersonalPhotoFile")
-  proofOfAddressFile SupportingFiles? @relation(name: "ProofOfAddressFile")
-
-  siblingId        Int?
-  sibling          Sibling?           @relation(fields: [siblingId], references: [id])
-
   applicationId    Int?
   application      Application?       @relation(fields: [applicationId], references: [id])
 
-  academicPerformance AcademicPerformance?
 }

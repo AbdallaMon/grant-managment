@@ -10,11 +10,22 @@ export default function InputField({
                                        register,
                                        errors,
                                        watch,
-                                       trigger,
+                                       trigger, setValue
                                    }) {
     const [inputData, setInputData] = useState(input.data);
     const [showPassword, setShowPassword] = useState(false);
     const inputRef = useRef(null);
+    const [type, setType] = useState(null);
+    const fieldValue = watch(inputData.id);
+
+
+    function handleChange(event) {
+        input.onChange && input.onChange(event, setValue, watch)
+    }
+
+    useEffect(() => {
+
+    }, [])
     const handleClickShowPassword = () => {
         setInputData({
             ...inputData,
@@ -22,9 +33,6 @@ export default function InputField({
         });
     };
 
-
-    const [type, setType] = useState(null);
-    const fieldValue = watch(inputData.id);
 
     useEffect(() => {
         if (type) {
@@ -47,9 +55,9 @@ export default function InputField({
                 error={Boolean(errors[inputData.id])}
                 disabled={input.disabled}
                 helperText={errors[inputData.id]?.message ? errors[inputData.id]?.message : inputData.helperText}
-                margin="dense"
-
+                margin="none"
                 ref={inputRef}
+                onChange={handleChange}
                 {...inputData}
                 {...register(inputData.id, input.pattern)}
                 InputProps={{

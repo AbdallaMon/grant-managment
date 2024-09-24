@@ -5,8 +5,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 import authRoutes from './routes/auth.js';
 import studentRoutes from './routes/student.js';
+import {deleteFiles, uploadFiles, verifyTokenUsingReq} from "./services/utility.js";
 
 const app = express();
+
 const PORT = process.env.PORT || 3000;
 app.use(cors({
     origin: process.env.ORIGIN,
@@ -14,8 +16,28 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
+app.use('/uploads', express.static('uploads')); // we might needs to remove this later
 
 // Routes
+app.post('/upload', verifyTokenUsingReq, async (req, res) => {
+    try {
+        const fileUrls = await uploadFiles(req, res); // Upload the files and get their URLs
+        res.status(200).json({ data: fileUrls ,message:"تم رفع ملفاتك جاري اتمام عملية التخزين"});
+    } catch (err) {
+        console.log(err, "err")
+        res.status(500).json({ message: 'Failed to upload files', error: err.message });
+    }
+});
+app.post('/delete-files', async (req, res) => {
+    const { fileUrls } = req.body; // Expecting an array of file URLs in the request body
+    try {
+        const result = await deleteFiles(fileUrls);
+        res.status(200).json(result);
+    } catch (err) {
+        console.log(err,"errrrro in delete")
+        res.status(500).json({ message: err.message, failedFiles: err.failedFiles });
+    }
+});
 app.use('/auth', authRoutes);
 app.use('/student', studentRoutes);
 

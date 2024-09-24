@@ -241,7 +241,7 @@ export default function RegisterForm() {
 
     return (
           <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={locales}>
-              <Box sx={{width: "100%", minHeight: "100vh", py: 4}}>
+              <Box sx={{width: "100%", minHeight: "100vh", py: 4, mt: 3}}>
                   <Container maxWidth="md" sx={{p: 0}}>
                       <Box sx={{
                           width: "100%",

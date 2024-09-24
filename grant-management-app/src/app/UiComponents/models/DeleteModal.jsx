@@ -52,7 +52,7 @@ export default function DeleteModal({
           <>
               <Modal
                     open={open}
-                    onClose={handleClose}
+                    onClose={() => setOpen(false)}
                     closeAfterTransition
               >
                   <Fade in={open}>
@@ -65,7 +65,7 @@ export default function DeleteModal({
                                       onClick={handleDeleteOrArchive}>
                                   {archive ? "ارشفه" : "حذف"}
                               </Button>
-                              <Button variant="contained" onClick={handleClose} sx={{marginLeft: '8px'}}>
+                              <Button variant="contained" onClick={() => setOpen(false)} sx={{marginLeft: '8px'}}>
                                   الغاء
                               </Button>
                           </Box>

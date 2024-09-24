@@ -46,7 +46,7 @@ export default function UserGrantsPage() {
               {error && <ErrorMessage error={error}/>}
               <Grid container spacing={2}>
                   {applications.map((app, index) => (
-                        <Grid size={{xs: 12, md: 6}} key={app.id}>
+                        <Grid size={{xs: 12, md: 6, xl: 4}} key={app.id}>
                             <ApplicationCard app={app} setData={setData} index={index}/>
                         </Grid>
                   ))}

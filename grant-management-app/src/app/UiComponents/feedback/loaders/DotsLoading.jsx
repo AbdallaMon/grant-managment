@@ -16,7 +16,8 @@ export default function DotsLoader({instantLoading}) {
     useEffect(() => {
         if (!loading) {
             const dotContainer = document.querySelector(".dot_container");
-            dotContainer.classList.add("hid-animation");
+            
+            dotContainer.remove();
         }
     }, [loading]);
 

@@ -7,6 +7,7 @@ export default function SelectField({
                                         variant = "filled",
                                         register,
                                         errors,
+                                        set_value
                                     }) {
     const selectData = select.data;
     const options = selectData.options;
@@ -14,12 +15,14 @@ export default function SelectField({
 
     const handleChange = (event) => {
         setValue(event.target.value);
+        select.onChange && select.onChange(event, set_value)
     };
-
     return (
           <FormControl
+                fullWidth={true}
                 variant={variant}
-                sx={select.sx ? select.sx : {minWidth: 120, width: "100%", mb: 2}}
+                margin="none"
+                sx={select.sx ? select.sx : {minWidth: 120, width: "100%"}}
                 error={Boolean(errors[selectData.id])}
           >
               <InputLabel id={selectData.label}>{selectData.label}</InputLabel>
