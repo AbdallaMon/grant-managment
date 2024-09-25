@@ -4,16 +4,17 @@ import {DatePicker} from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import "dayjs/locale/en-gb";
 
-export function MuiDatePicker({control, input, errors, setValue}) {
+export function MuiDatePicker({control, input, errors, setValue, variant}) {
     const inputData = input.data;
     dayjs.locale("en-gb");
     return (
           <FormControl
                 fullWidth
                 error={!!errors[inputData.id]}
-                sx={{
-                    ...input.sx
-                }}
+                sx={(theme) => ({
+                    backgroundColor: variant === "outlined" ? theme.palette.background.default : 'inherit',
+                    ...(input.sx && input.sx),
+                })}
                 className={"MUI" + inputData.id}
                 margin={"none"}
           >

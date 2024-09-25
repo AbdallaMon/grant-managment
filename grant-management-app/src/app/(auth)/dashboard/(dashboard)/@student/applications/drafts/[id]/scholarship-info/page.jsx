@@ -68,7 +68,8 @@ export default function ScholarshipInfo({params: {id}}) {
                           formProps={{
                               formTitle:
                                     "نوع المنحة المطلوبة",
-                              btnText: "حفظ"
+                              btnText: "حفظ",
+                              variant: "outlined"
                           }}/>
     )
 }

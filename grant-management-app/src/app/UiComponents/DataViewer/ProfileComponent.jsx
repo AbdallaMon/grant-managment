@@ -144,9 +144,10 @@ export default function ProfileComponent({isApplication, id}) {
     useEffect(() => {
         async function fetchData() {
             const request = await getData({
-                url: `student/${user.id}`,
+                url: `student/personal/${user.id}`,
                 setLoading,
             });
+            console.log(request, "request")
             setPersonalInfo(request.data);
             setLoading(false);
         }
@@ -169,7 +170,7 @@ export default function ProfileComponent({isApplication, id}) {
         const request = await handleRequestSubmit(
               {updateData: data, model},
               setSubmitLoading,
-              `student/${user.id}/`,
+              `student/personal/${user.id}/`,
               false,
               "جاري الحفظ",
               null,
@@ -205,18 +206,18 @@ export default function ProfileComponent({isApplication, id}) {
         );
     }
     return (
-          <Box sx={{p: 3}}>
+          <Box sx={{p: {xs: 1.5, md: 3}}}>
               <Typography variant="h4" gutterBottom>
                   البيانات الشخصية
               </Typography>
-              {isApplication && <>
+              {isApplication && <div>
                   <Typography variant="h6" gutterBottom>
                       هذه البيانات مسجلة من وقت التسجيل ان كنت لا تريد تعديلها اذهب الي قسم اخر
                   </Typography>
                   <Button href={`/dashboard/applications/drafts/${id}/scholarship-info`}>
-                      الذهاب لملئ بيانات نوع المنحة المطلوبه
+                      اذغط هنا للذهاب لملئ بيانات نوع المنحة المطلوبه
                   </Button>
-              </>}
+              </div>}
               <Button variant="contained" color="primary" onClick={toggleEditMode}>
                   {editMode ? "وضع العرض" : "وضع التعديل"}
               </Button>
@@ -229,7 +230,7 @@ export default function ProfileComponent({isApplication, id}) {
                                       <RenderField item={sectionInput} editMode={editMode}
                                                    setItem={setSelectedField}
                                                    setOpenModal={setOpenModal}
-                                                   data={sectionIndex === 0 ? personalInfo.basicInfo : sectionIndex === 1 ? personalInfo.studyInfo : personalInfo.contactInfo}
+                                                   data={personalInfo && sectionIndex === 0 ? personalInfo.basicInfo : sectionIndex === 1 ? personalInfo.studyInfo : personalInfo.contactInfo}
                                                    setCurrentData={setCurrentData}
                                       />
                                   </Fragment>
@@ -257,7 +258,7 @@ function RenderForm({selectedField, data, handleSave}) {
         }
     }
     return (
-          <Form inputs={[input]} formTitle={"تعديل"} btnText={"حفظ"} onSubmit={handleSave}>
+          <Form inputs={[input]} formTitle={"تعديل"} btnText={"حفظ"} onSubmit={handleSave} variant="outlined">
           </Form>
     )
 }

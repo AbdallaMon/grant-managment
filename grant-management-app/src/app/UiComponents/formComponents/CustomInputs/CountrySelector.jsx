@@ -28,40 +28,41 @@ export default function CountrySelector({setValue, control, errors, input}) {
         setValue(input.data.id, value);
     };
     return (
-          <Grid size={{xs: 12, md: 6}}>
-              <Controller
-                    name={input.data.id}
-                    control={control}
-                    rules={{required: "من فضلك اختر بلد "}}
-                    render={({field}) => (
-                          <Autocomplete
-                                {...field}
-                                options={countries.map((c) => c.country)}
-                                getOptionLabel={(option) => option}
-                                onChange={handleCountryChange}
-                                renderInput={(params) => (
-                                      <TextField
-                                            {...params}
-                                            label={input.data.label}
-                                            error={!!errors.residenceCountry}
-                                            helperText={errors.residenceCountry ? errors.residenceCountry.message : ''}
-                                            InputProps={{
-                                                ...params.InputProps,
-                                                endAdornment: (
-                                                      <>
-                                                          {loadingCountries ? <CircularProgress color="inherit"
-                                                                                                size={20}/> : null}
-                                                          {params.InputProps.endAdornment}
-                                                      </>
-                                                ),
-                                            }}
-                                            sx={{bgcolor: 'background.default'}}
-                                      />
-                                )}
-                          />
-                    )}
-              />
-          </Grid>
+          <Controller
+                name={input.data.id}
+                control={control}
+                fullWidth
+                defaultValue={input.data.defaultValue}
+                rules={{required: "من فضلك اختر بلد "}}
+                render={({field}) => (
+                      <Autocomplete
+                            {...field}
+                            options={countries.map((c) => c.country)}
+                            getOptionLabel={(option) => option}
+                            onChange={handleCountryChange}
+                            renderInput={(params) => (
+                                  <TextField
+                                        {...params}
+                                        label={input.data.label}
+                                        error={!!errors.residenceCountry}
+                                        helperText={errors.residenceCountry ? errors.residenceCountry.message : ''}
+                                        InputProps={{
+                                            ...params.InputProps,
+                                            endAdornment: (
+                                                  <>
+                                                      {loadingCountries ? <CircularProgress color="inherit"
+                                                                                            size={20}/> : null}
+                                                      {params.InputProps.endAdornment}
+                                                  </>
+                                            ),
+                                        }}
+                                        sx={{bgcolor: 'background.default'}}
+                                  />
+                            )}
+                      />
+                )}
+          />
+
 
     )
 }

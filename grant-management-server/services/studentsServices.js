@@ -57,7 +57,6 @@ export const getDraftApplicationModel = async (appId, model) => {
     return application[model] || null;
 };
 export const createDraftApplicationModel = async (appId, model, inputData) => {
-    console.log(inputData,"inputd")
     switch (model) {
         case 'supportingFiles':
             return await prisma.application.update({
@@ -134,10 +133,10 @@ export const createDraftApplicationModel = async (appId, model, inputData) => {
                 data: { commitment: inputData.commitment }
             });
         case 'grantShipTerms':
-            if(inputData.commitment!==true) throw new Error("يجب عليك الموافقه في حالة كنت موافق بالفعل اعد تحميل الصفحة واكد موافقتك من فضلك")
+            if(inputData.grantShipTerms!==true) throw new Error("يجب عليك الموافقه في حالة كنت موافق بالفعل اعد تحميل الصفحة واكد موافقتك من فضلك")
             return await prisma.application.update({
                 where: { id: Number(appId), status: 'DRAFT' },
-                data: { grantShipTerms: inputData.grantShipTerms }
+                data: { scholarshipTerms: inputData.grantShipTerms }
             });
         default:
             throw new Error("نموذج غير صالح");
@@ -300,8 +299,10 @@ export const getPersonalInfo = async (userId) => {
 
 export const updatePersonalInfo = async (userId, model, updateData) => {
     const updateFields = {};
-console.log(updateData,"updatedData")
-    console.log(model,"model")
+    if(updateData.birthDate)
+    {
+        updateData.birthDate = new Date(updateData.birthDate).toISOString();
+    }
     if (model === 'basicInfo') {
         updateFields.basicInfo = {
             update: updateData
@@ -322,4 +323,55 @@ console.log(updateData,"updatedData")
         where: { userId: Number(userId) },
         data: updateFields,
     });
+};
+export const checkIfFieldsAreEmpty = async (appId) => {
+    const application = await prisma.application.findUnique({
+        where: { id: Number(appId) ,status:"DRAFT"},
+        select: {
+            supportingFiles: true,
+            scholarshipInfo: true,
+            academicPerformance: true,
+            residenceInfo: true,
+            siblings: true,
+            commitment: true,
+            scholarshipTerms: true
+        }
+    });
+    if (!application) {
+        throw new Error("الطلب غير موجود او انك قمت بملئه من قبل ");
+    }
+    if(application.siblings?.length===0)application.siblings=null
+
+    const missingFields = [];
+    const fieldLinks = {
+        supportingFiles: { href: "supporting-files", text: "الذهاب لمليء الملفات الداعمة" },
+        scholarshipInfo: { href: "scholarship-info", text: "الذهاب لمليء معلومات المنحة" },
+        academicPerformance: { href: "academic-performance", text: "الذهاب لمليء الأداء الأكاديمي" },
+        residenceInfo: { href: "residence-info", text: "الذهاب لمليء معلومات الإقامة" },
+        siblings: { href: "siblings", text: "الذهاب لمليء معلومات الأخوة" },
+        commitment: { href: "commitment", text: "الذهاب لمليء التعهد" },
+        scholarshipTerms: { href: "ship-terms", text: "الذهاب لمليء شروط المنحة" }
+    };
+
+    Object.keys(fieldLinks).forEach((key) => {
+        if (!application[key]) {
+            missingFields.push({
+                key: key,
+                ...fieldLinks[key]
+            });
+        }
+    });
+
+    return missingFields;
+};
+
+export const submitApplication = async (appId) => {
+    const updatedApplication = await prisma.application.update({
+        where: { id: Number(appId) },
+        data: {
+            status: 'PENDING'
+        }
+    });
+
+    return updatedApplication;
 };

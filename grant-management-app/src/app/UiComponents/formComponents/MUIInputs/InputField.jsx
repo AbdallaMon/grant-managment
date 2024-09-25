@@ -49,7 +49,12 @@ export default function InputField({
     return (
           <TextField
                 fullWidth
-                sx={input.sx ? input.sx : {width: "100%"}}
+                sx={(theme) => ({
+                    backgroundColor: variant === "outlined" ? theme.palette.background.default : 'inherit',
+                    width: "100%",
+                    ...(input.sx && input.sx),
+                })}
+
                 onInput={() => setType(true)}
                 variant={variant}
                 error={Boolean(errors[inputData.id])}

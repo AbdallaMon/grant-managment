@@ -1,3 +1,17 @@
+import {
+    FaUser,
+    FaFileAlt,
+    FaGraduationCap,
+    FaBook,
+    FaHome,
+    FaUsers,
+    FaCheckCircle,
+    FaFileContract,
+    FaQuestionCircle,
+    FaPaperPlane
+} from 'react-icons/fa';
+
+
 export const initialPageLimit = 1
 export const totalLimitPages = [1, 20, 50, 100]
 
@@ -133,6 +147,100 @@ export const GenderType = {
     male: "ذكر",
     female: "انثي"
 }
+export const grantLinks = [
+    {
+        href: "",
+        text: "البيانات الشخصية",
+        icon: <FaUser/>,  // Personal Data Icon
+        meta: {
+            title: "البيانات الشخصية",
+            description: ""
+        }
+    },
+    {
+        href: "supporting-files",
+        text: "الملفات الداعمة",
+        icon: <FaFileAlt/>,  // Supporting Files Icon
+        meta: {
+            title: "الملفات الداعمة",
+            description: "رفع جميع الملفات التي تدعم طلبك"
+        }
+    },
+    {
+        href: "scholarship-info",
+        text: "معلومات المنحة",
+        icon: <FaGraduationCap/>,  // Scholarship Info Icon
+        meta: {
+            title: "معلومات المنحة",
+            description: "توفير كافة المعلومات المتعلقة بالمنحة"
+        }
+    },
+    {
+        href: "academic-performance",
+        text: "الأداء الأكاديمي",
+        icon: <FaBook/>,  // Academic Performance Icon
+        meta: {
+            title: "الأداء الأكاديمي",
+            description: "إدخال بيانات الأداء الأكاديمي الخاص بك"
+        }
+    },
+    {
+        href: "residence-info",
+        text: "معلومات الإقامة",
+        icon: <FaHome/>,  // Residence Info Icon
+        meta: {
+            title: "معلومات الإقامة",
+            description: "تفاصيل الإقامة المتعلقة بك"
+        }
+    },
+    {
+        href: "siblings",
+        text: "معلومات الأقارب",
+        icon: <FaUsers/>,  // Siblings Info Icon
+        meta: {
+            title: "معلومات الأقارب",
+            description: "تفاصيل عن الأقارب في نفس البرنامج"
+        }
+    },
+    {
+        href: "commitment",
+        text: "التعهد",
+        icon: <FaCheckCircle/>,
+        meta: {
+            title: "التعهد",
+            description: "تعهداتك للموافقة على الشروط"
+        }
+    },
+    {
+        href: "ship-terms",
+        text: "شروط المنحة",
+        icon: <FaFileContract/>,
+        meta: {
+            title: "شروط المنحة",
+            description: "الاطلاع على الشروط والأحكام الخاصة بالمنحة"
+        }
+    },
+    {
+        href: "faq",
+        text: "الأسئلة الشائعة",
+        icon: <FaQuestionCircle/>,  //
+        meta: {
+            title: "الأسئلة الشائعة",
+            description: "عرض الأسئلة الشائعة عن المنحة"
+        },
+        notRequired: true
+    },
+    {
+        href: "submit",
+        text: "حفظ الطلب وارساله",
+        icon: <FaPaperPlane/>,
+        meta: {
+            title: "حفظ الطلب وارساله",
+            description: "إرسال طلبك بعد مراجعته"
+        },
+        notRequired: true
+    }
+];
 export const simpleModalStyle = {
     position: "absolute",
     top: "50%",

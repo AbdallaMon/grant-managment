@@ -60,10 +60,15 @@ export default function MuiFileField({
               <Controller
                     name={input.data.id}
                     control={control}
+
                     render={({field: {onChange, value = input.value}}) => (
                           <TextField
                                 label={label}
                                 id={id}
+                                sx={(theme) => ({
+                                    backgroundColor: variant === "outlined" ? theme.palette.background.default : 'inherit',
+                                    ...(input.sx && input.sx),
+                                })}
                                 type="file"
                                 InputLabelProps={{shrink: true}}
                                 {...register(id, input.pattern)}

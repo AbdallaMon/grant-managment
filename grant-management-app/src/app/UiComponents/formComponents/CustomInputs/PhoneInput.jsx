@@ -7,6 +7,7 @@ export default function PhoneInput({control, input}) {
               <Controller
                     name={input.data.id}
                     control={control}
+                    fullWidth
                     defaultValue={input.data.defaultValue}
                     rules={{
                         validate: (value) => matchIsValidTel(value,)
@@ -25,6 +26,8 @@ export default function PhoneInput({control, input}) {
                                 margin="dense"
                                 defaultCountry="EG"
                                 label={input.data.label}
+                                sx={{bgcolor: 'background.default'}}
+
                                 id={input.id}
                                 defaultValue={input.data.defaultValue}
                                 inputRef={fieldRef}

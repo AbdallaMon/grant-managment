@@ -17,13 +17,20 @@ export default function SelectField({
         setValue(event.target.value);
         select.onChange && select.onChange(event, set_value)
     };
+
     return (
           <FormControl
                 fullWidth={true}
                 variant={variant}
                 margin="none"
-                sx={select.sx ? select.sx : {minWidth: 120, width: "100%"}}
+                sx={(theme) => ({
+                    minWidth: 120,
+                    width: "100%",
+                    backgroundColor: variant === "outlined" ? theme.palette.background.default : 'inherit',
+                    ...(select.sx && select.sx),
+                })}
                 error={Boolean(errors[selectData.id])}
+
           >
               <InputLabel id={selectData.label}>{selectData.label}</InputLabel>
               <Select

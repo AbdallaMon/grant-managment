@@ -188,7 +188,7 @@ export default function Siblings({params: {id}}) {
                     deleteHref={"student/applications/draft/apps/siblings"}
               />
               {data && data.length > 0 &&
-                    <Button componet={Link} href={`/dashboard/applications/drafts/${id}/commitment`}
+                    <Button component={Link} href={`/dashboard/applications/drafts/${id}/commitment`}
                             variant="contained">
                         الذهاب الي صفحة التعهد
                     </Button>

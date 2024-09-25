@@ -164,6 +164,7 @@ function RenderInputs({
                         key={input.data.id}
                         errors={errors}
                         watch={watch}
+                        variant={variant}
                         setValue={setValue}
                   />
             );

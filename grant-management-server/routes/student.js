@@ -3,16 +3,15 @@ import {
     getPagination,
     handlePrismaError,
     verifyTokenAndHandleAuthorization,
-    verifyTokenUsingReq
 } from "../services/utility.js";
 import {
+    checkIfFieldsAreEmpty,
     createDraftApplicationModel,
     createNewApplication,
     deleteDraftApplication, deleteSibling,
     getDraftApplicationModel, getPersonalInfo,
-    getStudentApplications, updateDraftApplicationModel, updatePersonalInfo
+    getStudentApplications, submitApplication, updateDraftApplicationModel, updatePersonalInfo
 } from "../services/studentsServices.js";
-import axios from "axios";
 
 const router = Router();
 
@@ -21,12 +20,11 @@ router.use((req, res, next) => {
 });
 
 
-router.get('/:userId', async (req, res) => {
+router.get('/personal/:userId', async (req, res) => {
     const { userId } = req.params;
     try {
 
         const personalInfo = await getPersonalInfo(userId);
-        console.log(personalInfo,"personal")
         if (!personalInfo) {
             return res.status(404).json({ message: 'المعلومات الشخصية غير موجودة' });
         }
@@ -37,7 +35,7 @@ router.get('/:userId', async (req, res) => {
     }
 });
 // Route to update specific personal info of a specific user
-router.put('/:userId', async (req, res) => {
+router.put('/personal/:userId', async (req, res) => {
     const { userId } = req.params;
     const { model, updateData } = req.body; // model can be 'basicInfo', 'contactInfo', or 'studyInfo'
 
@@ -174,6 +172,47 @@ router.delete('/applications/draft/apps/siblings/:siblingId', async (req, res) =
         handlePrismaError(res, error);
     }
 });
+router.get('/applications/:appId/submit', async (req, res) => {
+    const { appId } = req.params;
 
+    try {
+        const missingFields = await checkIfFieldsAreEmpty(appId);
+
+        if (missingFields.length > 0) {
+            return res.status(400).json({
+                message: "لم يمكن حفظ الطلب لانه يوجد بيناتات لم يتم ملئها بعد",
+                data: missingFields
+            });
+        }
+
+        res.status(200).json({ message: "تم مراجعة بياناتك والتاكد ان كل البيانات مكتملة" });
+    } catch (error) {
+        res.status(500).json({ message: 'حدث خطأ', error: error.message });
+    }
+});
+
+router.post('/applications/:appId/submit', async (req, res) => {
+    const { appId } = req.params;
+
+    try {
+        const missingFields = await checkIfFieldsAreEmpty(appId);
+
+        if (missingFields.length > 0) {
+            return res.status(400).json({
+                message: "لم يمكن حفظ الطلب لانه يوجد بيناتات لم يتم ملئها بعد",
+                data: missingFields
+            });
+        }
+
+        const submittedApplication = await submitApplication(appId);
+
+        res.status(200).json({
+            message: "تم تقديم الطلب بنجاح",
+            data: submittedApplication
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'حدث خطأ', error: error.message });
+    }
+});
 
 export default router;

@@ -94,6 +94,7 @@ export default function SupportingFiles({params: {id}}) {
                               formTitle:
                                     "الملفات الداعمة",
                               btnText: "حفظ",
+                              variant: "outlined"
                           }}/>
 
     )

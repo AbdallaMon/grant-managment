@@ -24,7 +24,7 @@ const ParentStatus = {
 };
 
 // Main form component
-export default function FamilyInfoForm({params: {id}}) {
+export default function ResidenceInfo({params: {id}}) {
     const {control, handleSubmit, watch, setValue, formState: {errors}} = useForm();
     const [loadingData, setLoadingData] = useState(true);
     const {setLoading} = useToastContext()
@@ -97,7 +97,11 @@ export default function FamilyInfoForm({params: {id}}) {
                                             defaultValue=""
                                             rules={{required: "من فضلك اختر نوع الإقامة"}}
                                             render={({field}) => (
-                                                  <Select {...field} label="نوع الإقامة" variant={"filled"}>
+                                                  <Select {...field} label="نوع الإقامة" variant={"filled"}
+                                                          sx={(theme) => ({
+                                                              backgroundColor: theme.palette.background.default,
+                                                          })}
+                                                  >
                                                       <MenuItem value={ResidenceType.FAMILY}>مع العائلة</MenuItem>
                                                       <MenuItem value={ResidenceType.PRIVATE_HOUSING}>سكن
                                                           خاص</MenuItem>
@@ -121,7 +125,12 @@ export default function FamilyInfoForm({params: {id}}) {
                                                       control={control}
                                                       defaultValue=""
                                                       render={({field}) => (
-                                                            <Select {...field} label="حالة الأب" variant={"filled"}>
+                                                            <Select {...field} label="حالة الأب" variant={"outlined"}
+
+                                                                    sx={(theme) => ({
+                                                                        backgroundColor: theme.palette.background.default,
+                                                                    })}
+                                                            >
                                                                 <MenuItem value={ParentStatus.ALIVE}>على قيد
                                                                     الحياة</MenuItem>
                                                                 <MenuItem
@@ -141,8 +150,12 @@ export default function FamilyInfoForm({params: {id}}) {
                                                         defaultValue=""
                                                         render={({field}) => (
                                                               <TextField {...field} label="دخل الأب" type="number"
-                                                                         variant={"filled"}
-                                                                         fullWidth/>
+                                                                         variant={"outlined"}
+                                                                         fullWidth
+                                                                         sx={(theme) => ({
+                                                                             backgroundColor: theme.palette.background.default,
+                                                                         })}
+                                                              />
                                                         )}
                                                   />
                                               </Grid>
@@ -155,7 +168,11 @@ export default function FamilyInfoForm({params: {id}}) {
                                                       control={control}
                                                       defaultValue=""
                                                       render={({field}) => (
-                                                            <Select {...field} label="حالة الأم" variant={"filled"}>
+                                                            <Select {...field} label="حالة الأم" variant={"outlined"}
+                                                                    sx={(theme) => ({
+                                                                        backgroundColor: theme.palette.background.default,
+                                                                    })}
+                                                            >
                                                                 <MenuItem value={ParentStatus.ALIVE}>على قيد
                                                                     الحياة</MenuItem>
                                                                 <MenuItem
@@ -177,7 +194,11 @@ export default function FamilyInfoForm({params: {id}}) {
                                                         defaultValue=""
                                                         render={({field}) => (
                                                               <TextField {...field} label="دخل الأم" type="number"
-                                                                         fullWidth variant={"filled"}/>
+                                                                         fullWidth variant={"outlined"}
+                                                                         sx={(theme) => ({
+                                                                             backgroundColor: theme.palette.background.default,
+                                                                         })}
+                                                              />
                                                         )}
                                                   />
                                               </Grid>
@@ -191,7 +212,11 @@ export default function FamilyInfoForm({params: {id}}) {
                                                   defaultValue=""
                                                   render={({field}) => (
                                                         <TextField {...field} label="دخل الأسرة" type="number"
-                                                                   variant={"filled"} fullWidth/>
+                                                                   variant={"outlined"} fullWidth
+                                                                   sx={(theme) => ({
+                                                                       backgroundColor: theme.palette.background.default,
+                                                                   })}
+                                                        />
                                                   )}
                                             />
                                         </Grid>
@@ -214,7 +239,10 @@ export default function FamilyInfoForm({params: {id}}) {
                                         render={({field}) => (
                                               <TextField {...field} label="العنوان" fullWidth
                                                          error={!!errors.address}
-                                                         variant={"filled"}
+                                                         variant={"outlined"}
+                                                         sx={(theme) => ({
+                                                             backgroundColor: theme.palette.background.default,
+                                                         })}
                                                          helperText={errors.address ? errors.address.message : ''}/>
                                         )}
                                   />

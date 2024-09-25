@@ -3,6 +3,7 @@ import {GrantDraftFrom} from "@/app/UiComponents/formComponents/forms/GrantDraft
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 
+
 const inputs = [
     {
         data: {
@@ -89,7 +90,7 @@ export default function AcademicPerformance({params: {id}}) {
                               formTitle:
                                     "الاداء الاكاديمي",
                               btnText: "حفظ",
-
+                              variant: "outlined"
                           }}/>
 
     )

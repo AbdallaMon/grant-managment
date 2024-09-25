@@ -10,11 +10,10 @@ export default function CountryCitySelector({control, errors, input, setValue}) 
     const [countries, setCountries] = useState([]);
     const [cities, setCities] = useState([]);
     const [country, setCountry] = useState('');
-    const [city, setCity] = useState(input.data.country.city);
+    const [_, setCity] = useState(input.data.country.city);
     const [loadingCountries, setLoadingCountries] = useState(false);
     const [loadingCities, setLoadingCities] = useState(false);
 
-    const isLargeScreen = useMediaQuery('(min-width:600px)');
 
     useEffect(() => {
         const fetchCountries = async () => {
@@ -92,7 +91,7 @@ export default function CountryCitySelector({control, errors, input, setValue}) 
                                           <TextField
                                                 {...params}
                                                 label="الدولة"
-                                                variant={"filled"}
+                                                variant={"outlined"}
                                                 error={!!errors.country}
                                                 sx={{bgcolor: "background.default"}}
                                                 helperText={errors.country ? errors.country.message : ""}
@@ -132,7 +131,7 @@ export default function CountryCitySelector({control, errors, input, setValue}) 
                                                 label="المدينة"
                                                 sx={{bgcolor: "background.default"}}
                                                 error={!!errors.city}
-                                                variant={"filled"}
+                                                variant={"outlined"}
                                                 helperText={errors.city ? errors.city.message : ""}
                                                 InputProps={{
                                                     ...params.InputProps,
