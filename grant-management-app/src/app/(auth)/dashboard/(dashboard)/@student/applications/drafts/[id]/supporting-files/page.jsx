@@ -72,25 +72,28 @@ export default function SupportingFiles({params: {id}}) {
 
     async function handleBeforeUpdate(data, PUT) {
         const formData = new FormData()
-        console.log(data, "data")
+        let count = 0;
         Object.entries(data).forEach(([key, value]) => {
+            count++;
+            if (!value[0] || value[0] === "undefined") {
+                count--
+            }
             formData.append(key, value[0]);
         })
+        if (count === 0 && PUT) return {};
         const request = await handleRequestSubmit(formData, setLoading, "upload", true, "جاري رفع  ملفاتك")
-        console.log(request, "request")
         if (request.status === 200)
             return request.data
     }
 
     return (
           <GrantDraftFrom inputs={inputs} appId={id} current={"supportingFiles"}
-                          next={{url: "Sibling", text: "مليء بيانات  الاقارب "}}
+                          next={{url: "siblings", text: "مليء بيانات  الاقارب "}}
                           handleBeforeUpdate={handleBeforeUpdate}
                           formProps={{
                               formTitle:
                                     "الملفات الداعمة",
                               btnText: "حفظ",
-                              variant: "outlined"
                           }}/>
 
     )

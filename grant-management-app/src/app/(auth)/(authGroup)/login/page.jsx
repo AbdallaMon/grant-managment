@@ -23,7 +23,6 @@ export default function LoginPage() {
         if (response.status === 200) {
             setIsLoggedIn(true)
             setUser(response.user)
-            router.push("/dashboard")
         }
     }
 

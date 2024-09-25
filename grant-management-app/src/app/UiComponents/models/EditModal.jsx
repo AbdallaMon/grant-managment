@@ -5,7 +5,16 @@ import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import {simpleModalStyle} from "@/app/helpers/constants";
 import {Form} from "@/app/UiComponents/formComponents/forms/Form";
 
-const EditModal = ({editButtonText, handleClose, item, inputs, setData, href, checkChanges = false}) => {
+const EditModal = ({
+                       editButtonText,
+                       handleClose,
+                       item,
+                       inputs,
+                       setData,
+                       href,
+                       checkChanges = false,
+                       handleBeforeSubmit
+                   }) => {
     const {setLoading} = useToastContext()
     const [open, setOpen] = useState(false)
 
@@ -22,6 +31,8 @@ const EditModal = ({editButtonText, handleClose, item, inputs, setData, href, ch
                 }
             }
         }
+        if (handleBeforeSubmit) dataToSubmit = await handleBeforeSubmit(formData)
+
         const result = await handleRequestSubmit(dataToSubmit, setLoading, `${href}/${item.id}`, false, "جاري التعديل", null, "PUT");
         if (result.status === 200) {
             if (setData) {
@@ -55,7 +66,7 @@ const EditModal = ({editButtonText, handleClose, item, inputs, setData, href, ch
 
               <Modal
                     open={open}
-                    onClose={handleClose}
+                    onClose={() => setOpen(false)}
                     closeAfterTransition
               >
                   <Fade in={open}>

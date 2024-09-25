@@ -18,14 +18,14 @@ import Grid from '@mui/material/Grid2';
 import {MuiDatePicker} from "@/app/UiComponents/FormComponents/MUIInputs/MuiDatePicker";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
-import CountryCitySelector from "@/app/UiComponents/formComponents/MUIInputs/CountryCitySelector";
+import CountryCitySelector from "@/app/UiComponents/formComponents/CustomInputs/CountryCitySelector";
 import InputField from "@/app/UiComponents/formComponents/MUIInputs/InputField";
-import PhoneInput from "@/app/UiComponents/formComponents/MUIInputs/PhoneInput";
+import PhoneInput from "@/app/UiComponents/formComponents/CustomInputs/PhoneInput";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import ResidenceAndNationalitySelectors
-    from "@/app/UiComponents/formComponents/MUIInputs/ResidenceAndNationalitySelectors";
-import DisabilityInput from "@/app/UiComponents/formComponents/MUIInputs/DisabilityInput";
+    from "@/app/UiComponents/formComponents/CustomInputs/ResidenceAndNationalitySelectors";
+import DisabilityInput from "@/app/UiComponents/formComponents/CustomInputs/DisabilityInput";
 
 const locales = ["ar"];
 

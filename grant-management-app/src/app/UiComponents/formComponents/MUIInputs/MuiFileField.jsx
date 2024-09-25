@@ -50,7 +50,7 @@ export default function MuiFileField({
                     alt="Preview"
                     width={60}
                     height={60}
-                    style={{objectFit: "cover"}}
+                    style={{objectFit: "cover", maxHeight: "60px"}}
               />
         );
     };

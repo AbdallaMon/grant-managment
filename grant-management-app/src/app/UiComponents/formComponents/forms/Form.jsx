@@ -195,6 +195,7 @@ function RenderInputs({
             return (
                   <Component input={input} setValue={setValue} register={register} watch={watch} trigger={trigger}
                              errors={errors} variant={variant}
+                             control={control}
 
                   />
             )

@@ -22,7 +22,7 @@ export default function AuthForm({
                 onSubmit={handleSubmit(onSubmit)}
 
                 className={
-                    "flex flex-col gap-2 items-center bg-bgPrimary justify-center w-full  p-5 py-6 rounded shadow-md  sm:max-w-[400px] md:max-w-[450px] max-w-[500px] h-fit m-auto  "
+                    "flex flex-col items-center bg-bgPrimary justify-center w-full  p-5 py-6 rounded shadow-md  sm:max-w-[400px] md:max-w-[450px] max-w-[500px] h-fit m-auto  "
                 }
                 style={{
                     ...formStyle,
@@ -42,7 +42,7 @@ export default function AuthForm({
                         {subTitle}
                     </Typography>
               )}
-              <div className={"w-full "}>
+              <div className={"w-full flex flex-col gap-3 "}>
                   {inputs.map((input) => {
                             return (
                                   <InputField

@@ -1,18 +1,60 @@
 import { Router } from 'express';
-import {getPagination, handlePrismaError, verifyTokenAndHandleAuthorization} from "../services/utility.js";
+import {
+    getPagination,
+    handlePrismaError,
+    verifyTokenAndHandleAuthorization,
+    verifyTokenUsingReq
+} from "../services/utility.js";
 import {
     createDraftApplicationModel,
     createNewApplication,
-    deleteDraftApplication,
-    getDraftApplicationModel,
-    getStudentApplications, updateDraftApplicationModel
+    deleteDraftApplication, deleteSibling,
+    getDraftApplicationModel, getPersonalInfo,
+    getStudentApplications, updateDraftApplicationModel, updatePersonalInfo
 } from "../services/studentsServices.js";
+import axios from "axios";
 
 const router = Router();
 
 router.use((req, res, next) => {
     verifyTokenAndHandleAuthorization(req, res, next,"STUDENT");
 });
+
+
+router.get('/:userId', async (req, res) => {
+    const { userId } = req.params;
+    try {
+
+        const personalInfo = await getPersonalInfo(userId);
+        console.log(personalInfo,"personal")
+        if (!personalInfo) {
+            return res.status(404).json({ message: 'المعلومات الشخصية غير موجودة' });
+        }
+        res.status(200).json({ data: personalInfo });
+    } catch (error) {
+        console.error('Error fetching personal info:', error);
+        res.status(500).json({ message: 'حدث خطأ أثناء جلب المعلومات الشخصية' });
+    }
+});
+// Route to update specific personal info of a specific user
+router.put('/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const { model, updateData } = req.body; // model can be 'basicInfo', 'contactInfo', or 'studyInfo'
+
+    try {
+        if(updateData.hasDisability==="yes")updateData.hasDisability=true
+        if(updateData.hasDisability==="no")updateData.hasDisability=false
+        const updatedInfo = await updatePersonalInfo(userId, model, updateData);
+        if (!updatedInfo) {
+            return res.status(404).json({ message: 'لم يتم العثور على المعلومات المطلوبة' });
+        }
+        res.status(200).json({ message: 'تم تحديث المعلومات بنجاح', data: updatedInfo });
+    } catch (error) {
+        console.error('Error updating personal info:', error);
+        res.status(500).json({ message: 'حدث خطأ أثناء تحديث المعلومات الشخصية' });
+    }
+});
+
 
 router.get('/applications', async (req, res) => {
     const { limit, skip } = getPagination(req);
@@ -80,8 +122,9 @@ router.post('/applications/draft/:appId', async (req, res) => {
         if (!inputData) {
             return res.status(400).json({ message: "بيانات المدخلات مطلوبة" });
         }
-        const updatedData = await createDraftApplicationModel(appId, model, inputData);
-        res.status(200).json({ message: "تم تحديث البيانات بنجاح", data: updatedData[model] });
+
+        const createdData = await createDraftApplicationModel(appId, model, inputData);
+        res.status(200).json({ message: "تم حفظ البيانات بنجاح", data: createdData });
     } catch (error) {
         console.log(error, "خطأ في تحديث بيانات نموذج طلب المسودة");
         handlePrismaError(res, error);
@@ -106,6 +149,31 @@ router.put('/applications/draft/:appId', async (req, res) => {
     }
 });
 
+router.put('/applications/draft/apps/siblings/:siblingId', async (req, res) => {
+    const { siblingId } = req.params;
+    const inputData = req.body;
+    try {
+        if (!inputData) {
+            return res.status(400).json({ message: "بيانات المدخلات مطلوبة" });
+        }
+        const updatedData = await updateDraftApplicationModel(siblingId, "siblings", inputData);
+        res.status(200).json({ message: "تم تحديث البيانات بنجاح", data: updatedData });
+    } catch (error) {
+        console.log(error, "خطأ في تحديث بيانات نموذج طلب المسودة");
+        handlePrismaError(res, error);
+    }
+});
+
+router.delete('/applications/draft/apps/siblings/:siblingId', async (req, res) => {
+    const { siblingId } = req.params;
+    try {
+        const updatedData = await deleteSibling(siblingId);
+        res.status(200).json({ message: "تمت عملية الحذف بنجاح", data: updatedData });
+    } catch (error) {
+        console.log(error, "خطأ في تحديث بيانات نموذج طلب المسودة");
+        handlePrismaError(res, error);
+    }
+});
 
 
 export default router;

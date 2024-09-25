@@ -1,5 +1,4 @@
 import prisma from '../prisma/prisma.js';
-import axios from "axios";
 import {deleteListOfFiles} from "./utility.js";
 
 export const getStudentApplications = async (studentId, skip, limit) => {
@@ -111,30 +110,41 @@ export const createDraftApplicationModel = async (appId, model, inputData) => {
                 }
             });
         case 'siblings':
+            inputData.studyYear = new Date(inputData.studyYear).toISOString();
+            if (inputData.grantAmount) inputData.grantAmount = +inputData.grantAmount;
+
             return await prisma.application.update({
                 where: { id: Number(appId), status: 'DRAFT' },
                 data: {
                     siblings: {
-                        create: inputData
-                    }
-                }
+                        create: inputData,
+                    },
+                },
+                include: {
+                    siblings: true, // Include siblings to return the created sibling data
+                },
+            }).then(result => {
+                // Return the newly created sibling from the result
+                return result.siblings[result.siblings.length - 1]; // Return the last created sibling
             });
         case 'commitment':
+            if(inputData.commitment!==true) throw new Error("يجب عليك الموافقه في حالة كنت موافق بالفعل اعد تحميل الصفحة واكد موافقتك من فضلك")
             return await prisma.application.update({
                 where: { id: Number(appId), status: 'DRAFT' },
-                data: { commitment: inputData }
+                data: { commitment: inputData.commitment }
             });
         case 'grantShipTerms':
+            if(inputData.commitment!==true) throw new Error("يجب عليك الموافقه في حالة كنت موافق بالفعل اعد تحميل الصفحة واكد موافقتك من فضلك")
             return await prisma.application.update({
                 where: { id: Number(appId), status: 'DRAFT' },
-                data: { grantShipTerms: inputData }
+                data: { grantShipTerms: inputData.grantShipTerms }
             });
         default:
             throw new Error("نموذج غير صالح");
     }
 };
 export const updateDraftApplicationModel = async (appId, model, inputData) => {
-    console.log(inputData,'update')
+
     switch (model) {
         case 'supportingFiles':
             const keysToDelete = Object.keys(inputData).reduce((acc, key) => {
@@ -142,7 +152,7 @@ export const updateDraftApplicationModel = async (appId, model, inputData) => {
                 return acc;
             }, {});
             let oldFiles=null;
-              if(keysToDelete)
+              if(keysToDelete&&keysToDelete.length>0)
               {
                   oldFiles=await prisma.supportingFiles.findUnique({
                       where:{
@@ -228,14 +238,30 @@ export const updateDraftApplicationModel = async (appId, model, inputData) => {
                 }
             });
         case 'siblings':
-            return await prisma.application.update({
-                where: { id: Number(appId), status: 'DRAFT' },
-                data: {
-                    siblings: {
-                        updateMany: inputData
-                    }
-                }
+            let oldDocument=null;
+            if(inputData.studyYear){
+            inputData.studyYear = new Date(inputData.studyYear).toISOString();
+            }
+            if(inputData.grantAmount){
+            inputData.grantAmount = +inputData.grantAmount;
+            }
+
+            if(inputData.document)
+            {
+           const oldData=await prisma.sibling.findUnique({
+            where:{id: Number(appId)},
+            select:{document:true}
+            })
+                oldDocument=oldData.document
+            }
+            const updated =await prisma.sibling.update({
+                where: { id: Number(appId) },
+                data: inputData
             });
+            if(oldDocument){
+                await deleteListOfFiles([oldDocument])
+            }
+            return updated;
         case 'commitment':
             return await prisma.application.update({
                 where: { id: Number(appId), status: 'DRAFT' },
@@ -249,4 +275,51 @@ export const updateDraftApplicationModel = async (appId, model, inputData) => {
         default:
             throw new Error("نموذج غير صالح");
     }
+};
+export const deleteSibling = async (siblingId,) => {
+    const sibling= await prisma.sibling.delete({
+        where: { id: Number(siblingId) },
+    });
+    await deleteListOfFiles([sibling.document])
+    return sibling
+}
+
+
+// profile
+
+export const getPersonalInfo = async (userId) => {
+    return await prisma.personalInfo.findUnique({
+        where: { userId: Number(userId) },
+        include: {
+            basicInfo: true,
+            contactInfo: true,
+            studyInfo: true
+        }
+    });
+};
+
+export const updatePersonalInfo = async (userId, model, updateData) => {
+    const updateFields = {};
+console.log(updateData,"updatedData")
+    console.log(model,"model")
+    if (model === 'basicInfo') {
+        updateFields.basicInfo = {
+            update: updateData
+        };
+    } else if (model === 'contactInfo') {
+        updateFields.contactInfo = {
+            update: updateData
+        };
+    } else if (model === 'studyInfo') {
+        updateFields.studyInfo = {
+            update: updateData
+        };
+    } else {
+        throw new Error('نموذج غير صالح للتحديث');
+    }
+
+    return await prisma.personalInfo.update({
+        where: { userId: Number(userId) },
+        data: updateFields,
+    });
 };

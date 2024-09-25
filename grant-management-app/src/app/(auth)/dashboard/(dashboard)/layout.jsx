@@ -16,6 +16,7 @@ export default function Layout({supervisor, admin, student, sponsor}) {
                 toastId = toast.loading("يتم التاكد من صلاحيتك");
             }
             if (!isLoggedIn && !validatingAuth) {
+                window.localStorage.setItem("redirect", window.location.pathname)
                 toast.update(toastId, Failed("يجب عليك تسجيل الدخول اولا , جاري اعادة التوجية..."));
                 router.push("/login");
                 return

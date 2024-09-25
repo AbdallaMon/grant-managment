@@ -89,7 +89,7 @@ export default function AcademicPerformance({params: {id}}) {
                               formTitle:
                                     "الاداء الاكاديمي",
                               btnText: "حفظ",
-                              
+
                           }}/>
 
     )

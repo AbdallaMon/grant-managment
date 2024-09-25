@@ -16,6 +16,7 @@ const CreateModal = ({
                          setData,
                          label,
                          inputs,
+                         handleBeforeSubmit,
                          href,
                          extraProps, handleSubmit, setTotal, BtnColor = "secondary", extraSubmitData
                      }) => {
@@ -30,11 +31,14 @@ const CreateModal = ({
         if (extraProps.extraId) {
             href = `${href}?extraId=${extraProps.extraId}`
         }
-
+        if (handleBeforeSubmit) {
+            formData = await handleBeforeSubmit(formData)
+        }
         if (extraSubmitData) {
             formData = {...formData, ...extraSubmitData}
         }
         const result = await handleRequestSubmit(formData, setLoading, `${href}`, false, "جاري الانشاء");
+        console.log(result, "results")
         if (result.status === 200) {
             if (handleSubmit) {
                 handleSubmit(result.data);

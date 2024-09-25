@@ -6,7 +6,7 @@ import Grid from "@mui/material/Grid2";
 
 import {getData} from "@/app/helpers/functions/getData";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
-import CountryCitySelector from "@/app/UiComponents/formComponents/MUIInputs/CountryCitySelector";
+import CountryCitySelector from "@/app/UiComponents/formComponents/CustomInputs/CountryCitySelector";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import {LoadingState, SubmissionConfirmation} from "@/app/UiComponents/formComponents/forms/GrantDraftFrom";
 
@@ -35,7 +35,6 @@ export default function FamilyInfoForm({params: {id}}) {
     const motherStatus = watch('motherStatus');
 
     useEffect(() => {
-        // Fetch data and populate the form with default values
         const fetchData = async () => {
             const request = await getData({
                 url: `student/applications/draft/${id}?model=residenceInfo&`,

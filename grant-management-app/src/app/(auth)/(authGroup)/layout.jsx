@@ -9,7 +9,20 @@ export default function HandleAuth({children}) {
 
     const router = useRouter();
     useEffect(() => {
-        if (isLoggedIn) router.push("/dashboard/");
+        function handleRedirect() {
+            const redirect = window.localStorage.getItem("redirect")
+            if (isLoggedIn) {
+                if (redirect && redirect.includes("dashboard")) {
+                    window.localStorage.removeItem("redirect")
+                    router.push(redirect)
+                } else {
+                    router.push("/dashboard")
+                }
+            }
+
+        }
+
+        handleRedirect()
     }, [isLoggedIn]);
 
     return (
