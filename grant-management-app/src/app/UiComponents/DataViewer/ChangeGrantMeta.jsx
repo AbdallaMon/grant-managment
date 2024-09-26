@@ -28,5 +28,5 @@ export default function ChangeGrantMeta() {
         }
     }, [lastSlug]);
 
-    return null; // Since this component is for updating meta, no need to render anything.
+    return null;
 }

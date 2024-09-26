@@ -1,5 +1,3 @@
-import LogoutButton from "@/app/UiComponents/buttons/LogoutBtn";
-
 export default function AdminPage() {
-    return (<div>Admin<LogoutButton/></div>)
+    return (<div>Admin</div>)
 }
