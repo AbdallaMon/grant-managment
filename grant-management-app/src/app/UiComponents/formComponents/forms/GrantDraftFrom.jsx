@@ -5,8 +5,10 @@ import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import {useEffect, useState} from "react";
 import {Alert, Box, Button, Typography, CircularProgress} from "@mui/material";
 import Link from "next/link";
-import {useRouter} from "next/navigation";
+import {usePathname, useRouter} from "next/navigation";
 import {getData} from "@/app/helpers/functions/getData";
+import {useGrantLinks} from "@/app/providers/GrantLinksProvider";
+import {grantLinks} from "@/app/helpers/constants";
 
 // Loading Component
 export const LoadingState = () => (
@@ -80,6 +82,7 @@ export function GrantDraftFrom({
     const router = useRouter();
     const [currentData, setCurrentData] = useState(null)
     const [prefilledInputs, setInputs] = useState(inputs)
+    const {setNotFilledLinks, nonFilledLinks} = useGrantLinks()
     useEffect(() => {
         async function getAppData() {
             setLoadingData(true);
@@ -110,7 +113,6 @@ export function GrantDraftFrom({
 
         getAppData();
     }, [appId, current]);
-
     useEffect(() => {
         if (saved) {
             setTimeout(() => {
@@ -133,6 +135,8 @@ export function GrantDraftFrom({
         );
         if (request.status === 200) {
             setSubmitted(true);
+            const nowNonFilled = nonFilledLinks.filter((item) => item.key !== current)
+            setNotFilledLinks(nowNonFilled)
         }
     };
 

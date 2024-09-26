@@ -9,6 +9,7 @@ import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import CountryCitySelector from "@/app/UiComponents/formComponents/CustomInputs/CountryCitySelector";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import {LoadingState, SubmissionConfirmation} from "@/app/UiComponents/formComponents/forms/GrantDraftFrom";
+import {useGrantLinks} from "@/app/providers/GrantLinksProvider";
 
 // Enums for residence and parent status in Arabic
 const ResidenceType = {
@@ -33,7 +34,7 @@ export default function ResidenceInfo({params: {id}}) {
     const residenceType = watch('residenceType'); // watch the residenceType field
     const fatherStatus = watch('fatherStatus');
     const motherStatus = watch('motherStatus');
-
+    const {nonFilledLinks, setNotFilledLinks} = useGrantLinks()
     useEffect(() => {
         const fetchData = async () => {
             const request = await getData({
@@ -59,7 +60,11 @@ export default function ResidenceInfo({params: {id}}) {
               null,
               currentData ? "PUT" : "POST"
         );
-        if (request.status === 200) setSubmitted(true)
+        if (request.status === 200) {
+            setSubmitted(true)
+            const nowNonFilled = nonFilledLinks.filter((item) => item.key !== "residenceInfo")
+            setNotFilledLinks(nowNonFilled)
+        }
     };
 
 

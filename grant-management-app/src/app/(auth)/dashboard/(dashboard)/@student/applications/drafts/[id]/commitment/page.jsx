@@ -13,6 +13,7 @@ import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import {getData} from "@/app/helpers/functions/getData";
 import {LoadingState, SubmissionConfirmation} from "@/app/UiComponents/formComponents/forms/GrantDraftFrom";
+import {useGrantLinks} from "@/app/providers/GrantLinksProvider";
 
 export default function CommitmentForm({params: {id}}) {
     const [agreed, setAgreed] = useState(false);
@@ -23,13 +24,14 @@ export default function CommitmentForm({params: {id}}) {
     const handleCheckboxChange = (event) => {
         setAgreed(event.target.checked);
     };
+    const {nonFilledLinks, setNotFilledLinks} = useGrantLinks()
+
     useEffect(() => {
         const fetchData = async () => {
             const request = await getData({
                 url: `student/applications/draft/${id}?model=commitment&`,
                 setLoading: setLoadingData
             });
-            console.log(request, "request")
             if (request.status === 200) {
                 setAgreed(request.data)
                 if (request.data === true) {
@@ -45,6 +47,8 @@ export default function CommitmentForm({params: {id}}) {
         const request = await handleRequestSubmit({commitment: agreed}, setLoading, `student/applications/draft/${id}?model=commitment`, false, "جاري حفظ بياناتك")
         if (request.status === 200) {
             setSubmit(true)
+            const nowNonFilled = nonFilledLinks.filter((item) => item.key !== current)
+            setNotFilledLinks(nowNonFilled)
         }
     };
     const submittedText = isSubmittedBefore ? "لقد وافقت علي هذا من قبل هل تريد الذهاب للموافقة علي شروط المنحه؟" : "الذهاب للموافقه علي شروط المنحه"

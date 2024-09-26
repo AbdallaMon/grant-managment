@@ -14,22 +14,13 @@ import {grantLinks} from "@/app/helpers/constants";
 import {usePathname} from "next/navigation";
 import {useEffect, useState} from "react";
 import {getData} from "@/app/helpers/functions/getData";
+import {useGrantLinks} from "@/app/providers/GrantLinksProvider";
 
 export function GrantListLinksAndChildren({children, id}) {
     const theme = useTheme();
     const isMdOrBelow = useMediaQuery(theme.breakpoints.down('lg'));
     const [isExpanded, setIsExpanded] = useState(false);
-    const [loading, setLoading] = useState(true)
-    const [nonFilledLinks, setNotFilledLinks] = useState()
-    useEffect(() => {
-        async function getNotFilledLinks() {
-            const nonFilledLinks = await getData({url: `student/applications/${id}/submit`, setLoading})
 
-            setNotFilledLinks(nonFilledLinks.data)
-        }
-
-        getNotFilledLinks()
-    }, [])
     const handleToggleExpand = () => {
         setIsExpanded((prev) => !prev); // Toggle the expand state
     };
@@ -57,8 +48,8 @@ export function GrantListLinksAndChildren({children, id}) {
                   <Collapse in={!isMdOrBelow || isExpanded}>
                       <Grid container spacing={2}>
                           {grantLinks.map((item) => (
-                                <GrantCard item={item} key={item.href} nonFilledLinks={nonFilledLinks}
-                                           loading={loading}/>
+                                <GrantCard item={item} key={item.href}
+                                           appId={id}/>
                           ))}
                       </Grid>
                   </Collapse>
@@ -71,13 +62,13 @@ export function GrantListLinksAndChildren({children, id}) {
     );
 }
 
-function GrantCard({item, nonFilledLinks, loading}) {
+function GrantCard({item, appId}) {
     const pathname = usePathname();
     const pathSegments = pathname.split('/').filter(Boolean);
     const lastSlug = pathSegments[pathSegments.length - 1];
     const isNumber = !isNaN(Number(lastSlug));
     const [isFilled, setIsFilled] = useState(false);
-
+    const {nonFilledLinks, loading} = useGrantLinks()
     useEffect(() => {
         if (!loading && nonFilledLinks) {
             const isNotFilled = nonFilledLinks.find((nonFilled) => nonFilled.href === item.href);
@@ -94,7 +85,8 @@ function GrantCard({item, nonFilledLinks, loading}) {
 
     return (
           <Grid size={{xs: 4, md: 2, lg: 4}} sx={{display: 'flex'}}>
-              <Box component={Link} href={item.href} sx={{textDecoration: 'none', width: '100%'}}>
+              <Box component={Link} href={`/dashboard/applications/drafts/${appId}/${item.href}`}
+                   sx={{textDecoration: 'none', width: '100%'}}>
                   <Card
                         sx={(theme) => ({
                             display: 'flex',
@@ -120,7 +112,7 @@ function GrantCard({item, nonFilledLinks, loading}) {
                       <CardMedia
                             sx={{
                                 fontSize: {xs: 20, md: 32},
-                                color: isFilled ? 'white' : 'primary.main', // Change icon color based on isFilled
+                                color: isFilled ? 'white' : 'secondary.main', // Change icon color based on isFilled
                                 mb: 1,
                             }}
                       >
@@ -132,13 +124,9 @@ function GrantCard({item, nonFilledLinks, loading}) {
                                 paddingBottom: {xs: 1, md: 3},
                             }}
                       >
-                          {isFilled &&
-                                <Typography variant={"subtitle1"} color="white" sx={{
-                                    fontSize: {xs: 10, md: 15},
-                                }}>ملئت هذه من قبل</Typography>}
                           <Typography
                                 variant="body1"
-                                color={isFilled ? 'white' : 'text.primary'} // Change text color based on isFilled
+                                color={isFilled ? 'white' : 'text.secondary'} // Change text color based on isFilled
                                 sx={{
                                     fontSize: {xs: 11, md: 16},
                                 }}
@@ -146,6 +134,7 @@ function GrantCard({item, nonFilledLinks, loading}) {
                               {item.text}
                           </Typography>
                       </Box>
+
                   </Card>
               </Box>
           </Grid>

@@ -11,6 +11,7 @@ import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import {getData} from "@/app/helpers/functions/getData";
 import {LoadingState, SubmissionConfirmation} from "@/app/UiComponents/formComponents/forms/GrantDraftFrom";
+import {useGrantLinks} from "@/app/providers/GrantLinksProvider";
 
 const fakeTerms = [
     "يلتزم الطالب بحضور جميع المحاضرات.",
@@ -27,6 +28,8 @@ export default function ScholarshipTermsForm({params: {id}}) {
     const handleCheckboxChange = (event) => {
         setAgreed(event.target.checked);
     };
+    const {nonFilledLinks, setNotFilledLinks} = useGrantLinks()
+
     useEffect(() => {
         const fetchData = async () => {
             const request = await getData({
@@ -54,6 +57,8 @@ export default function ScholarshipTermsForm({params: {id}}) {
         );
         if (request.status === 200) {
             setSubmit(true);
+            const nowNonFilled = nonFilledLinks.filter((item) => item.key !== "grantShipTerms")
+            setNotFilledLinks(nowNonFilled)
         }
     };
 

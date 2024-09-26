@@ -9,6 +9,11 @@ datasource db {
 }
 
 // Enums
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+}
 enum Role {
   ADMIN
   SUPERVISOR
@@ -128,7 +133,6 @@ model User {
   personalInfo     PersonalInfo?
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
-
   applications     Application[]     @relation("UserApplications")
   reviewedApps     Application[]     @relation("Review")
   tickets          Ticket[]
@@ -402,8 +406,8 @@ model DirectMessage {
   content          String
   senderId         Int
   receiverId       Int
+  status           MessageStatus      @default(SENT)
   createdAt        DateTime           @default(now())
-
   sender           User               @relation("SentMessages", fields: [senderId], references: [id])
   receiver         User               @relation("ReceivedMessages", fields: [receiverId], references: [id])
 }

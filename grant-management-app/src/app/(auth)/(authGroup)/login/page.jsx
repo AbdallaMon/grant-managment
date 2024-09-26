@@ -5,11 +5,9 @@ import {useAuth} from "@/app/providers/AuthProvider";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import AuthForm from "@/app/UiComponents/formComponents/forms/AuthForm";
-import {useRouter} from "next/navigation";
 
 export default function LoginPage() {
     const {setLoading} = useToastContext();
-    const router = useRouter()
     const {setIsLoggedIn, setUser} = useAuth()
 
     async function handleLogin(data) {

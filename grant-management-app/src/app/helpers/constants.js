@@ -158,15 +158,6 @@ export const grantLinks = [
         }
     },
     {
-        href: "supporting-files",
-        text: "الملفات الداعمة",
-        icon: <FaFileAlt/>,  // Supporting Files Icon
-        meta: {
-            title: "الملفات الداعمة",
-            description: "رفع جميع الملفات التي تدعم طلبك"
-        }
-    },
-    {
         href: "scholarship-info",
         text: "معلومات المنحة",
         icon: <FaGraduationCap/>,  // Scholarship Info Icon
@@ -200,6 +191,15 @@ export const grantLinks = [
         meta: {
             title: "معلومات الأقارب",
             description: "تفاصيل عن الأقارب في نفس البرنامج"
+        }
+    },
+    {
+        href: "supporting-files",
+        text: "الملفات الداعمة",
+        icon: <FaFileAlt/>,  // Supporting Files Icon
+        meta: {
+            title: "الملفات الداعمة",
+            description: "رفع جميع الملفات التي تدعم طلبك"
         }
     },
     {

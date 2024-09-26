@@ -82,6 +82,13 @@ export const createDraftApplicationModel = async (appId, model, inputData) => {
                 }
             });
         case 'academicPerformance':
+            if(inputData.gpaType==="GPA_4"&&(inputData.gpaValue>4||inputData.gpaValue<0)){
+                throw new Error("المعدل التراكمي يجب ان يكون اكبر من 0 واقل من او يساوي 4 اذا كان نوعه معدل من 4 نقاط")
+            }
+            if(inputData.gpaType==="PERCENTAGE"&&(inputData.gpaValue>100||inputData.gpaValue<0)){
+                throw new Error("المعدل التراكمي يجب ان يكون اكبر من 0 واقل من او يساوي 100 اذا كان نوعه معدل مئوي")
+            }
+
             return await prisma.application.update({
                 where: { id: Number(appId), status: 'DRAFT' },
                 data: {
@@ -201,6 +208,14 @@ export const updateDraftApplicationModel = async (appId, model, inputData) => {
                     oldFileUrl = currentAcademicPerformance.transcript;
                 }
             }
+       console.log(inputData)
+       if(inputData.gpaType==="GPA_4"&&(inputData.gpaValue>4||inputData.gpaValue<0)){
+           throw new Error("المعدل التراكمي يجب ان يكون اكبر من 0 واقل من او يساوي 4 اذا كان نوعه معدل من 4 نقاط")
+       }
+            if(inputData.gpaType==="PERCENTAGE"&&(inputData.gpaValue>100||inputData.gpaValue<0)){
+                throw new Error("المعدل التراكمي يجب ان يكون اكبر من 0 واقل من او يساوي 100 اذا كان نوعه معدل مئوي")
+            }
+
             const updatedApplication = await prisma.application.update({
                 where: { id: Number(appId), status: 'DRAFT' },
                 data: {

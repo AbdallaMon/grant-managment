@@ -1,6 +1,6 @@
 "use client"
 import useDataFetcher from "@/app/helpers/hooks/useDataFetcher";
-import React from "react";
+import React, {useEffect} from "react";
 import AdminTable from "@/app/UiComponents/DataViewer/AdminTable";
 import CreateModal from "@/app/UiComponents/models/CreateModal";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
@@ -8,6 +8,7 @@ import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import {StudySource} from "@/app/helpers/constants";
 import {Button} from "@mui/material";
 import Link from "next/link";
+import {useGrantLinks} from "@/app/providers/GrantLinksProvider";
 
 export default function Siblings({params: {id}}) {
     const {
@@ -139,8 +140,13 @@ export default function Siblings({params: {id}}) {
         {name: "grantAmount", label: "قيمة المنحة"},
         {name: "document", label: "المستند", type: "document"}
     ];
-
-
+    const {nonFilledLinks, setNotFilledLinks} = useGrantLinks()
+    useEffect(() => {
+        if (data.length > 0) {
+            const nowNonFilled = nonFilledLinks.filter((item) => item.key !== "siblings")
+            setNotFilledLinks(nowNonFilled)
+        }
+    }, [data])
     const editInputs = [...inputs]
 
     async function handleBeforeSubmit(data) {
@@ -165,7 +171,6 @@ export default function Siblings({params: {id}}) {
                     extraProps={{formTitle: "اضافة قريب جديد", btnText: "اضافة"}}
                     setTotal={setTotal}
                     handleBeforeSubmit={handleBeforeSubmit}
-
               />
               <AdminTable
                     withEdit={true}
