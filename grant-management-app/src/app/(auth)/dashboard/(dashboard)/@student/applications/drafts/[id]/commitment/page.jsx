@@ -47,7 +47,7 @@ export default function CommitmentForm({params: {id}}) {
         const request = await handleRequestSubmit({commitment: agreed}, setLoading, `student/applications/draft/${id}?model=commitment`, false, "جاري حفظ بياناتك")
         if (request.status === 200) {
             setSubmit(true)
-            const nowNonFilled = nonFilledLinks.filter((item) => item.key !== current)
+            const nowNonFilled = nonFilledLinks.filter((item) => item.key !== "commitment")
             setNotFilledLinks(nowNonFilled)
         }
     };

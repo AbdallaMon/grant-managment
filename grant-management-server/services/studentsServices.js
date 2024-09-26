@@ -88,7 +88,6 @@ export const createDraftApplicationModel = async (appId, model, inputData) => {
             if(inputData.gpaType==="PERCENTAGE"&&(inputData.gpaValue>100||inputData.gpaValue<0)){
                 throw new Error("المعدل التراكمي يجب ان يكون اكبر من 0 واقل من او يساوي 100 اذا كان نوعه معدل مئوي")
             }
-
             return await prisma.application.update({
                 where: { id: Number(appId), status: 'DRAFT' },
                 data: {
@@ -130,7 +129,6 @@ export const createDraftApplicationModel = async (appId, model, inputData) => {
                     siblings: true, // Include siblings to return the created sibling data
                 },
             }).then(result => {
-                // Return the newly created sibling from the result
                 return result.siblings[result.siblings.length - 1]; // Return the last created sibling
             });
         case 'commitment':

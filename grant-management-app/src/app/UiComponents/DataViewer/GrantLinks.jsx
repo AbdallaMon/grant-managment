@@ -13,7 +13,6 @@ import Link from "next/link";
 import {grantLinks} from "@/app/helpers/constants";
 import {usePathname} from "next/navigation";
 import {useEffect, useState} from "react";
-import {getData} from "@/app/helpers/functions/getData";
 import {useGrantLinks} from "@/app/providers/GrantLinksProvider";
 
 export function GrantListLinksAndChildren({children, id}) {

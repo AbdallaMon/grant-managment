@@ -180,7 +180,7 @@ router.get('/applications/:appId/submit', async (req, res) => {
 
         if (missingFields.length > 0) {
             return res.status(400).json({
-                message: "لم يمكن حفظ الطلب لانه يوجد بيناتات لم يتم ملئها بعد",
+                message: "لا  يمكن حفظ الطلب لانه يوجد بيناتات لم يتم ملئها بعد",
                 data: missingFields
             });
         }

@@ -11,6 +11,7 @@ import {getData} from "@/app/helpers/functions/getData";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import {useRouter} from "next/navigation";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
+import Link from "next/link";
 
 export default function ReviewSubmissionPage({params: {id}}) {
     const [loading, setLoading] = useState(true);
@@ -35,7 +36,7 @@ export default function ReviewSubmissionPage({params: {id}}) {
 
         fetchData();
     }, []);
-
+    console.log(data, "data")
     const handleSaveAndSubmit = async () => {
         const request = await handleRequestSubmit({}, setSubmitLoading, `student/applications/${id}/submit`, false, "جاري الحفظ")
         if (request.status === 200) {
@@ -63,17 +64,17 @@ export default function ReviewSubmissionPage({params: {id}}) {
                     </Box>
               ) : data ? (
                     <Box>
-                        <Alert>
+                        <Alert severity={"error"}>
                             {message}
                         </Alert>
-                        {Object.entries(data).map(([key, value]) => (
-                              <Box key={key} sx={{mb: 2}}>
-                                  <Typography variant="body1" component="span">
-                                      {value.text}:&nbsp;
-                                  </Typography>
-                                  <MuiLink href={value.link} underline="hover" color="primary">
-                                      {value.link}
-                                  </MuiLink>
+                        <Typography variant="h5" my={3}>
+                            من فضلك قم بملئ البيانات التاليه
+                        </Typography>
+                        {data.map((item) => (
+                              <Box key={item.key} sx={{mb: 2}}>
+                                  <Button variant="contained" component={Link} href={item.href}>
+                                      {item.text}
+                                  </Button>
                               </Box>
                         ))}
                     </Box>

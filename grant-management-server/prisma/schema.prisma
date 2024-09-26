@@ -135,11 +135,10 @@ model User {
   updatedAt        DateTime          @updatedAt
   applications     Application[]     @relation("UserApplications")
   reviewedApps     Application[]     @relation("Review")
+  superVisorGrants       UserGrant[]  @relation("GrantSuperVisor")
   tickets          Ticket[]
   tasks            Task[]
   messages         Message[]
-  groups           Group[]           @relation("GroupStudents")
-  supervisedGroups Group[]           @relation("GroupSupervisors")
   userGrants       UserGrant[]
   viewGrants       Grant[]           @relation("GrantViewAccess")
   sentMessages     DirectMessage[]   @relation("SentMessages")
@@ -305,9 +304,11 @@ model UserGrant {
   id               Int                @id @default(autoincrement())
   userId           Int
   grantId          Int
+  supervisorId      Int?
   applicationId    Int
   payments         Payment[]
   createdAt        DateTime           @default(now())
+  supervisor        User?             @relation("GrantSuperVisor", fields: [supervisorId], references: [id])
 
   user             User               @relation(fields: [userId], references: [id])
   grant            Grant              @relation(fields: [grantId], references: [id])
@@ -384,7 +385,6 @@ model Ticket {
   content          String
   status           TicketStatus       @default(OPEN)
   createdAt        DateTime           @default(now())
-
   userId           Int
   user             User               @relation(fields: [userId], references: [id])
   messages         Message[]
@@ -396,7 +396,6 @@ model Message {
   content          String
   senderId         Int
   createdAt        DateTime           @default(now())
-
   ticket           Ticket             @relation(fields: [ticketId], references: [id])
   sender           User               @relation(fields: [senderId], references: [id])
 }
@@ -410,14 +409,6 @@ model DirectMessage {
   createdAt        DateTime           @default(now())
   sender           User               @relation("SentMessages", fields: [senderId], references: [id])
   receiver         User               @relation("ReceivedMessages", fields: [receiverId], references: [id])
-}
-
-model Group {
-  id               Int                @id @default(autoincrement())
-  name             String
-  createdAt        DateTime           @default(now())
-  students         User[]             @relation("GroupStudents")
-  supervisors      User[]             @relation("GroupSupervisors")
 }
 
 model Task {
