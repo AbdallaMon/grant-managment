@@ -9,6 +9,7 @@ import axios from "axios";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
 export const deleteFiles = (fileUrls) => {
     return new Promise((resolve, reject) => {
         const baseUploadPath = path.join(__dirname, '../uploads/');
@@ -92,11 +93,9 @@ export const uploadFiles = (req, res) => {
 };
 export const verifyTokenUsingReq = (req, res, next) => {
     const token = req.cookies.token
-
     if (!token) {
-        return res.status(403).json({ message: 'No token provided, access denied' });
+        return res.status(403).json({ message: 'تم رفض صلاحيتك' });
     }
-
     try {
         const decoded = jwt.verify(token,SECRET_KEY);
         req.user = decoded;
@@ -175,6 +174,7 @@ export function handlePrismaError(res, error) {
 export const verifyTokenAndHandleAuthorization = (req, res, next,role) => {
 
     const token = req.cookies.token
+
     if (!token) {
         return res.status(401).json({ message: 'يجب عليك تسجيل الدخول اولا' });
     }
@@ -214,4 +214,70 @@ export async function deleteListOfFiles(files){
     } catch (error) {
         console.error(`Error while deleting old file :`, error.message);
     }
+}
+const modelMap = {
+    user: prisma.user,
+    grant: prisma.grant,
+};
+export async function searchData(body) {
+    const { model, query, filters } = body;
+    const prismaModel = modelMap[model];
+    let where = {};
+    if (query) {
+        if (model === 'user') {
+            where.OR = [
+                { email: { contains: query } },
+                { personalInfo: { basicInfo: { name: { contains: query } } } },
+                { personalInfo: { contactInfo: { phone: { contains: query } } } }
+            ];
+        } else if (model === 'grant') {
+            where.name = { contains: query };
+        }
+    }
+
+    if (filters&&filters!=="undefined") {
+        const parsedFilters = JSON.parse(filters);
+        if (parsedFilters.role) {
+            where.role = parsedFilters.role;
+        }
+        if(parsedFilters.OR){
+            where.OR=parsedFilters.OR
+        }
+        if ( parsedFilters.type) {
+            where.type = parsedFilters.type;
+        }
+    }
+
+        const selectFields = {
+            user: {
+                id: true,
+                email: true,
+                personalInfo: {
+                    select: {
+                        basicInfo: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                        contactInfo: {
+                            select: {
+                                phone: true,
+                                whatsapp: true,
+                            },
+                        },
+                    },
+                },
+            },
+            grant: {
+                name: true,
+                type: true,
+                amount: true,
+                amountLeft: true,
+            },
+        };
+        const data = await prismaModel.findMany({
+            where,
+            select: selectFields[model],
+        });
+        return data;
 }

@@ -5,7 +5,9 @@ import dotenv from 'dotenv';
 dotenv.config();
 import authRoutes from './routes/auth.js';
 import studentRoutes from './routes/student.js';
-import {deleteFiles, uploadFiles, verifyTokenUsingReq} from "./services/utility.js";
+import adminRoutes from './routes/admin.js';
+
+import {deleteFiles, searchData, uploadFiles, verifyTokenUsingReq} from "./services/utility.js";
 
 const app = express();
 
@@ -19,6 +21,17 @@ app.use(cookieParser());
 app.use('/uploads', express.static('uploads')); // we might needs to remove this later
 
 // Routes
+app.get('/search', verifyTokenUsingReq, async (req, res) => {
+    const searchBody=req.query
+    try{
+        const data=await  searchData(searchBody)
+        res.status(200).json({ data });
+    } catch (error) {
+        console.error(`Error fetching data :`, error);
+        res.status(500).json({ message: `حدثت مشكلة اثناء جلب البينات: ${error.message}` });
+    }
+});
+
 app.post('/upload', verifyTokenUsingReq, async (req, res) => {
     try {
         const fileUrls = await uploadFiles(req, res); // Upload the files and get their URLs
@@ -40,6 +53,7 @@ app.post('/delete-files', async (req, res) => {
 });
 app.use('/auth', authRoutes);
 app.use('/student', studentRoutes);
+app.use('/admin', adminRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

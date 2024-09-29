@@ -3,8 +3,9 @@
 import React, {useState, useEffect} from "react";
 import {TextField, Box, CircularProgress} from "@mui/material";
 import Autocomplete from '@mui/material/Autocomplete';
+import {getPropertyValue} from "@/app/helpers/functions/utility";
 
-const SearchComponent = ({apiEndpoint, setFilters, inputLabel, renderKeys, mainKey, resetTrigger}) => {
+const SearchComponent = ({apiEndpoint, setFilters, inputLabel, renderKeys, mainKey, resetTrigger, localFilters}) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -13,7 +14,7 @@ const SearchComponent = ({apiEndpoint, setFilters, inputLabel, renderKeys, mainK
     const fetchSearchResults = async (query) => {
         setLoading(true);
         try {
-            const response = await fetch(`${apiEndpoint}&query=${query}`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/${apiEndpoint}&query=${query}&filters=${JSON.stringify(localFilters)}`, {credentials: "include"});
             const result = await response.json();
             setSearchResults(result.data);
         } catch (error) {
@@ -38,14 +39,11 @@ const SearchComponent = ({apiEndpoint, setFilters, inputLabel, renderKeys, mainK
             setSearchTerm(newValue[mainKey] || "");
             setFilters((prevFilters) => ({
                 ...prevFilters,
-                userId: newValue.id,
-                duty: newValue.duty,
-                name: newValue.name,
-                additionalDuties: newValue.additionalDuties
+                query: newValue
             }));
         } else {
             setSearchTerm("");
-            setFilters((prevFilters) => ({...prevFilters, userId: null}));
+            setFilters((prevFilters) => ({...prevFilters, query: null}));
         }
     };
 
@@ -60,7 +58,7 @@ const SearchComponent = ({apiEndpoint, setFilters, inputLabel, renderKeys, mainK
           <Box sx={{position: "relative", display: "flex", alignItems: "center"}}>
               <Autocomplete
                     options={searchResults}
-                    getOptionLabel={(option) => renderKeys.map((key) => option[key]).join(" - ")}
+                    getOptionLabel={(option) => renderKeys.map((key) => getPropertyValue(option, key)).join(" - ")}
                     loading={loading}
                     value={selectedItem}
                     sx={{

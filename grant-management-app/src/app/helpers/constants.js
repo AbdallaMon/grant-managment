@@ -12,20 +12,20 @@ import {
 } from 'react-icons/fa';
 
 
-export const initialPageLimit = 1
-export const totalLimitPages = [1, 20, 50, 100]
+export const initialPageLimit = 20
+export const totalLimitPages = [20, 50, 100]
 
 export const ProgramType = {
     BACH: "بكالريوس",
     MAST: "ماجستير", PHD: "دكتوراه"
 }
 // Roles in Arabic
-const Role = {
+export const Role = {
     ADMIN: "مسؤول",
     SUPERVISOR: "مشرف",
     STUDENT: "طالب",
-    SPONSOR: "راعي",
-    DONOR: "متبرع"
+    SPONSOR: "جهة داعمة",
+    INDIVIDUAL: "حساب افراد"
 };
 
 // Task Status in Arabic
@@ -260,3 +260,5 @@ export const simpleModalStyle = {
     boxShadow: 24,
     p: 4,
 }
+
+

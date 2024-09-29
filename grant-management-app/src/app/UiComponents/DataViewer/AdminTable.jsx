@@ -13,8 +13,8 @@ import {
 } from '@mui/material';
 import EditModal from "@/app/UiComponents/models/EditModal";
 import DeleteModal from "@/app/UiComponents/models/DeleteModal";
-import dayjs from 'dayjs';
 import PaginationWithLimit from "@/app/UiComponents/DataViewer/PaginationWithLimit";
+import {getPropertyValue} from "@/app/helpers/functions/utility";
 
 const DocumentRenderer = ({value}) => {
     if (!value) return null;
@@ -36,28 +36,6 @@ const DocumentRenderer = ({value}) => {
     }
 
     return null;
-};
-const getPropertyValue = (item, propertyPath, enums) => {
-    const value = propertyPath.split('.').reduce((acc, part) => {
-        if (acc) {
-            const arrayIndexMatch = part.match(/(\w+)\[(\d+)\]/);
-            if (arrayIndexMatch) {
-                const arrayName = arrayIndexMatch[1];
-                const index = parseInt(arrayIndexMatch[2], 10);
-                return acc[arrayName] && acc[arrayName][index];
-            } else {
-                return acc[part];
-            }
-        }
-        return undefined;
-    }, item);
-
-    if ((propertyPath.toLowerCase().includes('date') || propertyPath.toLowerCase().includes('year')) && dayjs(value).isValid()) {
-        return dayjs(value).format('YYYY-MM-DD');
-    }
-
-    if (enums) return enums[value]
-    return value;
 };
 
 export default function AdminTable({
@@ -114,12 +92,12 @@ export default function AdminTable({
                               {data?.map((item) => (
                                     <TableRow key={item.id}>
                                         {columns.map((column) => (
-
                                               <TableCell key={column.name}>
                                                   {column.type === "document" ? (
-                                                        <DocumentRenderer value={getPropertyValue(item, column.name)}/>
+                                                        <DocumentRenderer
+                                                              value={getPropertyValue(item, column.name, column.enum, column.type)}/>
                                                   ) : (
-                                                        getPropertyValue(item, column.name, column.type === "ENUM" && column.enum)
+                                                        getPropertyValue(item, column.name, column.enum, column.type)
                                                   )}
                                               </TableCell>
                                         ))}

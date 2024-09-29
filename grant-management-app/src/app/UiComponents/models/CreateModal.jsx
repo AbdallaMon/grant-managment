@@ -57,11 +57,14 @@ const CreateModal = ({
 
     return (
           <>
-              <div className={"px-2 mb-1 mt-2"}>
-                  <Button variant="contained" color={BtnColor} onClick={handleOpen}>
+              <>
+                  <Button variant="contained" color={BtnColor} onClick={handleOpen} sx={{
+                      width: "100%", display: "flex", m: "auto"
+                  }}
+                  >
                       {label}
                   </Button>
-              </div>
+              </>
               <Modal
                     open={open}
                     onClose={handleClose}

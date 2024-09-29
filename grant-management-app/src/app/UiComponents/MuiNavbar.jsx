@@ -14,27 +14,26 @@ import {
     useMediaQuery,
     useTheme,
 } from "@mui/material";
-import {FaBars, FaBell, FaEnvelope} from "react-icons/fa"; // Add icons for notifications and messages
+import {FaBars, FaBell, FaEnvelope} from "react-icons/fa";
 import Link from "next/link";
-import {useAuth} from "@/app/providers/AuthProvider"; // Assuming you have an AuthProvider
-import LogoutButton from "@/app/UiComponents/Buttons/LogoutBtn"; // Logout button component
+import {useAuth} from "@/app/providers/AuthProvider";
+import LogoutButton from "@/app/UiComponents/Buttons/LogoutBtn";
 
 // Define role-based navigation structure in Arabic
 const roleBasedLinks = {
     ADMIN: [
         {name: "لوحة التحكم", route: "dashboard"},
         {name: "المستخدمين", route: "users"},
-        {name: "المشرفين", route: "supervisors"},
-        {name: "المتبرعين والرعاة", route: "donors-sponsors"},
-        {name: "المنح الدراسية", route: "grants"},
-        {name: "التطبيقات", route: "applications"},
+        {name: "المنح", route: "grants"},
+        {name: "الشكاوي", route: "complaints"},
+        {name: "مهام المشرفين", route: "tasks"}
     ],
     SUPERVISOR: [
         {name: "لوحة التحكم", route: "dashboard"},
-        {name: "المجموعات", route: "groups"},
         {name: "الطلاب", route: "students"},
         {name: "طلبات المراجعة", route: "applications-review"},
-        {name: "المنح الدراسية", route: "grants"},
+        {name: "المنح", route: "grants"},
+        {name: "المهام", route: "tasks"}
     ],
     STUDENT: [
         {name: "لوحة التحكم", route: "dashboard"},
@@ -117,7 +116,6 @@ export default function Navbar() {
                                     <FaBars/>
                                 </IconButton>
                                 <NotificationsAndMessages role={role} isLoggedIn={isLoggedIn}/>
-
                                 <Drawer
                                       anchor="left"
                                       open={drawerOpen}

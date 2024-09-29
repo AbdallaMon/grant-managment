@@ -382,7 +382,9 @@ export const submitApplication = async (appId) => {
     const updatedApplication = await prisma.application.update({
         where: { id: Number(appId) },
         data: {
-            status: 'PENDING'
+            status: 'PENDING',
+            createdAt: new Date()
+
         }
     });
 

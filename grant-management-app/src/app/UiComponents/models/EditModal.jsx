@@ -4,6 +4,7 @@ import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import {simpleModalStyle} from "@/app/helpers/constants";
 import {Form} from "@/app/UiComponents/formComponents/forms/Form";
+import {getPropertyValue} from "@/app/helpers/functions/utility";
 
 const EditModal = ({
                        editButtonText,
@@ -73,13 +74,18 @@ const EditModal = ({
                       <Box sx={{...simpleModalStyle}}>
                           <Form
                                 onSubmit={onSubmit}
-                                inputs={prefilledInputs.map(input => ({
-                                    ...input,
-                                    data: {
-                                        ...input.data,
-                                        defaultValue: input.data.parentId ? item[input.data.parentId]?.id : item[input.data.id]
-                                    }
-                                }))}
+                                inputs={prefilledInputs.map(input => {
+                                          const defaultValue = getPropertyValue(item, input.data.key ? input.data.key : input.data.id, input.data.enum, input.data.type)
+                                          console.log(defaultValue, "defaultValue")
+                                          return {
+                                              ...input,
+                                              data: {
+                                                  ...input.data,
+                                                  defaultValue
+                                              }
+                                          }
+                                      }
+                                )}
                                 formTitle={`تعديل ${item.title || item.name || item.id}`}
                                 btnText="حفظ التغيرات"
                           >

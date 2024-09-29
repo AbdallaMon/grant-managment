@@ -19,7 +19,7 @@ enum Role {
   SUPERVISOR
   STUDENT
   SPONSOR
-  DONOR
+  INDIVIDUAL
 }
 
 enum TaskStatus {
@@ -53,6 +53,8 @@ enum NotificationType {
   MESSAGE
   APPLICATION_APPROVED
   APPLICATION_REJECTED
+  APPLICATION_UPDATE
+  APPLICATION_RESPONSE
   TASK_ASSIGNED
   TASK_COMPLETED
   PAYMENT_DUE
@@ -150,18 +152,22 @@ model PersonalInfo {
   id               Int                @id @default(autoincrement())
   userId           Int                @unique
   user             User               @relation(fields: [userId], references: [id])
-  basicInfo        BasicInfo?         @relation(fields: [id], references: [id], map: "BasicInfo_FK")
-  contactInfo      ContactInfo?       @relation(fields: [id], references: [id], map: "ContactInfo_FK")
-  studyInfo        StudyInformation?  @relation(fields: [id], references: [id], map: "StudyInfo_FK")
+  basicInfoId      Int?               @unique
+  contactInfoId    Int?               @unique
+  studyInfoId      Int?               @unique
+
+  basicInfo        BasicInfo?         @relation(fields: [basicInfoId], references: [id])
+  contactInfo      ContactInfo?       @relation(fields: [contactInfoId], references: [id])
+  studyInfo        StudyInformation?  @relation(fields: [studyInfoId], references: [id])
 }
 
 model BasicInfo {
   id               Int                @id @default(autoincrement())
   name             String
-  fatherName       String
-  familyName       String
-  nationality      String
-  residenceCountry String
+  fatherName       String?
+  familyName       String?
+  nationality      String?
+  residenceCountry String?
   passport         String?
   gender           String?
   birthDate        DateTime?
@@ -214,23 +220,10 @@ model Application {
 
   student           User              @relation("UserApplications", fields: [studentId], references: [id])
   supervisor        User?             @relation("Review", fields: [supervisorId], references: [id])
-
   updates           File[]
   askedFields       AskedField[]
   improvementRequests ImprovementRequest[]
   userGrants        UserGrant[]
-}
-
-model SupportingFiles {
-  id               Int                @id @default(autoincrement())
-  personalId       String?
-  studentDoc      String?
-  medicalReport    String?
-  personalPhoto    String?
-  proofOfAddress   String?
-  applicationId    Int                @unique
-
-  application      Application        @relation(fields: [applicationId], references: [id])
 }
 
 model ScholarshipInfo {
@@ -243,6 +236,17 @@ model ScholarshipInfo {
 
   application      Application        @relation(fields: [applicationId], references: [id])
 }
+
+model AcademicPerformance {
+  id               Int                @id @default(autoincrement())
+  typeOfStudy StudyType
+  gpaType          GpaType
+  gpaValue         Float?
+  transcript       String?
+  applicationId    Int                @unique
+  application      Application        @relation(fields: [applicationId], references: [id])
+}
+
 
 model ResidenceInformation {
   id               Int                @id @default(autoincrement())
@@ -260,13 +264,15 @@ model ResidenceInformation {
   application      Application        @relation(fields: [applicationId], references: [id])
 }
 
-model AcademicPerformance {
+model SupportingFiles {
   id               Int                @id @default(autoincrement())
-  typeOfStudy StudyType
-  gpaType          GpaType
-  gpaValue         Float?
-  transcript       String?
+  personalId       String?
+  studentDoc      String?
+  medicalReport    String?
+  personalPhoto    String?
+  proofOfAddress   String?
   applicationId    Int                @unique
+
   application      Application        @relation(fields: [applicationId], references: [id])
 }
 
@@ -294,6 +300,7 @@ model Grant {
   name             String
   type             GrantType
   amount           Float
+  amountLeft    Float
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   userGrants       UserGrant[]
@@ -345,7 +352,6 @@ model Invoice {
 
 model ImprovementRequest {
   id               Int                @id @default(autoincrement())
-  fieldId          String
   title            String
   message          String
   status           FieldStatus        @default(PENDING)
@@ -353,7 +359,6 @@ model ImprovementRequest {
 
   application      Application        @relation(fields: [applicationId], references: [id])
 }
-
 model AskedField {
   id               Int                @id @default(autoincrement())
   title            String
@@ -371,11 +376,11 @@ model AskedField {
 model Notification {
   id               Int                @id @default(autoincrement())
   content          String
+  href                 String?
   type             NotificationType
   isRead           Boolean            @default(false)
   userId           Int
   createdAt        DateTime           @default(now())
-
   user             User               @relation(fields: [userId], references: [id])
 }
 

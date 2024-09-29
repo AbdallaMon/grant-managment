@@ -79,7 +79,6 @@ const {email,password,confirmPassword}=basicInfo
     if(password!==confirmPassword){
         throw new Error('كلمة المرور ليست متطابقة مع تاكيد كلمة المرور');
     }
-    // تشفير كلمة المرور
 
     const hashedPassword = bcrypt.hashSync(password, 8);
 

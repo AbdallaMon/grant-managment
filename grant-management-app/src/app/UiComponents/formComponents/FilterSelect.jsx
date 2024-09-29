@@ -1,12 +1,38 @@
-import React from 'react';
-import { FormControl, InputLabel, Select, MenuItem, CircularProgress, Box } from '@mui/material';
+import React, {useEffect} from 'react';
+import {FormControl, InputLabel, Select, MenuItem, CircularProgress, Box} from '@mui/material';
+import {useRouter, useSearchParams} from "next/navigation";
 
-const FilterSelect = ({ label, options, value, onChange, loading }) => {
+const FilterSelect = ({label, options, param, onChange, loading, setFilters, reset}) => {
+    const searchParams = useSearchParams()
+    const router = useRouter()
+    const current = searchParams.get(param)
+    useEffect(() => {
+        if (searchParams.get(param)) {
+            if (reset) {
+                setFilters({[param]: searchParams.get(param)})
+            } else {
+                setFilters((oldFilters) => ({...oldFilters, [param]: searchParams.get(param)}))
+            }
+
+        }
+    }, [searchParams])
+
+    function handleChange(event) {
+        if (onChange) return onChange(event)
+        const value = event.target.value;
+        const params = new URLSearchParams(searchParams);
+        if (value) {
+            params.set(param, value);
+        } else {
+            params.set(param, "all");
+        }
+        router.push(`?${params.toString()}`);
+    }
+
     return (
-          <div className={"w-full flex justify-end px-2"}>
-
-              <FormControl  variant="outlined" margin="normal" sx={{
-                  mb:2,
+          <Box width="100%">
+              <FormControl variant="outlined" margin="normal" sx={{
+                  mb: 2,
                   width: {
                       xs: '100%',
                       sm: 200,
@@ -14,31 +40,31 @@ const FilterSelect = ({ label, options, value, onChange, loading }) => {
               }}>
                   <InputLabel>{label}</InputLabel>
                   <Select
-                        value={options?.find((option) => option.id == value)?.name || 'All '}
-                        onChange={onChange}
+                        value={options?.find((option) => option.id == current)?.name || 'الكل '}
+                        onChange={handleChange}
                         label={label}
                         disabled={loading}
                         renderValue={(selected) => {
                             if (loading) {
                                 return (
                                       <Box display="flex" alignItems="center">
-                                          <CircularProgress size={20} sx={{ marginRight: 2 }} />
-                                          <span>Loading...</span>
+                                          <CircularProgress size={20} sx={{marginRight: 2}}/>
+                                          <span>جاري التحميل</span>
                                       </Box>
                                 );
                             }
                             return selected || 'All';
                         }}
                   >
-                      <MenuItem value="">All</MenuItem>
+                      <MenuItem value="">الكل</MenuItem>
                       {options.map((option) => (
-                            <MenuItem key={option.id} value={option.id} >
+                            <MenuItem key={option.id} value={option.id}>
                                 {option.name}
                             </MenuItem>
                       ))}
                   </Select>
               </FormControl>
-          </div>
+          </Box>
     );
 };
 
