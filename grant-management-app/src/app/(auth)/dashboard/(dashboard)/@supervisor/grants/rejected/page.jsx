@@ -31,7 +31,7 @@ export default function Applications() {
         setLimit,
         total,
         setTotal, totalPages, setFilters
-    } = useDataFetcher("admin/grants/applications/pending", false);
+    } = useDataFetcher(`shared/grants/applications/rejected?supervisorId=${user.id}&`, false);
     return (
           <Box mt={2}>
               <Box display="flex" width="fit-content" gap={2} px={2}>
@@ -69,7 +69,6 @@ export default function Applications() {
                                                      route: "shared/grants/applications",
                                                      label: "اتخاذ اجراء",
                                                      setData: setData,
-                                                     isAdmin: true
                                                  }}/>
                           </Box>
                     )}

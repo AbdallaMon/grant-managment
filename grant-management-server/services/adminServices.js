@@ -5,6 +5,14 @@ import bcrypt from "bcrypt";
 export async function getUser(searchParams,limit, skip,role="STUDENT"){
     const filters = JSON.parse(searchParams.filters);
     let where = {role};
+    if(searchParams.supervisorId)
+    {
+        where.supervisorId=Number(searchParams.supervisorId)
+    }
+    if(filters.query)
+    {
+        where.id=Number(filters.query.id)
+    }
     if (role === "OTHER") {
         delete where.role;
         where.OR = [
@@ -429,10 +437,12 @@ export async function getApplications(searchParams, limit, skip, status = "PENDI
     const where = {status};
 
     if (filters !== "undefined" && filters.query) {
-        console.log(filters.query,"filters.query")
         where.studentId = filters.query.id;
     }
-
+    if(searchParams.supervisorId)
+    {
+        where.supervisorId=Number(searchParams.supervisorId)
+    }
     const orderBy = filters.sort === "new" ? {createdAt: 'desc'} : {createdAt: 'asc'};
 
     const applications = await prisma.application.findMany({

@@ -8,6 +8,8 @@ import {Box} from "@mui/material";
 import FilterSelect from "@/app/UiComponents/formComponents/FilterSelect";
 import CreateModal from "@/app/UiComponents/models/CreateModal";
 import {Role} from "@/app/helpers/constants";
+import SearchComponent from "@/app/UiComponents/formComponents/SearchComponent";
+import React from "react";
 
 const columns = [
     {name: "personalInfo.basicInfo.name", label: "الاسم"},
@@ -119,24 +121,49 @@ export default function SuperVisorPage() {
 
     return (
           <div>
-              <Box display="flex" width="fit-content" gap={2} px={2}>
-                  <FilterSelect options={studentStatusOption} label={"حالة حساب الداعم"}
-                                loading={false}
-                                param={"status"}
-                                setFilters={setFilters}
-                  />
-                  <FilterSelect options={accountStatus} label={"نوع الحساب"}
-                                loading={false}
-                                param={"role"}
-                                setFilters={setFilters}
-                  />
-                  <CreateModal
-                        label={"انشاء حساب داعم"}
-                        inputs={inputs}
-                        href={"admin/sponsor"}
-                        setData={setData}
-                        extraProps={{formTitle: "حساب داعم  جديد", btnText: "انشاء", variant: "outlined"}}
-                  />
+              <Box display="flex" width="fit-content" gap={2} px={2} flexWrap="wrap" alignItems="center">
+                  <div>
+                      <SearchComponent
+                            apiEndpoint="search?model=user"
+                            setFilters={setFilters}
+                            inputLabel="  ابحث بالاسم او الايميل لاختيار مشرف"
+                            renderKeys={["personalInfo.basicInfo.name", "email"]}
+                            mainKey="email"
+                            localFilters={{
+                                OR: [
+                                    {role: "SPONSOR"},
+                                    {role: "INDIVIDUAL"}
+                                ]
+                            }
+                            }
+                            withParamsChange={true}
+                      />
+                  </div>
+                  <div>
+                      <FilterSelect options={studentStatusOption} label={"حالة حساب الداعم"}
+                                    loading={false}
+                                    param={"status"}
+                                    setFilters={setFilters}
+                      />
+                  </div>
+                  <div>
+
+                      <FilterSelect options={accountStatus} label={"نوع الحساب"}
+                                    loading={false}
+                                    param={"role"}
+                                    setFilters={setFilters}
+                      />
+                  </div>
+                  <div>
+
+                      <CreateModal
+                            label={"انشاء حساب داعم"}
+                            inputs={inputs}
+                            href={"admin/sponsor"}
+                            setData={setData}
+                            extraProps={{formTitle: "حساب داعم  جديد", btnText: "انشاء", variant: "outlined"}}
+                      />
+                  </div>
               </Box>
               <AdminTable
                     data={data}

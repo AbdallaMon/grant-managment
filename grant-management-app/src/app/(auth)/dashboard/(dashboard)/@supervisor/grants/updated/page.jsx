@@ -7,6 +7,7 @@ import ApplicationWithProfileViewer from "@/app/UiComponents/admin/ApplicationWI
 import SearchComponent from "@/app/UiComponents/formComponents/SearchComponent";
 import React from "react";
 import FilterSelect from "@/app/UiComponents/formComponents/FilterSelect";
+import {useAuth} from "@/app/providers/AuthProvider";
 
 const columns = [
     {name: "student.personalInfo.basicInfo.name", label: "الاسم"},
@@ -21,6 +22,8 @@ const dateOptions = [
 
 ]
 export default function Applications() {
+    let {user, isLoggedIn, validatingAuth} = useAuth()
+
     const {
         data,
         loading,
@@ -31,7 +34,7 @@ export default function Applications() {
         setLimit,
         total,
         setTotal, totalPages, setFilters
-    } = useDataFetcher("admin/grants/applications/pending", false);
+    } = useDataFetcher(`shared/grants/applications/updated?supervisorId=${user.id}&`, false);
     return (
           <Box mt={2}>
               <Box display="flex" width="fit-content" gap={2} px={2}>
@@ -47,7 +50,6 @@ export default function Applications() {
                                 loading={false}
                                 param={"sort"}
                                 setFilters={setFilters}
-
                   />
               </Box>
               <AdminTable
@@ -69,7 +71,6 @@ export default function Applications() {
                                                      route: "shared/grants/applications",
                                                      label: "اتخاذ اجراء",
                                                      setData: setData,
-                                                     isAdmin: true
                                                  }}/>
                           </Box>
                     )}

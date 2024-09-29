@@ -1,5 +1,4 @@
 "use client";
-import {useRouter, useSearchParams} from "next/navigation";
 import useDataFetcher from "@/app/helpers/hooks/useDataFetcher";
 import AdminTable from "@/app/UiComponents/DataViewer/AdminTable";
 import StudentProfileViewer from "@/app/UiComponents/DataViewer/StudentProfileViewer";
@@ -9,6 +8,8 @@ import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import ConfirmWithActionModel from "@/app/UiComponents/models/ConfirmsWithActionModel";
 import {Box} from "@mui/material";
 import FilterSelect from "@/app/UiComponents/formComponents/FilterSelect";
+import SearchComponent from "@/app/UiComponents/formComponents/SearchComponent";
+import React from "react";
 
 const columns = [
     {name: "personalInfo.basicInfo.name", label: "الاسم"},
@@ -39,7 +40,7 @@ export default function StudentsPage() {
         setLimit,
         total,
         setTotal, totalPages, setFilters
-    } = useDataFetcher("admin/students", false);
+    } = useDataFetcher("shared/students", false);
 
     const {setLoading} = useToastContext()
 
@@ -53,19 +54,37 @@ export default function StudentsPage() {
 
     return (
           <div>
-              <Box display="flex" width="fit-content" gap={2} px={2}>
-                  <FilterSelect options={studentStatusOption} label={"حالة الطالب"}
-                                loading={false}
-                                param={"status"}
-                                setFilters={setFilters}
+              <Box display="flex" width="fit-content" gap={2} px={2} flexWrap="wrap" alignItems="center">
+                  <div>
 
-                  />
-                  <FilterSelect options={grantStatus} label={"حالة المنح"}
-                                loading={false}
-                                param={"hasGrant"}
-                                setFilters={setFilters}
+                      <SearchComponent
+                            apiEndpoint="search?model=user"
+                            setFilters={setFilters}
+                            inputLabel="  ابحث بالاسم او الايميل لاختيار طالب"
+                            renderKeys={["personalInfo.basicInfo.name", "email"]}
+                            mainKey="email"
+                            localFilters={{role: "STUDENT"}}
+                            withParamsChange={true}
+                      />
+                  </div>
+                  <div>
 
-                  />
+                      <FilterSelect options={studentStatusOption} label={"حالة حساب الطالب"}
+                                    loading={false}
+                                    param={"status"}
+                                    setFilters={setFilters}
+
+                      />
+                  </div>
+                  <div>
+
+                      <FilterSelect options={grantStatus} label={"حالة المنح"}
+                                    loading={false}
+                                    param={"hasGrant"}
+                                    setFilters={setFilters}
+
+                      />
+                  </div>
               </Box>
               <AdminTable
                     data={data}
@@ -83,7 +102,7 @@ export default function StudentsPage() {
                     extraComponent={({item}) => (
                           <Box sx={{display: "flex", gap: 2}}>
                               <DrawerWithContent item={item} component={StudentProfileViewer}
-                                                 extraData={{route: "admin/students", label: "رؤية التفاصيل"}}/>
+                                                 extraData={{route: "shared/students", label: "رؤية التفاصيل"}}/>
                               <ConfirmWithActionModel
                                     title={item.isActive ? "هل انت متاكد انك تريد حظر هذا الطالب؟" : "هل انت متاكد انك تريد رفع الحظر عن هذا الطالب"}
                                     handleConfirm={() => banAStudent(item)} isDelete={item.isActive}

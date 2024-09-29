@@ -3,14 +3,26 @@
 import React, {useState, useEffect} from "react";
 import {TextField, Box, CircularProgress} from "@mui/material";
 import Autocomplete from '@mui/material/Autocomplete';
-import {getPropertyValue} from "@/app/helpers/functions/utility";
+import {getPropertyValue, handleSearchParamsChange} from "@/app/helpers/functions/utility";
+import {useRouter, useSearchParams} from "next/navigation";
 
-const SearchComponent = ({apiEndpoint, setFilters, inputLabel, renderKeys, mainKey, resetTrigger, localFilters}) => {
+const SearchComponent = ({
+                             apiEndpoint,
+                             setFilters,
+                             inputLabel,
+                             renderKeys,
+                             mainKey,
+                             resetTrigger,
+                             localFilters,
+                             restOtherFilters = false,
+                             withParamsChange = false
+                         }) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
-
+    const searchParams = useSearchParams()
+    const router = useRouter()
     const fetchSearchResults = async (query) => {
         setLoading(true);
         try {
@@ -35,12 +47,20 @@ const SearchComponent = ({apiEndpoint, setFilters, inputLabel, renderKeys, mainK
 
     const handleSelect = (event, newValue) => {
         setSelectedItem(newValue);
+        if (withParamsChange) {
+            const param = {target: {value: newValue && newValue.id}}
+            handleSearchParamsChange(param, "userId", searchParams, router)
+        }
         if (newValue) {
             setSearchTerm(newValue[mainKey] || "");
-            setFilters((prevFilters) => ({
-                ...prevFilters,
-                query: newValue
-            }));
+            if (restOtherFilters) {
+                setFilters({query: newValue})
+            } else {
+                setFilters((prevFilters) => ({
+                    ...prevFilters,
+                    query: newValue
+                }));
+            }
         } else {
             setSearchTerm("");
             setFilters((prevFilters) => ({...prevFilters, query: null}));

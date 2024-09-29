@@ -7,7 +7,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Link from "next/link";
 import {usePathname} from "next/navigation";
-import {TabScrollButton} from "@mui/material";
+import {TabScrollButton, Tooltip} from "@mui/material";
 
 function CustomTabPanel(props) {
     const {children, value, index, ...other} = props;
@@ -88,13 +88,19 @@ export function BasicTabs({tabs}) {
                         )}
                   >
                       {tabs.map((tab, index) => (
-                            <Tab
+                            <Tooltip
                                   key={tab.href}
-                                  href={tab.href}
-                                  label={tab.label}
-                                  {...a11yProps(index)}
-                                  component={Link}
-                            />
+                                  title={tab.hoverText || ""}
+                                  arrow
+                            >
+                                <Tab
+                                      key={tab.href}
+                                      href={tab.href}
+                                      label={tab.label}
+                                      {...a11yProps(index)}
+                                      component={Link}
+                                />
+                            </Tooltip>
                       ))}
                   </Tabs>
               </Box>

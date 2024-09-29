@@ -21,6 +21,8 @@ const dateOptions = [
 
 ]
 export default function Applications() {
+
+
     const {
         data,
         loading,
@@ -31,7 +33,7 @@ export default function Applications() {
         setLimit,
         total,
         setTotal, totalPages, setFilters
-    } = useDataFetcher("admin/grants/applications/pending", false);
+    } = useDataFetcher(`shared/grants/applications/underreview`, false);
     return (
           <Box mt={2}>
               <Box display="flex" width="fit-content" gap={2} px={2}>
@@ -70,6 +72,7 @@ export default function Applications() {
                                                      label: "اتخاذ اجراء",
                                                      setData: setData,
                                                      isAdmin: true
+                                                     , view: true,
                                                  }}/>
                           </Box>
                     )}

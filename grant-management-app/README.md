@@ -5,3 +5,6 @@
 4 - when a new ticket submit (send to the admin)
 5 - when a ticket had new message or status (student and admin)
 
+- إمكانية إنشاء مستخدمين للمتقدمين للطلبات المقبولة وإرسال إشعارات لهم عبر الإيميل
+
+

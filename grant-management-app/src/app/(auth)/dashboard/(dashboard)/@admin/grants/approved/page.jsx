@@ -31,7 +31,7 @@ export default function Applications() {
         setLimit,
         total,
         setTotal, totalPages, setFilters
-    } = useDataFetcher("admin/grants/applications/approved", false);
+    } = useDataFetcher("shared/grants/applications/approved", false);
     return (
           <Box mt={2}>
               <Box display="flex" width="fit-content" gap={2} px={2}>
@@ -67,7 +67,7 @@ export default function Applications() {
                               <DrawerWithContent item={item} component={ApplicationWithProfileViewer}
                                                  extraData={{
                                                      view: true,
-                                                     route: "admin/grants/applications",
+                                                     route: "shared/grants/applications",
                                                      label: "اتخاذ اجراء",
                                                      setData: setData,
                                                      isAdmin: true

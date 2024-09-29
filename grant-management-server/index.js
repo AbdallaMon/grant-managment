@@ -6,7 +6,7 @@ dotenv.config();
 import authRoutes from './routes/auth.js';
 import studentRoutes from './routes/student.js';
 import adminRoutes from './routes/admin.js';
-
+import sharedRoutes from "./routes/shared.js"
 import {deleteFiles, searchData, uploadFiles, verifyTokenUsingReq} from "./services/utility.js";
 
 const app = express();
@@ -54,6 +54,8 @@ app.post('/delete-files', async (req, res) => {
 app.use('/auth', authRoutes);
 app.use('/student', studentRoutes);
 app.use('/admin', adminRoutes);
+app.use('/shared', sharedRoutes);
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

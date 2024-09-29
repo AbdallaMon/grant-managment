@@ -59,9 +59,8 @@ export default function StudentsPage() {
         setLimit,
         total,
         setTotal, totalPages, setFilters
-    } = useDataFetcher("shared/grants/projects", false);
+    } = useDataFetcher("admin/grants/projects", false);
 
-    console.log(convertEnumToOptions(GrantType))
     return (
           <Box mt={2}>
               <Box display="flex" width="fit-content" gap={2} px={2}>
@@ -70,20 +69,9 @@ export default function StudentsPage() {
                                 param={"type"}
                                 setFilters={setFilters}
                   />
-                  <CreateModal
-                        label={"انشاء مشروع منحة"}
-                        inputs={inputs}
-                        href={"admin/grants/projects"}
-                        setData={setData}
-                        extraProps={{formTitle: "حساب داعم  جديد", btnText: "انشاء", variant: "outlined"}}
-                  />
               </Box>
               <AdminTable
                     data={data}
-                    withEdit={true}
-                    editHref={"admin/grants/projects"}
-                    withDelete={true}
-                    deleteHref={"admin/grants/projects"}
                     columns={columns}
                     page={page}
                     setPage={setPage}
@@ -95,28 +83,6 @@ export default function StudentsPage() {
                     inputs={inputs}
                     setData={setData}
                     loading={loading}
-                    extraComponent={({item}) => (
-                          <Box sx={{display: "flex", gap: 2}}>
-                              <DrawerWithContent item={item} component={UserSelectorWithAction}
-                                                 extraData={{
-                                                     route: `admin/grants/projects/access`,
-                                                     label: "اضافة مانحين (صلاحيات وصول)",
-                                                     searchFilter: {
-                                                         OR: [
-                                                             {role: "SPONSOR"},
-                                                             {role: "INDIVIDUAL"}
-                                                         ]
-                                                     },
-                                                     renderKeys: [{
-                                                         id: "name", label: "اسم المنحة"
-                                                     },
-                                                         {id: "type", label: "نوع المنحة", enums: GrantType},
-                                                         {id: "amount", label: "مبلغ المحفظة"},
-                                                         {id: "amountLeft", label: "مبلغ المحفظة المتبقي"}
-                                                     ]
-                                                 }}/>
-                          </Box>
-                    )}
               />
 
           </Box>

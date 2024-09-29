@@ -181,11 +181,17 @@ export const verifyTokenAndHandleAuthorization = (req, res, next,role) => {
 
     try {
         const decoded = jwt.verify(token, SECRET_KEY);
-
+        if(role==="SHARED")
+        {
+            if(decoded.role!=="ADMIN"&&decoded.role!=="SUPERVISOR")
+            {
+            return res.status(403).json({ message: 'غير مصرح لك بالوصول' });
+            }
+        }else{
         if (decoded.role !== role) {
             return res.status(403).json({ message: 'غير مصرح لك بالوصول' });
         }
-
+        }
         req.user = decoded;
         next();
     } catch (error) {

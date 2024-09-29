@@ -2,13 +2,14 @@ import dayjs from "dayjs";
 import {Box, Link, Paper, Typography} from "@mui/material";
 import React from "react";
 
-export const handleSearchParamsChange = (event, key, searchParams, router) => {
+export const handleSearchParamsChange = (event, key, searchParams, router, onChange) => {
+    if (onChange) return onChange(event)
     const value = event.target.value;
     const params = new URLSearchParams(searchParams);
     if (value) {
         params.set(key, value);
     } else {
-        params.delete(key);
+        params.set(key, "all");
     }
     router.push(`?${params.toString()}`);
 };

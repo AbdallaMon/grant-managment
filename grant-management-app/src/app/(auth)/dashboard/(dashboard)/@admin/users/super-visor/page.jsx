@@ -7,6 +7,8 @@ import ConfirmWithActionModel from "@/app/UiComponents/models/ConfirmsWithAction
 import {Box} from "@mui/material";
 import FilterSelect from "@/app/UiComponents/formComponents/FilterSelect";
 import CreateModal from "@/app/UiComponents/models/CreateModal";
+import SearchComponent from "@/app/UiComponents/formComponents/SearchComponent";
+import React from "react";
 
 const columns = [
     {name: "personalInfo.basicInfo.name", label: "الاسم"},
@@ -104,20 +106,39 @@ export default function SuperVisorPage() {
 
     return (
           <div>
-              <Box display="flex" width="fit-content" gap={2} px={2}>
-                  <FilterSelect options={studentStatusOption} label={"حالة المشرف"}
-                                loading={false}
-                                param={"status"}
-                                setFilters={setFilters}
+              <Box display="flex" width="fit-content" gap={2} px={2} flexWrap="wrap" alignItems="center">
+                  <div>
 
-                  />
-                  <CreateModal
-                        label={"انشاء مشرف جديد"}
-                        inputs={editInputs}
-                        href={"admin/supervisor"}
-                        setData={setData}
-                        extraProps={{formTitle: "حساب مشرف جديد", btnText: "انشاء", variant: "outlined"}}
-                  />
+                      <SearchComponent
+                            apiEndpoint="search?model=user"
+                            setFilters={setFilters}
+                            inputLabel="  ابحث بالاسم او الايميل لاختيار مشرف"
+                            renderKeys={["personalInfo.basicInfo.name", "email"]}
+                            mainKey="email"
+                            localFilters={{role: "SUPERVISOR"}}
+                            withParamsChange={true}
+                      />
+                  </div>
+                  <div>
+
+                      <FilterSelect options={studentStatusOption} label={"حالة المشرف"}
+                                    loading={false}
+                                    param={"status"}
+                                    setFilters={setFilters}
+
+                      />
+
+                  </div>
+                  <div>
+
+                      <CreateModal
+                            label={"انشاء مشرف جديد"}
+                            inputs={editInputs}
+                            href={"admin/supervisor"}
+                            setData={setData}
+                            extraProps={{formTitle: "حساب مشرف جديد", btnText: "انشاء", variant: "outlined"}}
+                      />
+                  </div>
               </Box>
 
               <AdminTable

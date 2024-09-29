@@ -10,8 +10,12 @@ export async function getData({
                               }) {
     try {
         setLoading(true);
+        let queryPrefix = "?"
+        if (url.endsWith("&")) {
+            queryPrefix = ""
+        }
         const response = await fetch(
-              `${process.env.NEXT_PUBLIC_URL}/${url}?page=${page}&limit=${limit}&filters=${JSON.stringify(filters)}&search=${search}&sort=${JSON.stringify(sort)}&${others}`,
+              `${process.env.NEXT_PUBLIC_URL}/${url}${queryPrefix}page=${page}&limit=${limit}&filters=${JSON.stringify(filters)}&search=${search}&sort=${JSON.stringify(sort)}&${others}`,
               {
                   headers: {
                       "Content-Type": "application/json",

@@ -33,6 +33,7 @@ enum ApplicationStatus {
   PENDING
   UNDER_REVIEW
   UN_COMPLETE
+  UPDATED
   APPROVED
   REJECTED
 }

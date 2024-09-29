@@ -1,6 +1,7 @@
 import React, {useEffect} from 'react';
 import {FormControl, InputLabel, Select, MenuItem, CircularProgress, Box} from '@mui/material';
 import {useRouter, useSearchParams} from "next/navigation";
+import {handleSearchParamsChange} from "@/app/helpers/functions/utility";
 
 const FilterSelect = ({label, options, param, onChange, loading, setFilters, reset}) => {
     const searchParams = useSearchParams()
@@ -18,15 +19,17 @@ const FilterSelect = ({label, options, param, onChange, loading, setFilters, res
     }, [searchParams])
 
     function handleChange(event) {
-        if (onChange) return onChange(event)
-        const value = event.target.value;
-        const params = new URLSearchParams(searchParams);
-        if (value) {
-            params.set(param, value);
-        } else {
-            params.set(param, "all");
-        }
-        router.push(`?${params.toString()}`);
+
+        handleSearchParamsChange(event, param, searchParams, router, onChange)
+        // if (onChange) return onChange(event)
+        // const value = event.target.value;
+        // const params = new URLSearchParams(searchParams);
+        // if (value) {
+        //     params.set(param, value);
+        // } else {
+        //     params.set(param, "all");
+        // }
+        // router.push(`?${params.toString()}`);
     }
 
     return (

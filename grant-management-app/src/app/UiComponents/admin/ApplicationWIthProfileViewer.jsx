@@ -47,6 +47,7 @@ export default function ApplicationWithProfileViewer({
 
     const [personalInfo, setPersonalInfo] = useState(null);
     const [application, setApplication] = useState(null);
+
     const [loadingPersonalInfo, setLoadingPersonalInfo] = useState(true);
     const [loadingApplication, setLoadingApplication] = useState(true);
     const [openPersonalInfo, setOpenPersonalInfo] = useState(false);
@@ -399,6 +400,7 @@ export default function ApplicationWithProfileViewer({
                                           item={item}
                                           route={route}
                                           view={view}
+                                          application={application}
                     />
               }
           </Box>
@@ -556,7 +558,7 @@ const RenderImprovementsAndAskedFields = ({item, route, view}) => {
     );
 };
 
-function RenderActionsButtons({isAdmin, route, appId, onClose, setData, item, view}) {
+function RenderActionsButtons({isAdmin, route, appId, onClose, setData, item, view, application}) {
     return (
           <>
               <Alert severity="warning">
@@ -565,7 +567,8 @@ function RenderActionsButtons({isAdmin, route, appId, onClose, setData, item, vi
               <Box display="flex" gap={2} alignItem="center" flexWrap="wrap" mt={4}>
                   {isAdmin && !view &&
                         <>
-                            <ApproveByAdmin route={route} setData={setData} appId={appId} onClose={onClose}/>
+                            <ApproveByAdmin route={route} setData={setData} appId={appId} onClose={onClose}
+                                            application={application}/>
                             <MarkUnderReview route={route} setData={setData} appId={appId} onClose={onClose}/>
                         </>
                   }
@@ -597,19 +600,20 @@ function RenderActionsButtons({isAdmin, route, appId, onClose, setData, item, vi
     )
 }
 
-function ApproveByAdmin({route, appId, onClose, setData}) {
+function ApproveByAdmin({route, appId, onClose, setData, application}) {
     const [user, setUser] = useState(null)
     const [error, setError] = useState(null)
     const {setLoading} = useToastContext()
 
     async function confirm() {
-        if (!user) {
+        if (!user && !application.supervisorId) {
             setError("يجب ان تختار مشرف حتي تتم عملية الموافقه علي الطلب")
             return
         }
         const request = await handleRequestSubmit({
             supervisorId: user.query?.id,
-            action: "approve"
+            action: "approve",
+            notAdmin: application.supervisorId
         }, setLoading, `${route}/${appId}`, false, "جاري الموافقه علي الطلب")
         if (request.status === 200) {
             setData((oldData) => oldData.filter((item) => item.id !== appId))
@@ -626,14 +630,16 @@ function ApproveByAdmin({route, appId, onClose, setData}) {
                     title={"تعين مشرف والموافقه علي الطلب"}
                     removeAfterConfirm={true}
               >
-                  <SearchComponent
-                        apiEndpoint="search?model=user"
-                        setFilters={setUser}
-                        inputLabel="  ابحث بالاسم او الايميل لاختيار مشرف"
-                        renderKeys={["personalInfo.basicInfo.name", "email"]}
-                        mainKey="email"
-                        localFilters={{role: "SUPERVISOR"}}
-                  />
+                  {!application.supervisorId &&
+                        <SearchComponent
+                              apiEndpoint="search?model=user"
+                              setFilters={setUser}
+                              inputLabel="  ابحث بالاسم او الايميل لاختيار مشرف"
+                              renderKeys={["personalInfo.basicInfo.name", "email"]}
+                              mainKey="email"
+                              localFilters={{role: "SUPERVISOR"}}
+                        />
+                  }
               </ConfirmWithActionModel>
               {error &&
                     <Snackbar
@@ -661,7 +667,7 @@ function ApproveBySupervisor({route, appId, onClose, setData}) {
 
     async function confirm() {
         const request = await handleRequestSubmit({
-            action: "approve"
+            action: "approve", notAdmin: true,
         }, setLoading, `${route}/${appId}`, false, "جاري الموافقه علي الطلب")
         if (request.status === 200) {
             setData((oldData) => oldData.filter((item) => item.id !== appId))
