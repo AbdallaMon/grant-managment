@@ -147,11 +147,19 @@ export const GenderType = {
     male: "ذكر",
     female: "انثي"
 }
+export const PayEveryENUM = {
+    ONE_MONTH: "كل شهر",
+    TWO_MONTHS: "كل شهرين",
+    THREE_MONTHS: "كل ثلاث شهور",
+    FOUR_MONTHS: "كل اربع شهور",
+    SIX_MONTHS: "كل ست شهور",
+    ONE_YEAR: "كل سنه",
+};
 export const grantLinks = [
     {
         href: "",
         text: "البيانات الشخصية",
-        icon: <FaUser/>,  // Personal Data Icon
+        icon: <FaUser/>,
         meta: {
             title: "البيانات الشخصية",
             description: ""

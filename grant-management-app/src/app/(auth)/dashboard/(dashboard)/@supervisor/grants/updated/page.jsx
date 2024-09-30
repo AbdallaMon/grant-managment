@@ -22,7 +22,7 @@ const dateOptions = [
 
 ]
 export default function Applications() {
-    let {user, isLoggedIn, validatingAuth} = useAuth()
+    let {user} = useAuth()
 
     const {
         data,
@@ -71,6 +71,7 @@ export default function Applications() {
                                                      route: "shared/grants/applications",
                                                      label: "اتخاذ اجراء",
                                                      setData: setData,
+                                                     isAdmin: false
                                                  }}/>
                           </Box>
                     )}

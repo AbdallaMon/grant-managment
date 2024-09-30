@@ -116,10 +116,6 @@ function ApplicationCard({app, setData, index}) {
                   <Box>
                       <Typography mb={1}>
                           هذا الطلب معلق حاليًا ولم يتم تعيين مشرف بعد.</Typography>
-                      <Button variant="outlined" color="primary" href={`/dashboard/application/view/${app.id}`}
-                              component={Link}>
-                          عرض الطلب
-                      </Button>
                   </Box>
             );
             break;
@@ -129,10 +125,6 @@ function ApplicationCard({app, setData, index}) {
                       <Typography mb={1}>
                           طلبك قيد المراجعة من قبل المشرف. سيتم إشعارك عند الانتهاء.
                       </Typography>
-                      <Button variant="outlined" color="primary" href={`/dashboard/application/view/${app.id}`}
-                              component={Link}>
-                          عرض الطلب
-                      </Button>
                   </Box>
             );
             break;
@@ -169,14 +161,14 @@ function ApplicationCard({app, setData, index}) {
         case "APPROVED":
             content = (
                   <Box>
-                      {app.userGrants?.id ? (
+                      {app.userGrants ? (
                             <>
                                 <Typography>تم قبول الطلب .</Typography>
                                 <Button variant="contained" color="success"
-                                        href={`/dashboard/grants/${app.userGrants.id}`}
+                                        href={`/dashboard/grants/${app.id}`}
                                         component={Link}
                                 >
-                                    عرض المنحة
+                                    عرض المنحه
                                 </Button>
                             </>
                       ) : (
@@ -191,11 +183,20 @@ function ApplicationCard({app, setData, index}) {
                       <Typography color="warning">
                           هذا الطلب غير مكتمل. تحتاج إلى إعادة تحميل بعض المستندات أو إجراء تغييرات.
                       </Typography>
-                      <Button variant="outlined" color="primary" href={`/dashboard/application/uncomplete/${app.id}`}
+                      <Button variant="outlined" color="primary" href={`/dashboard/applications/uncomplete/${app.id}`}
                               component={Link}
                       >
                           تعديل الطلب غير المكتمل
                       </Button>
+                  </Box>
+            );
+            break;
+        case "UPDATED":
+            content = (
+                  <Box>
+                      <Typography color="warning">
+                          هذا طلب تم تحديثة من قبلك وجاري مراجعته من قبل الادمن
+                      </Typography>
                   </Box>
             );
             break;

@@ -73,7 +73,7 @@ export function GrantDraftFrom({
                                    appId,
                                    last,
                                    first,
-                                   handleBeforeUpdate
+                                   handleBeforeUpdate, uncomplete = false
                                }) {
     const {setLoading} = useToastContext();
     const [submitted, setSubmitted] = useState(false);
@@ -83,11 +83,14 @@ export function GrantDraftFrom({
     const [currentData, setCurrentData] = useState(null)
     const [prefilledInputs, setInputs] = useState(inputs)
     const {setNotFilledLinks, nonFilledLinks} = useGrantLinks()
+    const unCompleteParam = uncomplete && "status=UN_COMPLETE&"
+
     useEffect(() => {
         async function getAppData() {
             setLoadingData(true);
             const request = await getData({
-                url: `student/applications/draft/${appId}?model=${current}&`, setLoading: setLoadingData
+                url: `student/applications/draft/${appId}?model=${current}&${unCompleteParam}`,
+                setLoading: setLoadingData
             });
             const currentData = request.data;
             if (currentData) {

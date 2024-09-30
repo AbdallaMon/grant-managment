@@ -30,7 +30,6 @@ export default function SelectField({
                     ...(select.sx && select.sx),
                 })}
                 error={Boolean(errors[selectData.id])}
-
           >
               <InputLabel id={selectData.label}>{selectData.label}</InputLabel>
               <Select

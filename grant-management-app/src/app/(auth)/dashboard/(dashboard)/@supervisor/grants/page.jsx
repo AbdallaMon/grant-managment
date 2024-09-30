@@ -59,7 +59,7 @@ export default function StudentsPage() {
         setLimit,
         total,
         setTotal, totalPages, setFilters
-    } = useDataFetcher("admin/grants/projects", false);
+    } = useDataFetcher("shared/grants/projects", false);
 
     return (
           <Box mt={2}>

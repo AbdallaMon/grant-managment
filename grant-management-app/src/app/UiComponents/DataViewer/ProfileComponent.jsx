@@ -34,7 +34,7 @@ export default function ProfileComponent({isApplication, id}) {
     useEffect(() => {
         async function fetchData() {
             const request = await getData({
-                url: `student/personal/${user.id}`,
+                url: `student/${user.id}/personal`,
                 setLoading,
             });
             setPersonalInfo(request.data);

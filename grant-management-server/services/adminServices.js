@@ -2,34 +2,31 @@ import prisma from '../prisma/prisma.js';
 import bcrypt from "bcrypt";
 
 // accounts
-export async function getUser(searchParams,limit, skip,role="STUDENT"){
+export async function getUser(searchParams, limit, skip, role = "STUDENT") {
     const filters = JSON.parse(searchParams.filters);
     let where = {role};
-    if(searchParams.supervisorId)
-    {
-        where.supervisorId=Number(searchParams.supervisorId)
+    if (searchParams.supervisorId) {
+        where.supervisorId = Number(searchParams.supervisorId)
     }
-    if(filters.query)
-    {
-        where.id=Number(filters.query.id)
+    if (filters.query) {
+        where.id = Number(filters.query.id)
     }
     if (role === "OTHER") {
         delete where.role;
         where.OR = [
-            { role: "SPONSOR" },
-            { role: "INDIVIDUAL" }
+            {role: "SPONSOR"},
+            {role: "INDIVIDUAL"}
         ];
     }
-    if(filters.role!==undefined&&filters.role!=="all")
-    {
+    if (filters.role !== undefined && filters.role !== "all") {
         delete where.OR;
-        where.role=filters.role
+        where.role = filters.role
     }
     if (filters.status !== undefined) {
-        if(filters.status==="active"){
-        where.isActive = true;
-        }else if(filters.status==="banned"){
-            where.isActive=false
+        if (filters.status === "active") {
+            where.isActive = true;
+        } else if (filters.status === "banned") {
+            where.isActive = false
         }
     }
 
@@ -48,10 +45,10 @@ export async function getUser(searchParams,limit, skip,role="STUDENT"){
         skip,
         take: limit,
         select: {
-            id:true,
+            id: true,
             email: true,
             isActive: true,
-            role:true,
+            role: true,
             personalInfo: {
                 select: {
                     basicInfo: {
@@ -69,18 +66,19 @@ export async function getUser(searchParams,limit, skip,role="STUDENT"){
             },
             _count: {
                 select: {
-                    reviewedApps:true,
+                    reviewedApps: true,
                     superVisorGrants: true,
                     viewGrants: true,
                 },
             },
         },
     });
-    const total = await prisma.user.count({ where:  where });
+    const total = await prisma.user.count({where: where});
 
-    return { users, total };
+    return {users, total};
 }
-export async function createNonStudentUser(user,role) {
+
+export async function createNonStudentUser(user, role) {
     const hashedPassword = bcrypt.hashSync(user.password, 8);
 
     const newUser = await prisma.user.create({
@@ -88,7 +86,7 @@ export async function createNonStudentUser(user,role) {
             email: user.email,
             password: hashedPassword,
             role,
-            emailConfirmed:true,
+            emailConfirmed: true,
             personalInfo: {
                 create: {
                     basicInfo: {
@@ -123,35 +121,36 @@ export async function createNonStudentUser(user,role) {
             },
             email: true,
             isActive: true,
-            role:true,
+            role: true,
         },
     });
 
     return newUser;
 }
-export async function editNonStudentUser(user,userId) {
-console.log(user,"user")
-    let hashedPassword=undefined
-    if(user.password){
+
+export async function editNonStudentUser(user, userId) {
+    console.log(user, "user")
+    let hashedPassword = undefined
+    if (user.password) {
         hashedPassword = bcrypt.hashSync(user.password, 8);
     }
     const newUser = await prisma.user.update({
-        where:{id:Number(userId)},
+        where: {id: Number(userId)},
         data: {
-            email: user.email&&user.email,
-            password: hashedPassword&&hashedPassword,
-            role:user.role&&user.role,
+            email: user.email && user.email,
+            password: hashedPassword && hashedPassword,
+            role: user.role && user.role,
             personalInfo: {
                 update: {
                     basicInfo: {
                         create: {
-                            name: user.name&&user.name,
+                            name: user.name && user.name,
                         },
                     },
                     contactInfo: {
                         update: {
-                            phone: user.phone&& user.phone,
-                            whatsapp: user.whatsapp&& user.whatsapp,
+                            phone: user.phone && user.phone,
+                            whatsapp: user.whatsapp && user.whatsapp,
                         },
                     },
                 },
@@ -173,47 +172,48 @@ console.log(user,"user")
                     },
                 },
             },
-            id:true,
+            id: true,
             email: true,
             isActive: true,
-            role:true,
+            role: true,
 
         },
     });
     return newUser;
 }
-export async function changeUserStatus(user,studentId){
-return prisma.user.update({
-    where:{
-        id:Number(studentId)
-    },
-    data:{
-      isActive:!user.isActive
-    }
-    ,select:{
-        id:true
-    }
-})
+
+export async function changeUserStatus(user, studentId) {
+    return prisma.user.update({
+        where: {
+            id: Number(studentId)
+        },
+        data: {
+            isActive: !user.isActive
+        }
+        , select: {
+            id: true
+        }
+    })
 }
 
 // grant
 
-export async function getGrantsProjects(searchParams,limit, skip){
+export async function getGrantsProjects(searchParams, limit, skip) {
     const filters = JSON.parse(searchParams.filters);
-    const where={}
-    if(filters!=="undefined"&&filters.type!=="all"){
-        where.type=filters.type
+    const where = {}
+    if (filters !== "undefined" && filters.type !== "all") {
+        where.type = filters.type
     }
     const grants = await prisma.grant.findMany({
         where: where,
         skip,
         take: limit,
         select: {
-            id:true,
-            name:true,
-            type:true,
-            amount:true,
-            amountLeft :true,
+            id: true,
+            name: true,
+            type: true,
+            amount: true,
+            amountLeft: true,
             _count: {
                 select: {
                     userGrants: true,
@@ -221,23 +221,24 @@ export async function getGrantsProjects(searchParams,limit, skip){
             },
         },
     });
-    const total = await prisma.grant.count({ where:  where });
-    return { grants, total };
+    const total = await prisma.grant.count({where: where});
+    return {grants, total};
 }
-export async function createNewGrantProject(grant){
-  return   await prisma.grant.create({
+
+export async function createNewGrantProject(grant) {
+    return await prisma.grant.create({
         data: {
-            name:grant.name,
-            type:grant.type,
-            amount:+grant.amount,
-            amountLeft :+grant.amount,
+            name: grant.name,
+            type: grant.type,
+            amount: +grant.amount,
+            amountLeft: +grant.amount,
         },
         select: {
-            id:true,
-            name:true,
-            type:true,
-            amount:true,
-            amountLeft :true,
+            id: true,
+            name: true,
+            type: true,
+            amount: true,
+            amountLeft: true,
             _count: {
                 select: {
                     userGrants: true,
@@ -250,7 +251,7 @@ export async function createNewGrantProject(grant){
 export async function editAGrant(grant, grantId) {
     // Fetch the current grant details from the database
     const existingGrant = await prisma.grant.findUnique({
-        where: { id: Number(grantId) },
+        where: {id: Number(grantId)},
         select: {
             amount: true,
             amountLeft: true,
@@ -260,7 +261,7 @@ export async function editAGrant(grant, grantId) {
     if (!existingGrant) {
         throw new Error('المنحة غير موجودة.');
     }
-    const { amount: currentAmount, amountLeft: currentAmountLeft } = existingGrant;
+    const {amount: currentAmount, amountLeft: currentAmountLeft} = existingGrant;
 
     // If the incoming `grant.amount` is provided
     if (grant.amount) {
@@ -274,10 +275,10 @@ export async function editAGrant(grant, grantId) {
             }
             const newAmountLeft = currentAmountLeft - decreaseInAmount;
             return await prisma.grant.update({
-                where: { id: Number(grantId) },
+                where: {id: Number(grantId)},
                 data: {
-                    name: grant.name&&grant.name,
-                    type: grant.type&&grant.type,
+                    name: grant.name && grant.name,
+                    type: grant.type && grant.type,
                     amount: newAmount,
                     amountLeft: newAmountLeft,
                 },
@@ -294,17 +295,15 @@ export async function editAGrant(grant, grantId) {
                     },
                 },
             });
-        }
-
-        else if (newAmount > currentAmount) {
+        } else if (newAmount > currentAmount) {
             const increaseInAmount = newAmount - currentAmount;
             const newAmountLeft = currentAmountLeft + increaseInAmount;
 
             return await prisma.grant.update({
-                where: { id: Number(grantId) },
+                where: {id: Number(grantId)},
                 data: {
-                    name: grant.name&&grant.name,
-                    type: grant.type&&grant.type,
+                    name: grant.name && grant.name,
+                    type: grant.type && grant.type,
                     amount: newAmount,
                     amountLeft: newAmountLeft,
                 },
@@ -322,34 +321,34 @@ export async function editAGrant(grant, grantId) {
                 },
             });
         }
-        }
+    }
 
-            return await prisma.grant.update({
-                where: { id: Number(grantId) },
-                data: {
-                    name: grant.name,
-                    type: grant.type,
-                },
+    return await prisma.grant.update({
+        where: {id: Number(grantId)},
+        data: {
+            name: grant.name,
+            type: grant.type,
+        },
+        select: {
+            id: true,
+            name: true,
+            type: true,
+            amount: true,
+            amountLeft: true,
+            _count: {
                 select: {
-                    id: true,
-                    name: true,
-                    type: true,
-                    amount: true,
-                    amountLeft: true,
-                    _count: {
-                        select: {
-                            userGrants: true,
-                        },
-                    },
+                    userGrants: true,
                 },
-            });
+            },
+        },
+    });
 }
 
 export async function deleteGrant(grantId) {
     // Check if the grant is related to any userGrant
     const relatedUserGrants = await prisma.userGrant.findFirst({
         where: {
-            grantId:Number(grantId),
+            grantId: Number(grantId),
         },
     });
 
@@ -364,25 +363,25 @@ export async function deleteGrant(grantId) {
 }
 
 // grant access
-export async function getUserViewAccessForAGrant(grantId){
-    const where={id:Number(grantId)}
+export async function getUserViewAccessForAGrant(grantId) {
+    const where = {id: Number(grantId)}
     const grant = await prisma.grant.findUnique({
         where: where,
         select: {
-            id:true,
-            name:true,
-            amount:true,
+            id: true,
+            name: true,
+            amount: true,
             amountLeft: true,
-            type:true,
-            viewAccessUsers:{
-                select:{
-                    id:true,
-                    email:true,
+            type: true,
+            viewAccessUsers: {
+                select: {
+                    id: true,
+                    email: true,
                     personalInfo: {
-                        select:{
-                            basicInfo:{
-                                select:{
-                                    name:true
+                        select: {
+                            basicInfo: {
+                                select: {
+                                    name: true
                                 }
                             }
                         }
@@ -393,16 +392,17 @@ export async function getUserViewAccessForAGrant(grantId){
     });
     return grant
 }
-export async function assignUserToViewGrant(grantId,userId){
-   return  await prisma.user.update({
-        where: { id: Number(userId) },
+
+export async function assignUserToViewGrant(grantId, userId) {
+    return await prisma.user.update({
+        where: {id: Number(userId)},
         data: {
             viewGrants: {
-                connect: { id: Number(grantId) }
+                connect: {id: Number(grantId)}
             }
         },
         select: {
-            id:true,
+            id: true,
             email: true,
             personalInfo: {
                 select: {
@@ -417,16 +417,17 @@ export async function assignUserToViewGrant(grantId,userId){
     });
 
 }
+
 export async function removeUserFromViewGrant(grantId, userId) {
     return await prisma.user.update({
-        where: { id: Number(userId) },
+        where: {id: Number(userId)},
         data: {
             viewGrants: {
-                disconnect: { id: Number(grantId) } // Disconnecting the relation with the grant
+                disconnect: {id: Number(grantId)} // Disconnecting the relation with the grant
             }
         },
         select: {
-        id:true,
+            id: true,
         }
     });
 }
@@ -435,13 +436,41 @@ export async function removeUserFromViewGrant(grantId, userId) {
 export async function getApplications(searchParams, limit, skip, status = "PENDING") {
     const filters = JSON.parse(searchParams.filters);
     const where = {status};
+    if (searchParams.nogrant === "true") {
+        where.userGrants = {
+            none: {}
+        };
+    }
+
+    const today = new Date();
+    today.setHours(23, 59, 59, 999); // Set to end of the current day
+
+    if (searchParams.activeGrant === "true") {
+        where.userGrants = {
+            some: {
+                endDate: {
+                    gte: today // Greater than or equal to today
+                }
+            }
+        };
+    }
+
+    // For ended grants (userGrant exists and endDate is less than today)
+    if (searchParams.endedGrant === "true") {
+        where.userGrants = {
+            every: {
+                endDate: {
+                    lt: today // Less than today
+                }
+            }
+        };
+    }
 
     if (filters !== "undefined" && filters.query) {
         where.studentId = filters.query.id;
     }
-    if(searchParams.supervisorId)
-    {
-        where.supervisorId=Number(searchParams.supervisorId)
+    if (searchParams.supervisorId) {
+        where.supervisorId = Number(searchParams.supervisorId)
     }
     const orderBy = filters.sort === "new" ? {createdAt: 'desc'} : {createdAt: 'asc'};
 
@@ -453,6 +482,7 @@ export async function getApplications(searchParams, limit, skip, status = "PENDI
         include: {
             student: {
                 select: {
+                    id: true,
                     email: true,
                     personalInfo: {
                         select: {
@@ -472,27 +502,29 @@ export async function getApplications(searchParams, limit, skip, status = "PENDI
             }
         }
     });
-    const total = await prisma.application.count({ where:  where });
+    const total = await prisma.application.count({where: where});
 
-    return {applications,total}
+    return {applications, total}
 }
-export async function getApplicationById(appId){
+
+export async function getApplicationById(appId) {
     return await prisma.application.findUnique({
-        where:{id:Number(appId)},
-        include:{
-            scholarshipInfo  :true,
-            academicPerformance:true,
-            residenceInfo    :true,
-            supportingFiles   :true,
-            siblings          :true,
+        where: {id: Number(appId)},
+        include: {
+            scholarshipInfo: true,
+            academicPerformance: true,
+            residenceInfo: true,
+            supportingFiles: true,
+            siblings: true,
         }
     })
 }
-export async function getSpecificApplicationField(appId,field){
+
+export async function getSpecificApplicationField(appId, field) {
     return await prisma.application.findUnique({
-        where:{id:Number(appId)},
-        include:{
-            [field]  :true,
+        where: {id: Number(appId)},
+        include: {
+            [field]: true,
         }
     })
 }
@@ -505,7 +537,7 @@ export async function approveApplication(appId, supervisorId = null) {
         updateData.supervisorId = Number(supervisorId);
     }
     const updatedApplication = await prisma.application.update({
-        where: { id: Number(appId) },
+        where: {id: Number(appId)},
         data: updateData
     });
 
@@ -518,7 +550,7 @@ export async function rejectApplication(appId, rejectReason) {
     }
 
     const updatedApplication = await prisma.application.update({
-        where: { id: Number(appId) },
+        where: {id: Number(appId)},
         data: {
             status: 'REJECTED',
             rejectReason: rejectReason
@@ -528,7 +560,7 @@ export async function rejectApplication(appId, rejectReason) {
     return updatedApplication;
 }
 
-export async function markApplicationUnComplete(appId, fieldsData,unComplete) {
+export async function markApplicationUnComplete(appId, fieldsData, unComplete) {
     if (!fieldsData || fieldsData.length === 0) {
         throw new Error('يجب ادخال الحقول التي تريد تحسينها من الطالب');
     }
@@ -536,7 +568,7 @@ export async function markApplicationUnComplete(appId, fieldsData,unComplete) {
     const fields = fieldsData.map(field => ({
         title: field.title,
         message: field.message,
-        type: unComplete?undefined:field.type,
+        type: unComplete ? undefined : field.type,
     }));
 
     const updateData = unComplete
@@ -556,7 +588,7 @@ export async function markApplicationUnComplete(appId, fieldsData,unComplete) {
           };
 
     const updatedApplication = await prisma.application.update({
-        where: { id: Number(appId) },
+        where: {id: Number(appId)},
         data: {
             status: 'UN_COMPLETE',
             ...updateData
@@ -571,7 +603,7 @@ export async function markApplicationUnderReview(appId, supervisorId) {
     }
 
     const updatedApplication = await prisma.application.update({
-        where: { id: Number(appId) },
+        where: {id: Number(appId)},
         data: {
             status: 'UNDER_REVIEW',
             supervisorId: supervisorId

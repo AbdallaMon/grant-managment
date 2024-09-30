@@ -316,8 +316,11 @@ model UserGrant {
   applicationId    Int
   payments         Payment[]
   createdAt        DateTime           @default(now())
+  startDate       DateTime
+  endDate        DateTime
+  payEvery       String
   supervisor        User?             @relation("GrantSuperVisor", fields: [supervisorId], references: [id])
-
+  totalAmounts Float
   user             User               @relation(fields: [userId], references: [id])
   grant            Grant              @relation(fields: [grantId], references: [id])
   application      Application        @relation(fields: [applicationId], references: [id])
@@ -327,6 +330,7 @@ model Payment {
   id               Int                @id @default(autoincrement())
   userGrantId      Int
   amount           Float
+  amountPaid    Float?
   dueDate          DateTime
   paidAt           DateTime?
   status           PaymentStatus      @default(PENDING)

@@ -17,7 +17,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import {getData} from "@/app/helpers/functions/getData";
 import FullScreenLoader from "@/app/UiComponents/feedback/loaders/FullscreenLoader";
 import {
-    FieldStatus,
+    FieldStatus, FieldType,
     GenderType,
     GpaType,
     ParentStatus,
@@ -42,8 +42,9 @@ export default function ApplicationWithProfileViewer({
                                                          setData,
                                                          view = false,
                                                          isAdmin = true,
+                                                         isStudent = false
                                                      }) {
-    route = `${route}/student`
+    route = isStudent ? "student" : `${route}/student`
 
     const [personalInfo, setPersonalInfo] = useState(null);
     const [application, setApplication] = useState(null);
@@ -59,15 +60,15 @@ export default function ApplicationWithProfileViewer({
                 url: `${route}/${item.studentId}/personal`,
                 setLoading: setLoadingPersonalInfo
             })
-
             setPersonalInfo(response.data);
             setLoadingPersonalInfo(false);
         };
 
         const fetchApplication = async () => {
             setLoadingApplication(true);
-            const response = await getData({url: `${route}/${item.id}`, setLoading: setLoadingApplication})
-            console.log(response.data, "fetchApplication")
+            const url = isStudent ? `student/applications/${item.id}/approved` : `${route}/${item.id}`
+            const response = await getData({url, setLoading: setLoadingApplication})
+            console.log(response, "response")
             setApplication(response.data);
         };
 
@@ -391,10 +392,9 @@ export default function ApplicationWithProfileViewer({
                         <Collapse in={openAppDetails}>{renderApplicationData()}</Collapse>
                     </>
               }
-              <RenderImprovementsAndAskedFields item={item} route={route} view={view}/>
+              <RenderImprovementsAndAskedFields item={item} route={route} view={view} isStudent={isStudent}/>
 
-
-              {!loadingApplication &&
+              {!loadingApplication && !isStudent &&
                     <RenderActionsButtons isAdmin={isAdmin} onClose={onClose} appId={item.id}
                                           setData={setData}
                                           item={item}
@@ -407,7 +407,7 @@ export default function ApplicationWithProfileViewer({
     );
 };
 
-const RenderImprovementsAndAskedFields = ({item, route, view}) => {
+const RenderImprovementsAndAskedFields = ({item, route, view, isStudent}) => {
     const [openImprovements, setOpenImprovements] = useState(false);
     const [openAskedFields, setOpenAskedFields] = useState(false);
     const [openUpdates, setOpenUpdates] = useState(false); // State for updates
@@ -418,11 +418,10 @@ const RenderImprovementsAndAskedFields = ({item, route, view}) => {
     const [loadingAsked, setLoadingAsked] = useState(true)
     const [updates, setUpdates] = useState(null);
     const [loadingUpdates, setLoadingUpdates] = useState(true);
-
     const fetchImprovements = async (key, setLoading, setData) => {
         setLoading(true);
+        route = !isStudent ? route : 'student/applications'
         const response = await getData({url: `${route}/${item.id}/${key}`, setLoading: setLoading})
-        console.log(response.data, "fetchImprovements")
         if (response.data) {
             key = key === "asked" ? "askedFields" : key === "updates" ? "updates" : "improvementRequests"
             setData(response.data[key]);
@@ -465,7 +464,13 @@ const RenderImprovementsAndAskedFields = ({item, route, view}) => {
                         <Typography fontWeight="bold">العنوان: {field.title}</Typography>
                         <Typography>الرسالة: {field.message}</Typography>
                         <Typography>الحالة: {FieldStatus[field.status]}</Typography>
-                        <Typography>الرد: {field.value || "لم يتم الرد بعد"}</Typography>
+                        <Typography>نوع الطلب: {FieldType[field.type]}</Typography>
+                        {field.type === "FILE" ?
+                              <>
+                                  {renderFileLink(field.value, "الملف")}
+                              </>
+                              : <Typography>الرد: {field.value || "لم يتم الرد بعد"}</Typography>
+                        }
                     </Card>
               ))
         ) : (
@@ -490,7 +495,7 @@ const RenderImprovementsAndAskedFields = ({item, route, view}) => {
     };
     return (
           <Box>
-              {view &&
+              {view || isStudent &&
                     <Box my={2}>
                         <Button
                               variant="contained"
@@ -511,15 +516,19 @@ const RenderImprovementsAndAskedFields = ({item, route, view}) => {
                         </Collapse>
                     </Box>
               }
-              <Alert severity="info" my={2}>ملحوظه التعديلات التي بالاسفل انت او الادمن ارسل طلب الي الطالب لتعديلها
-                  سواء علي
-                  حقل معين او اضافه
-                  جديده تمام</Alert>
+              {!isStudent &&
+                    <Alert severity="info" my={2}>ملحوظه التعديلات التي بالاسفل انت او الادمن ارسل طلب الي الطالب
+                        لتعديلها
+                        سواء علي
+                        حقل معين او اضافه
+                        جديده تمام</Alert>
+              }
               <Box my={2}>
                   <Button
                         variant="contained"
                         onClick={() => setOpenImprovements(!openImprovements)}
                         endIcon={openImprovements ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
+                        sx={{mb: 2}}
 
                   >
                       {openImprovements ? "إخفاء طلبات تحسين حقول موجوده من قبل" : "عرض طلبات تحسين حقول موجوده من قبل"}
@@ -540,6 +549,7 @@ const RenderImprovementsAndAskedFields = ({item, route, view}) => {
                         variant="contained"
                         onClick={() => setOpenAskedFields(!openAskedFields)}
                         endIcon={openAskedFields ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
+                        sx={{mb: 2}}
 
                   >
                       {openAskedFields ? "إخفاء طلبات اضافه تحسينات جديده" : "عرض طلبات اضافه تحسينات جديده"}
@@ -680,7 +690,7 @@ function ApproveBySupervisor({route, appId, onClose, setData}) {
           <ConfirmWithActionModel
                 label={"الموافقة علي الطلب"}
                 handleConfirm={confirm}
-                title={"تعين مشرف والموافقه علي الطلب"}
+                title={"الموافقه علي الطلب"}
                 removeAfterConfirm={true}
           />
 

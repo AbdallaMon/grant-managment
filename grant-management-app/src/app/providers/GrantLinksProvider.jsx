@@ -10,6 +10,7 @@ export default function GrantLinksProvider({children, id}) {
     useEffect(() => {
         async function getNotFilledLinks() {
             const nonFilledLinks = await getData({url: `student/applications/${id}/submit`, setLoading})
+            console.log(nonFilledLinks, "nonfiled")
             setNotFilledLinks(nonFilledLinks.data)
         }
 

@@ -7,6 +7,7 @@ import ApplicationWithProfileViewer from "@/app/UiComponents/admin/ApplicationWI
 import SearchComponent from "@/app/UiComponents/formComponents/SearchComponent";
 import React from "react";
 import FilterSelect from "@/app/UiComponents/formComponents/FilterSelect";
+import {useAuth} from "@/app/providers/AuthProvider";
 
 const columns = [
     {name: "student.personalInfo.basicInfo.name", label: "الاسم"},
@@ -21,6 +22,7 @@ const dateOptions = [
 
 ]
 export default function Applications() {
+    const {user} = useAuth()
 
 
     const {
@@ -71,6 +73,8 @@ export default function Applications() {
                                                      route: "shared/grants/applications",
                                                      label: "اتخاذ اجراء",
                                                      setData: setData,
+                                                     isAdmin: false
+
                                                  }}/>
                           </Box>
                     )}

@@ -28,7 +28,6 @@ export function MuiDatePicker({control, input, errors, setValue, variant}) {
                                 id={inputData.id}
                                 label={inputData.label}
                                 disabled={input.disabled}
-
                                 sx={{bgcolor: 'background.default'}}
                                 value={value ? dayjs(value).locale("en-gb") : null}
                                 onChange={(date) => {

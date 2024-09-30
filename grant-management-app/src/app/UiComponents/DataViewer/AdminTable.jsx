@@ -18,15 +18,11 @@ import {getPropertyValue} from "@/app/helpers/functions/utility";
 
 const DocumentRenderer = ({value}) => {
     if (!value) return null;
-
-    // Check if the value is an image or PDF based on its file extension
     const isImage = /\.(jpg|jpeg|png|gif)$/i.test(value);
     const isPDF = /\.pdf$/i.test(value);
-
     if (isImage) {
         return <img src={value} alt="Document" style={{maxWidth: '100px', maxHeight: '80px'}}/>;
     }
-
     if (isPDF) {
         return (
               <Button href={value} target="_blank" rel="noopener noreferrer">

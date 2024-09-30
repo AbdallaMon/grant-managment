@@ -31,7 +31,7 @@ const roleBasedLinks = {
     SUPERVISOR: [
         {name: "لوحة التحكم", route: "dashboard"},
         {name: "الطلاب", route: "students"},
-        {name: "طلبات المراجعة", route: "applications-review"},
+        {name: "طلبات المراجعة", route: "grants/applications"},
         {name: "المنح", route: "grants"},
         {name: "المهام", route: "tasks"}
     ],

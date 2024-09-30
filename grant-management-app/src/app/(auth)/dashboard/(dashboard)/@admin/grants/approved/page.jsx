@@ -7,6 +7,8 @@ import ApplicationWithProfileViewer from "@/app/UiComponents/admin/ApplicationWI
 import SearchComponent from "@/app/UiComponents/formComponents/SearchComponent";
 import React from "react";
 import FilterSelect from "@/app/UiComponents/formComponents/FilterSelect";
+import UserGrantsView from "@/app/UiComponents/DataViewer/UserGrantsView";
+import AddAGrant from "@/app/UiComponents/admin/AddAGrant";
 
 const columns = [
     {name: "student.personalInfo.basicInfo.name", label: "الاسم"},
@@ -31,7 +33,7 @@ export default function Applications() {
         setLimit,
         total,
         setTotal, totalPages, setFilters
-    } = useDataFetcher("shared/grants/applications/approved", false);
+    } = useDataFetcher("shared/grants/applications/approved?withgrant=true&", false);
     return (
           <Box mt={2}>
               <Box display="flex" width="fit-content" gap={2} px={2}>
@@ -64,6 +66,17 @@ export default function Applications() {
                     loading={loading}
                     extraComponent={({item}) => (
                           <Box sx={{display: "flex", gap: 2}}>
+                              <DrawerWithContent item={item} component={UserGrantsView}
+                                                 extraData={{
+                                                     route: "shared/grants/applications/student",
+                                                     label: "عرض المنح"
+                                                 }}/>
+                              <DrawerWithContent item={item} component={AddAGrant}
+                                                 extraData={{
+                                                     setData: setData,
+                                                     userId: item.student.id,
+                                                     label: "تعين منحة اخري"
+                                                 }}/>
                               <DrawerWithContent item={item} component={ApplicationWithProfileViewer}
                                                  extraData={{
                                                      view: true,

@@ -15,7 +15,7 @@ import {usePathname} from "next/navigation";
 import {useEffect, useState} from "react";
 import {useGrantLinks} from "@/app/providers/GrantLinksProvider";
 
-export function GrantListLinksAndChildren({children, id}) {
+export function GrantListLinksAndChildren({children, id, uncomplete}) {
     const theme = useTheme();
     const isMdOrBelow = useMediaQuery(theme.breakpoints.down('lg'));
     const [isExpanded, setIsExpanded] = useState(false);
@@ -48,7 +48,7 @@ export function GrantListLinksAndChildren({children, id}) {
                       <Grid container spacing={2}>
                           {grantLinks.map((item) => (
                                 <GrantCard item={item} key={item.href}
-                                           appId={id}/>
+                                           appId={id} uncomplete={uncomplete}/>
                           ))}
                       </Grid>
                   </Collapse>
@@ -61,7 +61,7 @@ export function GrantListLinksAndChildren({children, id}) {
     );
 }
 
-function GrantCard({item, appId}) {
+function GrantCard({item, appId, uncomplete = false}) {
     const pathname = usePathname();
     const pathSegments = pathname.split('/').filter(Boolean);
     const lastSlug = pathSegments[pathSegments.length - 1];
@@ -84,7 +84,8 @@ function GrantCard({item, appId}) {
 
     return (
           <Grid size={{xs: 4, md: 2, lg: 4}} sx={{display: 'flex'}}>
-              <Box component={Link} href={`/dashboard/applications/drafts/${appId}/${item.href}`}
+              <Box component={Link}
+                   href={`/dashboard/applications/${uncomplete ? "uncomplete" : "drafts"}/${appId}/${item.href}`}
                    sx={{textDecoration: 'none', width: '100%'}}>
                   <Card
                         sx={(theme) => ({
