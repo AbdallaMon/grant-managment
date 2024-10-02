@@ -48,7 +48,7 @@ const inputs = [
     },
 ]
 
-export default function StudentsPage() {
+export default function GrantPage() {
     const {
         data,
         loading,
@@ -61,7 +61,6 @@ export default function StudentsPage() {
         setTotal, totalPages, setFilters
     } = useDataFetcher("shared/grants/projects", false);
 
-    console.log(convertEnumToOptions(GrantType))
     return (
           <Box mt={2}>
               <Box display="flex" width="fit-content" gap={2} px={2}>

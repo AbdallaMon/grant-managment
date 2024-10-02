@@ -5,11 +5,10 @@ import {
     Typography,
     CircularProgress,
     Button,
-    Link as MuiLink, Alert, AlertTitle,
+    Alert,
 } from "@mui/material";
 import {getData} from "@/app/helpers/functions/getData";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
-import {useRouter} from "next/navigation";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import Link from "next/link";
 
@@ -27,6 +26,7 @@ export default function ReviewSubmissionPage({params: {id}}) {
                 setData(response.data || null); // Set the fetched data or null if no data
                 setMessage(response.message)
                 setLoading(false);
+                console.log(response, "response")
                 setError(response.error)
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -36,7 +36,6 @@ export default function ReviewSubmissionPage({params: {id}}) {
 
         fetchData();
     }, []);
-    console.log(data, "data")
     const handleSaveAndSubmit = async () => {
         const request = await handleRequestSubmit({}, setSubmitLoading, `student/applications/${id}/submit`, false, "جاري الحفظ")
         if (request.status === 200) {
@@ -62,9 +61,9 @@ export default function ReviewSubmissionPage({params: {id}}) {
                             يتم مراجعة بياناتك والتأكد من أنك أتممت جميع الإجراءات
                         </Typography>
                     </Box>
-              ) : data ? (
+              ) : data && data.length > 0 ? (
                     <Box>
-                        <Alert severity={"error"}>
+                        <Alert severity={data.length > 0 ? "warning" : "info"}>
                             {message}
                         </Alert>
                         <Typography variant="h5" my={3}>

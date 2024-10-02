@@ -12,7 +12,7 @@ const PaymentStatus = {
     PENDING: "لم يتم الدفع",
     PAID: "مدفوع"
 };
-const UserGrantsView = ({item, route}) => {
+const UserGrantsView = ({item, route, isStudent}) => {
     const [userGrants, setUserGrants] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -26,7 +26,6 @@ const UserGrantsView = ({item, route}) => {
                 setError("فشل في جلب البيانات");
             }
             setUserGrants(response.data);
-            // By default, keep all grants expanded
             setExpandedGrants(response.data.map(() => true));
         };
 
@@ -53,15 +52,15 @@ const UserGrantsView = ({item, route}) => {
 
     return (
           <Box>
-              {/* User Information */}
-              <Box mb={4}>
-                  <Typography variant="h5" fontWeight="bold">معلومات المستخدم</Typography>
-                  <Divider sx={{my: 2}}/>
-                  <Typography>الاسم: {userGrants[0]?.user?.personalInfo?.basicInfo?.name || "غير متوفر"}</Typography>
-                  <Typography>البريد الإلكتروني: {userGrants[0]?.user?.email || "غير متوفر"}</Typography>
-              </Box>
-
-              {/* Loop through each User Grant */}
+              {!isStudent &&
+                    <Box mb={4}>
+                        <Typography variant="h5" fontWeight="bold">معلومات المستخدم</Typography>
+                        <Divider sx={{my: 2}}/>
+                        <Typography>الاسم: {userGrants[0]?.user?.personalInfo?.basicInfo?.name || "غير متوفر"}</Typography>
+                        <Typography>البريد الإلكتروني: {userGrants[0]?.user?.email || "غير متوفر"}</Typography>
+                    </Box>
+              }
+              <Typography variant="h4" mb={4}>المنح المتاحه</Typography>
               {userGrants.map((userGrant, index) => (
                     <Card key={index} variant="outlined" sx={{
                         mb: 4,
@@ -80,11 +79,12 @@ const UserGrantsView = ({item, route}) => {
                             </Box>
                             <Divider sx={{my: 2}}/>
 
-                            {/* Collapsible User Grant Details */}
                             <Collapse in={expandedGrants[index]}>
                                 <Grid container spacing={2}>
                                     <Grid size={6}>
-                                        <Typography>اسم المنحة: {userGrant.grant.name}</Typography>
+                                        {!isStudent &&
+                                              <Typography>اسم المنحة: {userGrant.grant.name}</Typography>
+                                        }
                                         <Typography>تاريخ
                                             البدء: {dayjs(userGrant.startDate).format("DD/MM/YYYY")}</Typography>
                                         <Typography>تاريخ

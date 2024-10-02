@@ -165,10 +165,10 @@ function ApplicationCard({app, setData, index}) {
                             <>
                                 <Typography>تم قبول الطلب .</Typography>
                                 <Button variant="contained" color="success"
-                                        href={`/dashboard/grants/${app.id}`}
+                                        href={`/dashboard/applications/view/${app.id}`}
                                         component={Link}
                                 >
-                                    عرض المنحه
+                                    عرض المنح المضافه
                                 </Button>
                             </>
                       ) : (

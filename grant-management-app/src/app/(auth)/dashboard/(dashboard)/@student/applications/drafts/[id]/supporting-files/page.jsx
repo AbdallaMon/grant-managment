@@ -88,7 +88,7 @@ export default function SupportingFiles({params: {id}}) {
 
     return (
           <GrantDraftFrom inputs={inputs} appId={id} current={"supportingFiles"}
-                          next={{url: "siblings", text: "مليء بيانات  الاقارب "}}
+                          next={{url: "commitment", text: "الذهاب الي صفحة التعهد "}}
                           handleBeforeUpdate={handleBeforeUpdate}
                           formProps={{
                               formTitle:

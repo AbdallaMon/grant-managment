@@ -7,7 +7,7 @@ import {
 import {
     checkIfFieldsAreEmpty,
     createDraftApplicationModel,
-    createNewApplication,
+    createNewApplication, createNewUpdate,
     deleteDraftApplication,
     deleteSibling,
     getApplicationModel,
@@ -20,6 +20,7 @@ import {
     updatePersonalInfo
 } from "../services/studentsServices.js";
 import {getApplicationById, getSpecificApplicationField} from "../services/adminServices.js";
+import {getUserGrants} from "./supervisor.js";
 
 const router = Router();
 
@@ -320,5 +321,31 @@ router.get('/applications/:appId/updates', async (req, res) => {
         res.status(500).json({message: 'حدث خطأ أثناء جلب  طلب منحة '});
     }
 });
-
+router.post('/applications/:appId/updates', async (req, res) => {
+          const {appId} = req.params;
+          const body = req.body
+          try {
+              const update = await createNewUpdate(appId, body);
+              res.status(200).json({
+                  message: "تم اضافة تحديث جديد",
+                  data: update
+              });
+          } catch (error) {
+              handlePrismaError(error)
+          }
+      }
+)
+router.get('/applications/:appId/user-grant', async (req, res) => {
+    const {appId} = req.params
+    try {
+        const userGrants = await getUserGrants(appId);
+        if (!userGrants) {
+            return res.status(404).json({message: 'لا يوجد  لهذا الطالب منح'});
+        }
+        res.status(200).json({data: userGrants});
+    } catch (error) {
+        console.error('Error fetching supervisors:', error);
+        res.status(500).json({message: 'حدث خطأ أثناء جلب  بيانات الطالب  '});
+    }
+});
 export default router;

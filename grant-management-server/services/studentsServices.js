@@ -119,7 +119,7 @@ export const createDraftApplicationModel = async (appId, model, inputData) => {
                 }
             });
         case 'siblings':
-            inputData.studyYear = new Date(inputData.studyYear).toISOString();
+            inputData.studyYear = +inputData.studyYear
             if (inputData.grantAmount) inputData.grantAmount = +inputData.grantAmount;
 
             return await prisma.application.update({
@@ -209,7 +209,6 @@ export const updateApplicationModel = async (appId, model, inputData) => {
                     oldFileUrl = currentAcademicPerformance.transcript;
                 }
             }
-            console.log(inputData)
             if (inputData.gpaType === "GPA_4" && (inputData.gpaValue > 4 || inputData.gpaValue < 0)) {
                 throw new Error("المعدل التراكمي يجب ان يكون اكبر من 0 واقل من او يساوي 4 اذا كان نوعه معدل من 4 نقاط")
             }
@@ -255,7 +254,7 @@ export const updateApplicationModel = async (appId, model, inputData) => {
         case 'siblings':
             let oldDocument = null;
             if (inputData.studyYear) {
-                inputData.studyYear = new Date(inputData.studyYear).toISOString();
+                inputData.studyYear = +inputData.studyYear
             }
             if (inputData.grantAmount) {
                 inputData.grantAmount = +inputData.grantAmount;
@@ -449,4 +448,16 @@ export async function updateAskedFieldsAndImprovementRequests(appId, askedFields
     });
 
     return updatedApplication;
+}
+
+export async function createNewUpdate(appId, data) {
+    const newUpdate = await prisma.file.create({
+        data: {
+            applicationId: Number(appId),
+            title: data.title,
+            description: data.description,
+            url: data.url
+        }
+    })
+    return newUpdate
 }

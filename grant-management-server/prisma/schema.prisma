@@ -49,13 +49,13 @@ enum TicketStatus {
 }
 
 enum NotificationType {
-  APPLICATION
-  TICKET
   MESSAGE
   APPLICATION_APPROVED
   APPLICATION_REJECTED
   APPLICATION_UPDATE
   APPLICATION_RESPONSE
+  NEW_TICKET
+  TICKET_UPDATE
   TASK_ASSIGNED
   TASK_COMPLETED
   PAYMENT_DUE
@@ -104,14 +104,6 @@ enum PaymentStatus {
 enum GrantType {
   SPONSOR
   INDIVIDUAL
-}
-
-enum FileType {
-  ID
-  ACADEMIC
-  MEDICAL
-  SUPPORTING
-  OTHER
 }
 
 enum FieldType {
@@ -284,7 +276,7 @@ model Sibling {
   university        String
   college String
   department String
-  studyYear  DateTime
+  studyYear  Int
   sourceOfStudy    StudySource
   grantSource      String?
   grantAmount      Float?
@@ -384,9 +376,10 @@ model Notification {
   href                 String?
   type             NotificationType
   isRead           Boolean            @default(false)
-  userId           Int
+  userId           Int?
   createdAt        DateTime           @default(now())
-  user             User               @relation(fields: [userId], references: [id])
+  isAdmin             Boolean @default(false)
+  user             User?              @relation(fields: [userId], references: [id])
 }
 
 model Ticket {
@@ -441,7 +434,6 @@ model FAQ {
 
 model File {
   id               Int                @id @default(autoincrement())
-  fileType         FileType           @default(OTHER)
   title            String?
   description      String?
   url              String

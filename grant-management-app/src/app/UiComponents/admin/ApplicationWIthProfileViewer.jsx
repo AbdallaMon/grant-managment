@@ -16,6 +16,8 @@ import {FaDeleteLeft as DeleteIcon} from "react-icons/fa6";
 import CircularProgress from "@mui/material/CircularProgress";
 import {getData} from "@/app/helpers/functions/getData";
 import FullScreenLoader from "@/app/UiComponents/feedback/loaders/FullscreenLoader";
+import {MdDateRange as DateIcon} from "react-icons/md";
+
 import {
     FieldStatus, FieldType,
     GenderType,
@@ -34,6 +36,7 @@ import SearchComponent from "@/app/UiComponents/formComponents/SearchComponent";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import DrawerWithContent from "@/app/UiComponents/DataViewer/DrawerWithContent";
+import {Form} from "@/app/UiComponents/formComponents/forms/Form";
 
 export default function ApplicationWithProfileViewer({
                                                          item,
@@ -325,7 +328,7 @@ export default function ApplicationWithProfileViewer({
                                                       </Grid>
                                                       <Grid size={{xs: 12, sm: 6}}>
                                                           <Typography>سنة
-                                                              الدراسة: {dayjs(sibling.studyYear).format("YYYY")}</Typography>
+                                                              الدراسة: {sibling.studyYear}</Typography>
                                                       </Grid>
                                                       <Grid size={{xs: 12, sm: 6}}>
                                                           <Typography>مصدر تغطية
@@ -480,22 +483,48 @@ const RenderImprovementsAndAskedFields = ({item, route, view, isStudent}) => {
 
     const renderUpdates = () => {
         if (loadingUpdates) return <CircularProgress/>;
-        return updates?.length > 0 ? (
-              updates.map((update, index) => (
-                    <Card key={index} variant="outlined" sx={{my: 2, p: 2}}>
-                        <Typography fontWeight="bold">العنوان: {update.title || "بدون عنوان"}</Typography>
-                        <Typography>الوصف: {update.description || "لا يوجد وصف"}</Typography>
-                        {renderFileLink(update.url, "الملف المرفق")}
-                        <Typography>تاريخ الإضافة : {dayjs(update.createdAt).format("DD/ MM/ YYYY")}</Typography>
-                    </Card>
-              ))
-        ) : (
-              <Typography>لا يوجد تحديثات</Typography>
-        );
+        return <>
+            {isStudent &&
+                  <CreateNewUpdate setData={setUpdates} appId={item.id}/>
+            }
+            {updates?.length > 0 ? (
+                  updates.map((update, index) => (
+                        <Card key={index} variant="outlined" sx={{
+                            my: 3,
+                            p: 3,
+                            backgroundColor: "#f9fafc", // Light background for distinction
+                            borderRadius: "12px",
+                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)", // Subtle shadow for elevation
+
+                        }}
+                        >
+                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+
+                                <Typography fontWeight="bold">العنوان: {update.title || "بدون عنوان"}</Typography>
+                                <Typography>الوصف: {update.description || "لا يوجد وصف"}</Typography>
+                                {renderFileLink(update.url, "الملف المرفق")}
+                                <Typography
+                                      color="textSecondary"
+                                      sx={{
+                                          display: "flex",
+                                          alignItems: "center",
+                                      }}
+                                >
+                                    <DateIcon sx={{mr: 1}}/>
+                                    {dayjs(update.createdAt).format("DD/MM/YYYY")}
+                                </Typography>
+                            </Box>
+                        </Card>
+                  ))
+            ) : (
+                  <Typography>لا يوجد تحديثات</Typography>
+            )
+            }
+        </>
     };
     return (
           <Box>
-              {view || isStudent &&
+              {(view || isStudent) &&
                     <Box my={2}>
                         <Button
                               variant="contained"
@@ -508,7 +537,7 @@ const RenderImprovementsAndAskedFields = ({item, route, view, isStudent}) => {
                         <Collapse in={openUpdates}>
                             <Card variant="outlined" sx={{p: 3}}>
                                 <Typography variant="h5" fontWeight="bold" sx={{mb: 2}}>
-                                    تحديثات تم اضافتها من قبل الطالب (بعد قبول منحته)
+                                    تحديثات تم اضافتها من قبل الطالب ( بعد قبول منحته )
                                 </Typography>
                                 <Divider sx={{mb: 2}}/>
                                 {renderUpdates()}
@@ -567,6 +596,94 @@ const RenderImprovementsAndAskedFields = ({item, route, view, isStudent}) => {
           </Box>
     );
 };
+
+function CreateNewUpdate({appId, setData}) {
+    const [error, setError] = useState(null)
+
+    const {setLoading} = useToastContext()
+    const [rerender, setRerender] = useState(false)
+
+    async function handleBeforeUpdate(url) {
+        const formData = new FormData()
+        formData.append("url", url[0]);
+
+        const request = await handleRequestSubmit(formData, setLoading, "upload", true, "جاري رفع  ملفك")
+        if (request.status === 200)
+            return request.data
+    }
+
+    async function submit(data) {
+        const {url, description, title} = data
+        if (!title || !description && !url) {
+            setError("يجب عليك ملئ جميع الحقول")
+            return
+        }
+        const newUrl = await handleBeforeUpdate(url)
+        const request = await handleRequestSubmit({
+            title, description, url: newUrl.url
+        }, setLoading, `student/applications/${appId}/updates`, false, "جاري اضافة التحديث")
+        if (request.status === 200) {
+            setData((oldData) => ([...oldData, request.data]))
+            setRerender(true)
+        }
+    }
+
+    const inputs = [
+        {
+            data: {id: "title", type: "text", label: "عنوان التحديث"},
+            pattern: {
+                required: {value: true, message: "يجب عليك ادخال عنوان للتحديث"}
+            }
+        },
+        {
+            data: {id: "description", type: "textarea", label: "تفاصيل التحديث"}
+            ,
+            pattern: {
+                required: {value: true, message: "يجب عليك ادخال عنوان تفاصيل"}
+            }
+        },
+        {
+            data: {id: "url", type: "file", label: "مرفق"},
+            pattern: {
+                required: {value: true, message: "يجب عليك ادخال مرفق"}
+            }
+        },
+    ]
+    return (
+          <>
+              <DrawerWithContent
+                    extraData={{
+                        label: "اضافة تحديث علي الطلب",
+                        onSubmit: submit,
+                        inputs: inputs,
+                        formTitle: "اضافة تحديث جديد",
+                        btnText: "اضافة",
+                        variant: "outlined"
+                    }}
+                    rerender={rerender}
+                    component={Form}
+              >
+              </DrawerWithContent>
+              {error &&
+                    <Snackbar
+                          open={!!error}
+                          autoHideDuration={6000}
+                          sx={{zIndex: 500000000}}
+                          onClose={() => setError(null)}
+                    >
+                        <MuiAlert
+                              onClose={() => setError(null)}
+                              severity="error"
+                              elevation={6}
+                              variant="filled"
+                        >
+                            {error}
+                        </MuiAlert>
+                    </Snackbar>
+              }
+          </>
+    )
+}
 
 function RenderActionsButtons({isAdmin, route, appId, onClose, setData, item, view, application}) {
     return (

@@ -1,8 +1,8 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Button, Container, Drawer, IconButton} from "@mui/material";
 import {FaTimes} from "react-icons/fa";
 
-export default function DrawerWithContent({component, item, extraData}) {
+export default function DrawerWithContent({component, item, extraData, rerender}) {
     const [open, setOpen] = useState(false)
     const Component = component
 
@@ -10,6 +10,11 @@ export default function DrawerWithContent({component, item, extraData}) {
         setOpen(false)
     }
 
+    useEffect(() => {
+        if (rerender) {
+            onClose()
+        }
+    }, [rerender]);
     if (!open) {
         return (<Button onClick={() => setOpen(true)} variant="outlined">
             {extraData.label}
