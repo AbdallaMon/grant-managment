@@ -14,8 +14,8 @@ export const handleSearchParamsChange = (event, key, searchParams, router, onCha
     router.push(`?${params.toString()}`);
 };
 
-export const getPropertyValue = (item, propertyPath, enums, type) => {
-    const value = propertyPath.split('.').reduce((acc, part) => {
+export const getPropertyValue = (item, propertyPath, enums, type, defaultValue,) => {
+    let value = propertyPath.split('.').reduce((acc, part) => {
         if (acc) {
             const arrayIndexMatch = part.match(/(\w+)\[(\d+)\]/);
             if (arrayIndexMatch) {
@@ -28,9 +28,10 @@ export const getPropertyValue = (item, propertyPath, enums, type) => {
         }
         return undefined;
     }, item);
+    if (defaultValue) value = defaultValue
 
-
-    if ((propertyPath.toLowerCase().includes('date') || propertyPath.toLowerCase().includes('year')) && dayjs(value).isValid() || type === "date") {
+    if ((propertyPath.toLowerCase().includes('date') || (propertyPath.toLowerCase().includes('year')) && dayjs(value).isValid()) || type === "date") {
+        console.log(value, "value")
         return dayjs(value).format('YYYY-MM-DD');
     }
     if (enums && type === "boolean") {

@@ -36,15 +36,24 @@ const TaskStatus = {
 };
 
 // Application Status in Arabic
-const ApplicationStatus = {
+export const ApplicationStatus = {
     DRAFT: "مسودة",
     PENDING: "معلق",
     UNDER_REVIEW: "تحت المراجعة",
     UN_COMPLETE: "غير مكتمل",
+    UPDATED: "تم التحديث",
     APPROVED: "مقبول",
     REJECTED: "مرفوض"
 };
-
+export const StatusColor = {
+    DRAFT: "info",
+    PENDING: "warning",
+    UNDER_REVIEW: "info",
+    UN_COMPLETE: "error",
+    UPDATED: "info",
+    APPROVED: "success",
+    REJECTED: "error"
+};
 // Student Type in Arabic
 export const StudentType = {
     NEW: "طالب جديد",
@@ -57,18 +66,6 @@ export const TicketStatus = {
     CLOSED: "مغلق"
 };
 
-// Notification Type in Arabic
-export const NotificationType = {
-    APPLICATION: "طلب",
-    TICKET: "تذكرة",
-    MESSAGE: "رسالة",
-    APPLICATION_APPROVED: "تم قبول الطلب",
-    APPLICATION_REJECTED: "تم رفض الطلب",
-    TASK_ASSIGNED: "تم تعيين المهمة",
-    TASK_COMPLETED: "تم إنجاز المهمة",
-    PAYMENT_DUE: "الدفعة مستحقة",
-    PAYMENT_COMPLETED: "تم سداد الدفعة"
-};
 
 // Study Source in Arabic
 export const StudySource = {
@@ -155,6 +152,25 @@ export const PayEveryENUM = {
     SIX_MONTHS: "كل ست شهور",
     ONE_YEAR: "كل سنه",
 };
+export const NotificationType = {
+    MESSAGE: "رسالة",
+    APPLICATION_APPROVED: "تمت الموافقة على الطلب",
+    APPLICATION_REJECTED: "تم رفض الطلب",
+    APPLICATION_UPDATE: "تحديث الطلب",
+    APPLICATION_UN_COMPLETE: "الطلب غير مكتمل",
+    APPLICATION_RESPONSE: "رد على الطلب",
+    APPLICATION_NEW: "طلب جديد",
+    APPLICATION_UNDER_REVIEW: "الطلب قيد المراجعة",
+    APPLICATION_COMPLETED: "تم اكتمال الطلب",
+    NEW_TICKET: "تذكرة جديدة",
+    TICKET_UPDATE: "تحديث التذكرة",
+    TASK_ASSIGNED: "تم تعيين مهمة",
+    TASK_COMPLETED: "تم الانتهاء من المهمة",
+    PAYMENT_DUE: "موعد الدفع",
+    PAYMENT_COMPLETED: "تم عملية دفع"
+};
+
+
 export const grantLinks = [
     {
         href: "",

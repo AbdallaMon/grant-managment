@@ -1,6 +1,6 @@
 import {Router} from 'express';
 import {
-    getPagination,
+    getPagination, getStudentIdByAppId, getSuperVisorIdByAppId,
     handlePrismaError,
     verifyTokenAndHandleAuthorization,
 } from "../services/utility.js";
@@ -21,6 +21,7 @@ import {
 } from "../services/studentsServices.js";
 import {getApplicationById, getSpecificApplicationField} from "../services/adminServices.js";
 import {getUserGrants} from "./supervisor.js";
+import {createNotification} from "../services/utility.js";
 
 const router = Router();
 
@@ -220,7 +221,8 @@ router.post('/applications/:appId/submit', async (req, res) => {
         }
 
         const submittedApplication = await submitApplication(appId);
-
+        const studentId = await getStudentIdByAppId(appId)
+        await createNotification(null, "تم انشاء طلب منحة جديد", `/dashboard/apps/view/${appId}/${studentId}`, "APPLICATION_NEW", true)
         res.status(200).json({
             message: "تم تقديم الطلب بنجاح",
             data: submittedApplication
@@ -235,6 +237,10 @@ router.post('/applications/:appId/submit/uncomplete', async (req, res) => {
     const body = req.body
     try {
         const submittedApplication = await updateAskedFieldsAndImprovementRequests(appId, body.askedFields, body.improvementRequests);
+        const supervisorId = await getSuperVisorIdByAppId(appId)
+        const studentId = await getStudentIdByAppId(appId)
+
+        await createNotification(supervisorId, `تم تحديث طلب منحة من قبل الطالب (معرف الطلب:#${appId})`, `/dashboard/apps/view/${appId}/${studentId}`, "APPLICATION_RESPONSE")
 
         res.status(200).json({
             message: "تم تقديم الطلب بنجاح",
@@ -260,9 +266,7 @@ router.get('/applications/:appId/approved', async (req, res) => {
 router.get('/applications/:appId/check', async (req, res) => {
     const {appId} = req.params;
     const {status} = req.query;
-
     try {
-        // Check if the application exists
         const application = await prisma.application.findUnique({
             where: {id: Number(appId), status}
         });
@@ -326,6 +330,11 @@ router.post('/applications/:appId/updates', async (req, res) => {
           const body = req.body
           try {
               const update = await createNewUpdate(appId, body);
+              const supervisorId = await getSuperVisorIdByAppId(appId)
+              const studentId = await getStudentIdByAppId(appId)
+
+              await createNotification(supervisorId, `تم اضافة تحديث جديد علي طلب منحة من قبل الطالب (معرف الطلب:#${appId})`, `/dashboard/apps/view/${appId}/${studentId}`, "APPLICATION_UPDATE")
+
               res.status(200).json({
                   message: "تم اضافة تحديث جديد",
                   data: update

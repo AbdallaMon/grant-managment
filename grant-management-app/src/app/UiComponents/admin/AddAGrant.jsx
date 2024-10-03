@@ -32,7 +32,7 @@ const PayEveryType = {
     ONE_YEAR: 12,
 };
 
-function AddAGrant({setData, item, onClose, userId}) {
+function AddAGrant({setData, item, onClose, userId, setUserGrants}) {
     const [grant, setGrant] = useState(null); // Selected grant
     const [grantAmount, setGrantAmount] = useState(""); // Grant amount for the user
     const [totalAmountLeft, setTotalAmountLeft] = useState(0); // Amount left in the grant
@@ -79,7 +79,6 @@ function AddAGrant({setData, item, onClose, userId}) {
                   const dueDate = start.add(index * payEvery, "month");
                   const installmentAmountForCurrentPayment = index === numPayments - 1 ? remainingAmount : Math.floor(installmentAmount);
                   remainingAmount -= installmentAmountForCurrentPayment;
-
                   return {
                       dueDate: dueDate.format("YYYY-MM-DD"),
                       amount: installmentAmountForCurrentPayment,
@@ -137,7 +136,19 @@ function AddAGrant({setData, item, onClose, userId}) {
             userId: userId
         }, setLoading, `shared/grants/applications/student/${item.id}/user-grant`, false, "جاري تعين منحه للطالب")
         if (request.status === 200) {
-            setData((old) => old.filter((i) => i.id !== item.id))
+            if (setData) {
+                setData((old) => old.filter((i) => i.id !== item.id))
+            }
+            if (setUserGrants) {
+                setUserGrants((old) => ([...old, {
+                    startDate,
+                    endDate,
+                    totalPayments,
+                    payEvery,
+                    payments,
+                    grant: {name: grant.query.name}
+                }]))
+            }
             onClose()
         }
     };

@@ -1,5 +1,10 @@
 import {Router} from "express";
-import {getPagination, handlePrismaError, verifyTokenAndHandleAuthorization} from "../services/utility.js";
+import {
+    getPagination, getStudentIdByAppId,
+    getSuperVisorIdByAppId,
+    handlePrismaError,
+    verifyTokenAndHandleAuthorization
+} from "../services/utility.js";
 import {
     approveApplication,
     getApplicationById,
@@ -10,6 +15,9 @@ import {
 } from "../services/adminServices.js";
 import {getPersonalInfo} from "../services/studentsServices.js";
 import {createUserGrant, getUserGrants} from "./supervisor.js";
+import {createNotification} from "../services/utility.js";
+import {getPendingPaymentsByMonth, processPayment} from "../services/shared.js";
+import dayjs from "dayjs";
 
 const router = Router();
 router.use((req, res, next) => {
@@ -228,18 +236,35 @@ router.post('/grants/applications/student/:appId', async (req, res) => {
             }
             data = await approveApplication(appId, !body.notAdmin && body.supervisorId)
             message = "تم قبول الطلب يمكنك تعين منحه من قسم طلبات بدون مشروع  "
+            const studentId = await getStudentIdByAppId(appId)
+            await createNotification(studentId, ` تمت الموافقه علي طلبك وسيتم اختيار منحه له قريبا واخطارك معرف الطلب : #${appId}`, null, "APPLICATION_APPROVED")
+            await createNotification(null, ` تمت الموافقه علي طلب من قبل احد المشرفين وسيتم اخطارك عند تعين منحه لهذا الطلب معرف الطلب : #${appId}`, null, "APPLICATION_APPROVED", true)
+
+
         }
         if (action === "reject") {
             data = await rejectApplication(appId, body.rejectReason)
             message = "تم رفض الطلب وسيتم اخطار الطالب بسبب الرفض"
+            const studentId = await getStudentIdByAppId(appId)
+            await createNotification(studentId, `للاسف تم رفض طلبك سبب الرفض : ${body.rejectReason}`, null, "APPLICATION_REJECTED")
+            await createNotification(null, `تم رفض طلب من قبل المشرف معرف الطلب : #${appId}`, `/dashboard/apps/view/${appId}/${studentId}`, "APPLICATION_REJECTED", true)
+
         }
         if (action === "review") {
             data = await markApplicationUnderReview(appId, body.supervisorId)
             message = "تم تعين المشرف لمراجعة الطلب وسيتم اخطاره"
+            const studentId = await getStudentIdByAppId(appId)
+            await createNotification(studentId, `تم تعين مشرف لمراجعة طلبك وسيتم اخطارك بنتيجة المراجعة قريبا`, null, "APPLICATION_UNDER_REVIEW")
+            const superVisorId = await getSuperVisorIdByAppId(appId)
+            await createNotification(superVisorId, `تم تعينك لمراجعة طلب جديد معرف الطلب : #${appId}`, `/dashboard/apps/view/${appId}/${studentId}`, "APPLICATION_UNDER_REVIEW",)
+
         }
         if (action === "uncomplete" || action === "uncomplete_with_edit") {
             data = await markApplicationUnComplete(appId, body.askFields, action === "uncomplete_with_edit")
             message = "تم تعين الطلب كغير مكتمل وسيتم اخطار الطلب  بالتحديثات المطلوبه"
+            const studentId = await getStudentIdByAppId(appId)
+            await createNotification(studentId, `قم احد المشرفين بمراجعة طلبك وتم تعينه كطلب غير مكتمل (هذا لا يعني ان طلبك مرفوض ولكن هناك بعض التعديلات التي يجب عليك تعديلها ثم سيتم مراجعة طلبك مره اخري)`, `/dashboard/applications/uncomplete/${appId}/save`, "APPLICATION_UN_COMPLETE")
+
         }
         res.status(200).json({data, message});
     } catch (error) {
@@ -263,17 +288,55 @@ router.get('/grants/applications/student/:appId/user-grant', async (req, res) =>
 router.post('/grants/applications/student/:appId/user-grant', async (req, res) => {
     const body = req.body
     const {appId} = req.params
-
     try {
         if (!body) {
             res.status(404).json({message: 'لا يوجد بيانات مرسله'});
         }
         const data = await createUserGrant(body, appId)
+        const studentId = await getStudentIdByAppId(appId)
+        await createNotification(studentId, `مبروك تمت الموافقه علي طلبك وتم تعين منحة لك`, `/dashboard/applications/view/${appId}`, "APPLICATION_COMPLETED")
+        await createNotification(null, `تمت الموافقه علي طلب وتم تعين منحة لهذا الطلب بواسطة مشرف  معرف الطلب : #${appId}`, `/dashboard/apps/view/${appId}/${studentId}`, "APPLICATION_COMPLETED", true)
+
         res.status(200).json({data, message: "تم انشاء منحة للطالب بنجاح"});
     } catch (error) {
         handlePrismaError(res, error);
     }
 })
+router.get('/payments', async (req, res) => {
+    const {month, userId} = req.query;
+    const startOfMonth = dayjs(month).startOf('month').toDate();
+    const endOfMonth = dayjs(month).endOf('month').toDate();
 
+    try {
+        const payments = await getPendingPaymentsByMonth(startOfMonth, endOfMonth, null, userId);
+        if (!payments) {
+            return res.status(404).json({message: 'لا يوجد دفعات'});
+        }
+        res.status(200).json({data: payments});
+    } catch (error) {
+        console.error('Error fetching :', error);
+        res.status(500).json({message: 'حدث خطأ أثناء جلب الدفعات  '});
+    }
+});
+router.put('/payments/pay/:paymentId', async (req, res) => {
+    const {paymentId} = req.params;
+    const {amount, paidAt, isAdmin, studentId} = req.body;
+
+    try {
+        const payment = await processPayment(Number(paymentId), +amount, new Date(paidAt));
+        await createNotification(+studentId, `تم دفع مبلغ قدرة ${amount} بتاريخ , ${dayjs(paidAt).format("DD/MM/YY")} `, null, "PAYMENT_COMPLETED")
+        if (!isAdmin) {
+            await createNotification(null, ` تم دفع مبلغ قدرة ${amount} بتاريخ ${dayjs(paidAt).format("DD/MM/YY")} , وتم اصدار فاتورة رقم الفاتورة ${payment.invoiceNumber}`, `dashboard/invoices?invoiceId=${payment.invoiceId}`, "PAYMENT_COMPLETED", true)
+        }
+
+        return res.status(200).json({
+            message: 'تم الدفع بنجاح',
+            data: payment,
+        });
+    } catch (error) {
+        console.error('Error processing payment:', error);
+        return res.status(500).json({message: error.message});
+    }
+});
 
 export default router

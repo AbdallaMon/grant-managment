@@ -6,6 +6,8 @@ import dayjs from "dayjs";
 import {getData} from "@/app/helpers/functions/getData";
 import FullScreenLoader from "@/app/UiComponents/feedback/loaders/FullscreenLoader";
 import {PayEveryENUM} from "@/app/helpers/constants";
+import DrawerWithContent from "@/app/UiComponents/DataViewer/DrawerWithContent";
+import AddAGrant from "@/app/UiComponents/admin/AddAGrant";
 
 // Constants for payment status
 const PaymentStatus = {
@@ -46,12 +48,10 @@ const UserGrantsView = ({item, route, isStudent}) => {
         return <Alert severity="error" color="error">{error}</Alert>;
     }
 
-    if (userGrants.length === 0) {
-        return <Typography>لا يوجد منح لهذا المستخدم.</Typography>;
-    }
 
     return (
           <Box>
+              {userGrants.length === 0 && <Typography>لا يوجد منح لهذا المستخدم.</Typography>}
               {!isStudent &&
                     <Box mb={4}>
                         <Typography variant="h5" fontWeight="bold">معلومات المستخدم</Typography>
@@ -60,7 +60,18 @@ const UserGrantsView = ({item, route, isStudent}) => {
                         <Typography>البريد الإلكتروني: {userGrants[0]?.user?.email || "غير متوفر"}</Typography>
                     </Box>
               }
-              <Typography variant="h4" mb={4}>المنح المتاحه</Typography>
+              <Typography variant="h4" mb={2}>المنح المتاحه</Typography>
+              {(!isStudent && (item.studentId || item.userId)) &&
+                    <Box my={3}>
+
+                        <DrawerWithContent item={item} component={AddAGrant}
+                                           extraData={{
+                                               userId: item.studentId || item.userId,
+                                               label: "اضافة منحة جديدة"
+                                               , setUserGrants: setUserGrants
+                                           }}/>
+                    </Box>
+              }
               {userGrants.map((userGrant, index) => (
                     <Card key={index} variant="outlined" sx={{
                         mb: 4,
@@ -83,7 +94,8 @@ const UserGrantsView = ({item, route, isStudent}) => {
                                 <Grid container spacing={2}>
                                     <Grid size={6}>
                                         {!isStudent &&
-                                              <Typography>اسم المنحة: {userGrant.grant.name}</Typography>
+                                              <Typography>اسم
+                                                  المنحة: {userGrant.grant && userGrant.grant.name}</Typography>
                                         }
                                         <Typography>تاريخ
                                             البدء: {dayjs(userGrant.startDate).format("DD/MM/YYYY")}</Typography>

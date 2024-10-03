@@ -53,7 +53,11 @@ enum NotificationType {
   APPLICATION_APPROVED
   APPLICATION_REJECTED
   APPLICATION_UPDATE
+  APPLICATION_UN_COMPLETE
   APPLICATION_RESPONSE
+  APPLICATION_NEW
+  APPLICATION_UNDER_REVIEW
+  APPLICATION_COMPLETED
   NEW_TICKET
   TICKET_UPDATE
   TASK_ASSIGNED
@@ -139,6 +143,7 @@ model User {
   sentMessages     DirectMessage[]   @relation("SentMessages")
   receivedMessages DirectMessage[]   @relation("ReceivedMessages")
   notifications    Notification[]
+  adminNotification AdminNotification[]
 }
 
 model PersonalInfo {
@@ -227,7 +232,7 @@ model ScholarshipInfo {
   requestedAmount  Float?
   applicationId    Int                @unique
 
-  application      Application        @relation(fields: [applicationId], references: [id])
+  application      Application        @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 }
 
 model AcademicPerformance {
@@ -237,7 +242,7 @@ model AcademicPerformance {
   gpaValue         Float?
   transcript       String?
   applicationId    Int                @unique
-  application      Application        @relation(fields: [applicationId], references: [id])
+  application      Application        @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 }
 
 
@@ -254,7 +259,7 @@ model ResidenceInformation {
   address          String?
   applicationId    Int                @unique
 
-  application      Application        @relation(fields: [applicationId], references: [id])
+  application      Application        @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 }
 
 model SupportingFiles {
@@ -266,7 +271,7 @@ model SupportingFiles {
   proofOfAddress   String?
   applicationId    Int                @unique
 
-  application      Application        @relation(fields: [applicationId], references: [id])
+  application      Application        @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 }
 
 model Sibling {
@@ -283,7 +288,7 @@ model Sibling {
   document         String?
   createdAt        DateTime           @default(now())
   applicationId    Int
-  application      Application        @relation(fields: [applicationId], references: [id])
+  application      Application        @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 }
 
 // Grants and Payments
@@ -322,22 +327,21 @@ model Payment {
   id               Int                @id @default(autoincrement())
   userGrantId      Int
   amount           Float
-  amountPaid    Float?
+  amountPaid       Float?
   dueDate          DateTime
   paidAt           DateTime?
   status           PaymentStatus      @default(PENDING)
   createdAt        DateTime           @default(now())
 
   userGrant        UserGrant          @relation(fields: [userGrantId], references: [id])
-  invoice          Invoice?
+  invoices         Invoice[]
 }
 
 model Invoice {
   id               Int                @id @default(autoincrement())
   invoiceNumber    String             @unique
-  paymentId        Int                @unique
+  paymentId        Int
   dueDate          DateTime
-  status           PaymentStatus      @default(PENDING)
   amount           Float
   paidAt           DateTime?
   createdAt        DateTime           @default(now())
@@ -380,6 +384,16 @@ model Notification {
   createdAt        DateTime           @default(now())
   isAdmin             Boolean @default(false)
   user             User?              @relation(fields: [userId], references: [id])
+  adminReads AdminNotification[]
+}
+model AdminNotification {
+  id             Int      @id @default(autoincrement())
+  adminId        Int      // ID of the admin
+  notificationId Int      // ID of the notification
+  isRead         Boolean  @default(false)  // Each admin's read status
+
+  admin          User     @relation(fields: [adminId], references: [id])
+  notification   Notification @relation(fields: [notificationId], references: [id])
 }
 
 model Ticket {

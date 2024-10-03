@@ -2,61 +2,63 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import {createServer} from 'http';
+
 dotenv.config();
+
 import authRoutes from './routes/auth.js';
 import studentRoutes from './routes/student.js';
 import adminRoutes from './routes/admin.js';
-import sharedRoutes from "./routes/shared.js"
-import {deleteFiles, searchData, uploadFiles, verifyTokenUsingReq} from "./services/utility.js";
+import sharedRoutes from './routes/shared.js';
+import utilityRoutes from './routes/utility.js'; // Import utility routes
+
+import {initSocket} from './services/socket.js';
+import {deleteFiles, uploadFiles, verifyTokenUsingReq} from "./services/utility.js";
+import router from "./routes/utility.js"; // Import socket initialization
 
 const app = express();
-
 const PORT = process.env.PORT || 3000;
+
 app.use(cors({
     origin: process.env.ORIGIN,
     credentials: true,
 }));
+
+const httpServer = createServer(app);
+initSocket(httpServer); // Initialize socket.io with the server
+
 app.use(express.json());
 app.use(cookieParser());
-app.use('/uploads', express.static('uploads')); // we might needs to remove this later
+app.use('/uploads', express.static('uploads')); // Serve static files
 
 // Routes
-app.get('/search', verifyTokenUsingReq, async (req, res) => {
-    const searchBody=req.query
-    try{
-        const data=await  searchData(searchBody)
-        res.status(200).json({ data });
-    } catch (error) {
-        console.error(`Error fetching data :`, error);
-        res.status(500).json({ message: `حدثت مشكلة اثناء جلب البينات: ${error.message}` });
+app.post('/upload', verifyTokenUsingReq, async (req, res) => {
+    try {
+        const fileUrls = await uploadFiles(req, res);
+        res.status(200).json({data: fileUrls, message: 'تم رفع ملفاتك جاري اتمام عملية التخزين'});
+    } catch (err) {
+        console.log(err, 'Error uploading files');
+        res.status(500).json({message: 'Failed to upload files', error: err.message});
     }
 });
 
-app.post('/upload', verifyTokenUsingReq, async (req, res) => {
-    try {
-        const fileUrls = await uploadFiles(req, res); // Upload the files and get their URLs
-        res.status(200).json({ data: fileUrls ,message:"تم رفع ملفاتك جاري اتمام عملية التخزين"});
-    } catch (err) {
-        console.log(err, "err")
-        res.status(500).json({ message: 'Failed to upload files', error: err.message });
-    }
-});
+// Delete Files
 app.post('/delete-files', async (req, res) => {
-    const { fileUrls } = req.body; // Expecting an array of file URLs in the request body
+    const {fileUrls} = req.body;
     try {
         const result = await deleteFiles(fileUrls);
         res.status(200).json(result);
     } catch (err) {
-        console.log(err,"errrrro in delete")
-        res.status(500).json({ message: err.message, failedFiles: err.failedFiles });
+        console.log(err, 'Error deleting files');
+        res.status(500).json({message: err.message, failedFiles: err.failedFiles});
     }
 });
 app.use('/auth', authRoutes);
 app.use('/student', studentRoutes);
 app.use('/admin', adminRoutes);
 app.use('/shared', sharedRoutes);
+app.use('/utility', utilityRoutes); // Use utility routes
 
-
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

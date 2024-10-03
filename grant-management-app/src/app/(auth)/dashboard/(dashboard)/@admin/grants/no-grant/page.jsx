@@ -7,11 +7,7 @@ import ApplicationWithProfileViewer from "@/app/UiComponents/admin/ApplicationWI
 import SearchComponent from "@/app/UiComponents/formComponents/SearchComponent";
 import React, {useState} from "react";
 import FilterSelect from "@/app/UiComponents/formComponents/FilterSelect";
-import {useAuth} from "@/app/providers/AuthProvider";
-import {useToastContext} from "@/app/providers/ToastLoadingProvider";
-import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
-import ConfirmWithActionModel from "@/app/UiComponents/models/ConfirmsWithActionModel";
-import MuiAlert from "@mui/material/Alert";
+
 import AddAGrant from "@/app/UiComponents/admin/AddAGrant";
 
 const columns = [

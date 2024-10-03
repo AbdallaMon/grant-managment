@@ -14,7 +14,7 @@ const EditModal = ({
                        setData,
                        href,
                        checkChanges = false,
-                       handleBeforeSubmit
+                       handleBeforeSubmit, extraEditParams
                    }) => {
     const {setLoading} = useToastContext()
     const [open, setOpen] = useState(false)
@@ -34,7 +34,7 @@ const EditModal = ({
         }
         if (handleBeforeSubmit) dataToSubmit = await handleBeforeSubmit(formData)
 
-        const result = await handleRequestSubmit(dataToSubmit, setLoading, `${href}/${item.id}`, false, "جاري التعديل", null, "PUT");
+        const result = await handleRequestSubmit(dataToSubmit, setLoading, `${href}/${item.id}${extraEditParams}`, false, "جاري التعديل", null, "PUT");
         if (result.status === 200) {
             if (setData) {
                 setData((prevData) => prevData.map((dataItem) => dataItem.id === result.data.id ? result.data : dataItem));
@@ -49,7 +49,7 @@ const EditModal = ({
         ...input,
         data: {
             ...input.data,
-            defaultValue: item[input.data.id] ?? input.data.defaultValue,
+            defaultValue: input.useDefault ? input.data.defaultValue : item[input.data.id] || input.data.defaultValue,
         }
     }));
     if (!open) return (
@@ -75,7 +75,7 @@ const EditModal = ({
                           <Form
                                 onSubmit={onSubmit}
                                 inputs={prefilledInputs.map(input => {
-                                          const defaultValue = getPropertyValue(item, input.data.key ? input.data.key : input.data.id, input.data.enum, input.data.type)
+                                          const defaultValue = getPropertyValue(item, input.data.key ? input.data.key : input.data.id, input.data.enum, input.data.type, input.useDefault && input.data.defaultValue)
                                           console.log(defaultValue, "defaultValue")
                                           return {
                                               ...input,

@@ -9,7 +9,7 @@ import {
     TableHead,
     TableRow,
     Backdrop,
-    Paper, Button
+    Paper, Button, Link
 } from '@mui/material';
 import EditModal from "@/app/UiComponents/models/EditModal";
 import DeleteModal from "@/app/UiComponents/models/DeleteModal";
@@ -51,9 +51,9 @@ export default function AdminTable({
                                        deleteHref,
                                        withArchive,
                                        archiveHref,
-                                       extraComponent,
+                                       extraComponent, extraEditParams,
                                        extraComponentProps,
-                                       setTotal,
+                                       setTotal, noPagination = false,
                                        checkChanges,
                                        editButtonText = "تعديل" // Default value is "Edit"
                                        , checkDates, totalPages, handleBeforeSubmit
@@ -92,8 +92,15 @@ export default function AdminTable({
                                                   {column.type === "document" ? (
                                                         <DocumentRenderer
                                                               value={getPropertyValue(item, column.name, column.enum, column.type)}/>
+                                                  ) : (column.type === "href" && column.linkCondition) ? (
+                                                        <>
+                                                            <Link href={column.linkCondition(item)}>
+                                                                {getPropertyValue(item, column.name, column.enum,
+                                                                      column.type, null)}
+                                                            </Link>
+                                                        </>
                                                   ) : (
-                                                        getPropertyValue(item, column.name, column.enum, column.type)
+                                                        getPropertyValue(item, column.name, column.enum, column.type, null)
                                                   )}
                                               </TableCell>
                                         ))}
@@ -107,6 +114,7 @@ export default function AdminTable({
                                                         href={editHref}
                                                         handleBeforeSubmit={handleBeforeSubmit}
                                                         checkChanges={checkChanges}
+                                                        extraEditParams={extraEditParams}
                                                   /> </TableCell>
                                         )}
                                         {withDelete && (
@@ -147,10 +155,12 @@ export default function AdminTable({
                           </TableBody>
                       </Table>
                   </TableContainer>
-                  <PaginationWithLimit total={total} limit={limit} page={page} setLimit={setLimit} setPage={setPage}
-                                       totalPages={totalPages}/>
+                  {!noPagination &&
+                        <PaginationWithLimit total={total} limit={limit} page={page} setLimit={setLimit}
+                                             setPage={setPage}
+                                             totalPages={totalPages}/>
+                  }
               </>
-
 
               <Backdrop sx={{color: '#fff', zIndex: 6000000}} open={loading}>
                   <CircularProgress color="inherit"/>

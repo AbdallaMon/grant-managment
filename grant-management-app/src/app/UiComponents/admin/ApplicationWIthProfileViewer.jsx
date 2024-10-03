@@ -19,11 +19,12 @@ import FullScreenLoader from "@/app/UiComponents/feedback/loaders/FullscreenLoad
 import {MdDateRange as DateIcon} from "react-icons/md";
 
 import {
+    ApplicationStatus,
     FieldStatus, FieldType,
     GenderType,
     GpaType,
     ParentStatus,
-    ResidenceType,
+    ResidenceType, StatusColor,
     StudySource,
     StudyType,
     SupportType
@@ -265,8 +266,6 @@ export default function ApplicationWithProfileViewer({
                               </Grid>
                           </Grid>
                       </Box>
-
-                      {/* Supporting Files */}
                       <Box mb={4}>
                           <Typography variant="h6" fontWeight="bold" sx={{mb: 1}}>
                               الملفات الداعمة
@@ -355,7 +354,6 @@ export default function ApplicationWithProfileViewer({
                           )}
                       </Box>
 
-                      {/* Commitment & Scholarship Terms */}
                       <Box mb={4}>
                           <Typography>{commitment ? "تم الموافقة على التعهد" : "لم يتم الموافقة على التعهد"}</Typography>
                           <Typography>{scholarshipTerms ? "تم الموافقة على شروط المنحة" : "لم يتم الموافقة على شروط المنحة"}</Typography>
@@ -364,8 +362,17 @@ export default function ApplicationWithProfileViewer({
               </Card>
         );
     };
+    const status = application?.status;
+    const alertColor = StatusColor[status] || "info"; // Fallback to info if undefined
+
     return (
           <Box>
+              <Alert severity={alertColor} variant="outlined" width="fit-conent" sx={{my: 2}}>
+                  <Typography variant="h6" component="div">
+                      حالة الطلب: {ApplicationStatus[status]}
+                  </Typography>
+              </Alert>
+
               {loadingPersonalInfo ? (
                     <CircularProgress/>
               ) : (
@@ -489,20 +496,25 @@ const RenderImprovementsAndAskedFields = ({item, route, view, isStudent}) => {
             }
             {updates?.length > 0 ? (
                   updates.map((update, index) => (
-                        <Card key={index} variant="outlined" sx={{
+                        <Grid spacing={2} container key={index} variant="outlined" sx={{
                             my: 3,
                             p: 3,
                             backgroundColor: "#f9fafc", // Light background for distinction
                             borderRadius: "12px",
                             boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)", // Subtle shadow for elevation
-
                         }}
                         >
-                            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-
+                            <Grid size={{xs: 12, md: 6}}>
                                 <Typography fontWeight="bold">العنوان: {update.title || "بدون عنوان"}</Typography>
+                            </Grid>
+                            <Grid size={{xs: 12, md: 6}}>
+
                                 <Typography>الوصف: {update.description || "لا يوجد وصف"}</Typography>
+                            </Grid>
+                            <Grid size={{xs: 12, md: 6}}>
                                 {renderFileLink(update.url, "الملف المرفق")}
+                            </Grid>
+                            <Grid size={{xs: 12, md: 6}}>
                                 <Typography
                                       color="textSecondary"
                                       sx={{
@@ -513,8 +525,9 @@ const RenderImprovementsAndAskedFields = ({item, route, view, isStudent}) => {
                                     <DateIcon sx={{mr: 1}}/>
                                     {dayjs(update.createdAt).format("DD/MM/YYYY")}
                                 </Typography>
-                            </Box>
-                        </Card>
+                            </Grid>
+
+                        </Grid>
                   ))
             ) : (
                   <Typography>لا يوجد تحديثات</Typography>
@@ -572,7 +585,6 @@ const RenderImprovementsAndAskedFields = ({item, route, view, isStudent}) => {
                       </Card>
                   </Collapse>
               </Box>
-
               <Box my={2}>
                   <Button
                         variant="contained"
@@ -692,15 +704,25 @@ function RenderActionsButtons({isAdmin, route, appId, onClose, setData, item, vi
                   تحذير: في حالة طلب تحديثات سيتم تعديل الطلب الي غير مكتمل
               </Alert>
               <Box display="flex" gap={2} alignItem="center" flexWrap="wrap" mt={4}>
-                  {isAdmin && !view &&
+                  {(isAdmin && !view) &&
                         <>
-                            <ApproveByAdmin route={route} setData={setData} appId={appId} onClose={onClose}
-                                            application={application}/>
-                            <MarkUnderReview route={route} setData={setData} appId={appId} onClose={onClose}/>
+                            {application.status !== "APPROVED" &&
+                                  <>
+                                      <ApproveByAdmin route={route} setData={setData} appId={appId} onClose={onClose}
+                                                      application={application}/>
+                                      <MarkUnderReview route={route} setData={setData} appId={appId} onClose={onClose}/>
+                                  </>
+                            }
                         </>
                   }
-                  {!isAdmin && !view &&
-                        <ApproveBySupervisor route={route} setData={setData} appId={appId} onClose={onClose}/>}
+                  {(!isAdmin && !view) &&
+                        <>
+                            {
+                                  application.status !== "APPROVED" &&
+                                  <ApproveBySupervisor route={route} setData={setData} appId={appId} onClose={onClose}/>
+                            }
+                        </>
+                  }
                   <DrawerWithContent item={item} component={MarkAsUnCompleteAndAskForImprovement}
                                      extraData={{
                                          route: route,
@@ -719,7 +741,7 @@ function RenderActionsButtons({isAdmin, route, appId, onClose, setData, item, vi
                                          otherOnClose: onClose
                                      }}/>
 
-                  {!view &&
+                  {(!view && application.status !== "APPROVED") &&
                         <RejectApplication route={route} setData={setData} appId={appId} onClose={onClose}/>
                   }
               </Box>
@@ -731,6 +753,7 @@ function ApproveByAdmin({route, appId, onClose, setData, application}) {
     const [user, setUser] = useState(null)
     const [error, setError] = useState(null)
     const {setLoading} = useToastContext()
+    console.log(application, "applicationx")
 
     async function confirm() {
         if (!user && !application.supervisorId) {
@@ -738,7 +761,7 @@ function ApproveByAdmin({route, appId, onClose, setData, application}) {
             return
         }
         const request = await handleRequestSubmit({
-            supervisorId: user.query?.id,
+            supervisorId: user && user.query?.id,
             action: "approve",
             notAdmin: application.supervisorId
         }, setLoading, `${route}/${appId}`, false, "جاري الموافقه علي الطلب")

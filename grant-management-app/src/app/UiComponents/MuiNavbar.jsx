@@ -14,10 +14,12 @@ import {
     useMediaQuery,
     useTheme,
 } from "@mui/material";
-import {FaBars, FaBell, FaEnvelope} from "react-icons/fa";
+import {FaBars, FaEnvelope, FaThLarge} from "react-icons/fa"; // FaThLarge as the 'More' button
 import Link from "next/link";
 import {useAuth} from "@/app/providers/AuthProvider";
 import LogoutButton from "@/app/UiComponents/Buttons/LogoutBtn";
+import NotificationsIcon from "@/app/UiComponents/DataViewer/NotificationMenu";
+import MessagesIcon from "@/app/UiComponents/DataViewer/MessagesMenu";
 
 // Define role-based navigation structure in Arabic
 const roleBasedLinks = {
@@ -26,14 +28,18 @@ const roleBasedLinks = {
         {name: "المستخدمين", route: "users"},
         {name: "المنح", route: "grants"},
         {name: "الشكاوي", route: "complaints"},
-        {name: "مهام المشرفين", route: "tasks"}
+        {name: "مهام المشرفين", route: "tasks"},
+        {name: "الدفعات", route: "payments"},
+        {name: "الفواتير", route: "invoices"},
     ],
     SUPERVISOR: [
         {name: "لوحة التحكم", route: "dashboard"},
         {name: "الطلاب", route: "students"},
         {name: "طلبات المراجعة", route: "grants/applications"},
         {name: "المنح", route: "grants"},
-        {name: "المهام", route: "tasks"}
+        {name: "المهام", route: "tasks"},
+        {name: "الدفعات", route: "payments"},
+        {name: "الفواتير", route: "invoices"},
     ],
     STUDENT: [
         {name: "لوحة التحكم", route: "dashboard"},
@@ -54,26 +60,21 @@ function NotificationsAndMessages({role, isLoggedIn}) {
 
     return (
           <Box sx={{display: "flex", alignItems: "center"}}>
-              <IconButton component={Link} href="/dashboard/messages" aria-label="Messages" sx={{mx: 1}}
-                          color="primary">
-
-                  <FaEnvelope size={20}/>
-              </IconButton>
-              <IconButton component={Link} href="/dashboard/notifications" aria-label="Notifications" sx={{mx: 1}}
-                          color="primary">
-                  <FaBell size={20}/>
-              </IconButton>
+              <MessagesIcon/>
+              <NotificationsIcon/>
           </Box>
     );
 }
 
 export default function Navbar() {
-    const {isLoggedIn, user: {role} = {}} = useAuth(); // Assuming useAuth provides user data
+    const {isLoggedIn, user: {role} = {}} = useAuth();
     const isSmallMedia = useMediaQuery("(max-width:767px)");
+    const isLargeMedia = useMediaQuery("(min-width:768px)");
     const theme = useTheme();
 
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [links, setLinks] = useState([]);
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false); // State for the large-screen drawer
 
     // Manage links based on role
     useEffect(() => {
@@ -88,8 +89,9 @@ export default function Navbar() {
         setDrawerOpen(open);
     };
 
-    const renderLinks = (links) => {
-        return links.map((link) => (
+    // Function to render first four links
+    const renderFirstFourLinks = (links) => {
+        return links.slice(0, 4).map((link) => (
               <Button
                     key={link.route}
                     component={Link}
@@ -101,11 +103,30 @@ export default function Navbar() {
         ));
     };
 
+    // Function to render all links in the drawer
+    const renderAllLinks = (links) => {
+        return links.map((link, index) => (
+              <ListItem
+                    button
+                    key={index}
+                    component={Link}
+                    href={`/dashboard/${link.route === "dashboard" ? "" : link.route}`}
+              >
+                  <ListItemText primary={link.name}/>
+              </ListItem>
+        ));
+    };
+
+    // Function to toggle the large-screen drawer
+    const handleDrawerToggle = (open) => {
+        setIsDrawerOpen(open);
+    };
+
     return (
           <Box sx={{flexGrow: 1}}>
               <AppBar position="fixed" sx={{backgroundColor: theme.palette.background.paper}}>
                   <Toolbar>
-                      {isSmallMedia ? (
+                      {isSmallMedia && isLoggedIn ? (
                             <>
                                 <IconButton
                                       edge="start"
@@ -128,33 +149,47 @@ export default function Navbar() {
                                 >
                                     <Box sx={{width: 250}}>
                                         <List>
-                                            {isLoggedIn ? (
-                                                  links.map((link, index) => (
-                                                        <ListItem
-                                                              button
-                                                              key={index}
-                                                              component={Link}
-                                                              href={`/dashboard/${link.route === "dashboard" ? "" : link.route}`}
-                                                        >
-                                                            <ListItemText primary={link.name}/>
-                                                        </ListItem>
-                                                  ))
-                                            ) : (
-                                                  <ListItem button component={Link} href="/login">
-                                                      <ListItemText primary="تسجيل الدخول"/>
-                                                  </ListItem>
-                                            )}
+                                            {renderAllLinks(links)}
                                         </List>
                                     </Box>
+
                                 </Drawer>
                             </>
                       ) : (
                             <>
-                                <NotificationsAndMessages role={role}
-                                                          isLoggedIn={isLoggedIn}/>
-
+                                {isLoggedIn && (
+                                      <IconButton
+                                            edge="start"
+                                            color="primary"
+                                            aria-label="more-links"
+                                            onClick={() => handleDrawerToggle(true)}
+                                      >
+                                          <FaBars size={24}/>
+                                      </IconButton>
+                                )}
+                                <NotificationsAndMessages role={role} isLoggedIn={isLoggedIn}/>
                                 <Box sx={{flexGrow: 1, display: "flex", justifyContent: "center"}}>
-                                    {renderLinks(links)}
+                                    {renderFirstFourLinks(links)}
+                                    {isLargeMedia && (
+                                          <>
+                                              {/* Button to open drawer for the remaining links */}
+                                              <Drawer
+                                                    anchor="left"
+                                                    open={isDrawerOpen}
+                                                    onClose={() => handleDrawerToggle(false)}
+                                                    sx={{
+                                                        "& .MuiPaper-root": {
+                                                            width: 250,
+                                                            backgroundColor: theme.palette.background.paper,
+                                                        },
+                                                    }}
+                                              >
+                                                  <List>
+                                                      {renderAllLinks(links)}
+                                                  </List>
+                                              </Drawer>
+                                          </>
+                                    )}
                                 </Box>
                             </>
                       )}

@@ -30,11 +30,37 @@ export const createNewApplication = async (studentId) => {
     return application.id
 }
 export const deleteDraftApplication = async (appId) => {
+    const supportingFiles = await prisma.supportingFiles.findFirst({where: {applicationId: Number(appId)}})
+    let deleteFiles = [];
+    if (supportingFiles) {
+        deleteFiles = [supportingFiles.personalId, supportingFiles.studentDoc, supportingFiles.medicalReport, supportingFiles.personalPhoto, supportingFiles.proofOfAddress]
+    }
+    const siblings = await prisma.sibling.findMany({
+        where: {applicationId: Number(appId)}, select: {
+            document: true
+        }
+    })
+    if (siblings) {
+        siblings.forEach((sibling) => {
+            if (sibling.document) {
+                deleteFiles.push(sibling.document)
+            }
+        })
+    }
+    const academicPerformance = await prisma.academicPerformance.findFirst({
+              where: {applicationId: Number(appId)},
+              select: {transcript: true}
+          }
+    )
+    if (academicPerformance && academicPerformance.transcript) {
+        deleteFiles.push(academicPerformance.transcript)
+    }
     await prisma.application.delete({
         where: {
             id: appId, status: "DRAFT"
         }, select: {id: true}
     })
+    await deleteListOfFiles(deleteFiles)
 }
 
 export const getApplicationModel = async (appId, model, status = "DRAFT") => {
