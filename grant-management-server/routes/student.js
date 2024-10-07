@@ -6,14 +6,14 @@ import {
 } from "../services/utility.js";
 import {
     checkIfFieldsAreEmpty,
-    createDraftApplicationModel,
-    createNewApplication, createNewUpdate,
+    createDraftApplicationModel, createMessage,
+    createNewApplication, createNewUpdate, createTicket,
     deleteDraftApplication,
     deleteSibling,
-    getApplicationModel,
+    getApplicationModel, getMessagesByTicket,
     getPendingFieldsAndRequests,
     getPersonalInfo,
-    getStudentApplications,
+    getStudentApplications, getTicketsByUser,
     submitApplication,
     updateApplicationModel,
     updateAskedFieldsAndImprovementRequests,
@@ -500,5 +500,89 @@ router.get('/dashboard/recent-invoices', async (req, res) => {
     }
 });
 
+// Backend Endpoint: /student/tickets
+router.get('/tickets', async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const skip = parseInt(req.query.skip) || 0; // Starting point for records
+        const take = parseInt(req.query.take) || 10; // Number of records to return
+
+        const [tickets, totalTickets] = await getTicketsByUser(userId, skip, take);
+
+        res.json({
+            message: 'تم جلب التذاكر بنجاح.',
+            data: {tickets, totalTickets},
+        });
+    } catch (error) {
+        console.log(error, "err")
+        res.status(500).json({message: 'خطأ في جلب التذاكر.', error: error.message});
+    }
+});
+
+// Create ticket
+router.post('/tickets', async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const {title, content} = req.body;
+
+        if (!title || title.trim() === '') {
+            return res.status(400).json({message: 'العنوان مطلوب.'});
+        }
+        if (!content || content.trim() === '') {
+            return res.status(400).json({message: 'المحتوى مطلوب.'});
+        }
+
+        const ticket = await createTicket(userId, title, content);
+        await createNotification(null, `تم انشاء تذكرة جديدة بعنوان ${title}`, `/dashboard/tickets/${ticket.id}`, "NEW_TICKET", true)
+        res.status(201).json({
+            message: 'تم إنشاء التذكرة بنجاح.',
+            data: ticket,
+        });
+    } catch (error) {
+        res.status(500).json({message: 'خطأ في إنشاء التذكرة.', error: error.message});
+    }
+});
+
+// Get messages for a ticket
+router.get('/tickets/:ticketId/messages', async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const ticketId = parseInt(req.params.ticketId);
+        const skip = parseInt(req.query.skip) || 0;
+        const take = parseInt(req.query.take) || 50;
+
+        const ticketData = await getMessagesByTicket(ticketId, skip, take);
+
+        res.json({
+            message: 'تم جلب الرسائل بنجاح.',
+            data: ticketData,
+        });
+    } catch (error) {
+        res.status(500).json({message: 'خطأ في جلب الرسائل.', error: error.message});
+    }
+});
+
+// Create a message for a ticket
+router.post('/tickets/:ticketId/messages', async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const ticketId = parseInt(req.params.ticketId);
+        const {content} = req.body;
+        if (!content || content.trim() === '') {
+            return res.status(400).json({message: 'المحتوى مطلوب.'});
+        }
+
+        const message = await createMessage(userId, ticketId, content);
+        await createNotification(null, `رد جديد علي تذكرة #${ticketId} : ${content}`, `/dashboard/tickets/${ticketId}`, "TICKET_UPDATE", true)
+
+        res.status(201).json({
+            message: 'تم إرسال الرسالة بنجاح.',
+            data: message,
+        });
+    } catch (error) {
+        console.log(error, "error")
+        res.status(500).json({message: 'خطأ في إرسال الرسالة.', error: error.message});
+    }
+});
 
 export default router;

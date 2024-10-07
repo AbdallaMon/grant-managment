@@ -487,3 +487,108 @@ export async function createNewUpdate(appId, data) {
     })
     return newUpdate
 }
+
+
+//tickets
+export const getTicketsByUser = async (userId, skip, take) => {
+    const tickets = await prisma.ticket.findMany({
+        where: {userId},
+        select: {
+            id: true,
+            title: true,
+            status: true,
+            createdAt: true,
+        },
+        skip,
+        take,
+        orderBy: {createdAt: 'desc'},
+    });
+
+    const totalTickets = await prisma.ticket.count({
+        where: {userId},
+    });
+
+    return [tickets, totalTickets];
+};
+
+export const createTicket = async (userId, title, content) => {
+    return await prisma.ticket.create({
+        data: {
+            title: title.trim(),
+            content: content.trim(),
+            userId: userId,
+            status: 'OPEN',
+        },
+        select: {
+            id: true,
+            title: true,
+            status: true,
+            createdAt: true,
+        },
+    });
+};
+
+export const getMessagesByTicket = async (ticketId, skip, take) => {
+    const ticket = await prisma.ticket.findFirst({
+        where: {id: ticketId,},
+        select: {
+            id: true, status: true, title: true, content: true,
+        },
+    });
+    if (!ticket) {
+        throw new Error('تذكرة غير موجودة.');
+    }
+
+    const messages = await prisma.message.findMany({
+        where: {ticketId: ticketId},
+        orderBy: {createdAt: 'desc'},
+        skip: skip,
+        take: take,
+        select: {
+            id: true,
+            content: true,
+            senderId: true,
+            createdAt: true,
+            sender: {select: {role: true}},
+        },
+    });
+
+    const totalMessages = await prisma.message.count({
+        where: {ticketId: ticketId},
+    });
+
+    return {
+        ticketId: ticket.id,
+        status: ticket.status,
+        title: ticket.title,      // Include title in the response
+        content: ticket.content,  // Include content in the response
+        messages: messages.reverse(),
+        totalMessages
+    };
+};
+
+export const createMessage = async (userId, ticketId, content) => {
+    const ticket = await prisma.ticket.findFirst({
+        where: {id: ticketId, status: 'OPEN'},
+    });
+
+    if (!ticket) {
+        throw new Error('تذكرة غير موجودة أو مغلقة.');
+    }
+
+    const message = await prisma.message.create({
+        data: {
+            ticketId: ticketId,
+            content: content.trim(),
+            senderId: userId,
+        },
+        select: {
+            id: true,
+            content: true,
+            senderId: true,
+            createdAt: true,
+            sender: {select: {role: true}},
+        },
+    });
+    return {...message, studentId: ticket.userId}
+};

@@ -185,7 +185,6 @@ export const verifyTokenAndHandleAuthorization = (req, res, next, role) => {
 
     try {
         const decoded = jwt.verify(token, SECRET_KEY);
-        console.log(decoded)
 
         if (role === "SHARED") {
             if (decoded.role !== "ADMIN" && decoded.role !== "SUPERVISOR") {

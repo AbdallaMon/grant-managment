@@ -612,3 +612,43 @@ export async function markApplicationUnderReview(appId, supervisorId) {
 
     return updatedApplication;
 }
+
+export const getAllTickets = async (status, skip, take) => {
+    const filter = status && status !== "all" ? {status} : {};
+    const tickets = await prisma.ticket.findMany({
+        where: filter,
+        select: {
+            id: true,
+            title: true,
+            status: true,
+            createdAt: true,
+            userId: true,
+        },
+        skip: skip,
+        take: take,
+        orderBy: {
+            createdAt: 'desc',
+        },
+    });
+
+    const totalTickets = await prisma.ticket.count({where: filter});
+    return {tickets, totalTickets};
+};
+
+
+export const updateTicketStatus = async (ticketId, newStatus) => {
+    return prisma.ticket.update({
+        where: {id: ticketId},
+        data: {status: newStatus},
+    });
+};
+
+export const createMessage = async (ticketId, senderId, content) => {
+    return prisma.message.create({
+        data: {
+            ticketId,
+            senderId,
+            content,
+        },
+    });
+};

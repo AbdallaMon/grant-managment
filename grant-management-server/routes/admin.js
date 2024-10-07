@@ -1,5 +1,10 @@
 import {Router} from "express";
-import {getPagination, handlePrismaError, verifyTokenAndHandleAuthorization} from "../services/utility.js";
+import {
+    createNotification,
+    getPagination,
+    handlePrismaError,
+    verifyTokenAndHandleAuthorization
+} from "../services/utility.js";
 import {
     assignUserToViewGrant,
     changeUserStatus,
@@ -7,12 +12,13 @@ import {
     createNonStudentUser,
     deleteGrant,
     editAGrant,
-    editNonStudentUser,
+    editNonStudentUser, getAllTickets,
     getApplications,
     getUser,
     getUserViewAccessForAGrant,
-    removeUserFromViewGrant
+    removeUserFromViewGrant, updateTicketStatus
 } from "../services/adminServices.js";
+import {createMessage, getMessagesByTicket} from "../services/studentsServices.js";
 
 const router = Router();
 
@@ -439,6 +445,69 @@ router.get('/dashboard/recent-activities', async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({error: error.message});
+    }
+});
+
+//tickets
+router.get('/tickets/', async (req, res) => {
+    const {status, skip = 0, take = 10} = req.query;
+    try {
+        const {tickets, totalTickets} = await getAllTickets(status, parseInt(skip), parseInt(take));
+        res.json({data: {tickets, totalTickets}});
+    } catch (error) {
+        console.log(error)
+
+        res.status(500).json({message: 'Error fetching tickets'});
+    }
+});
+
+// Get single ticket details
+router.get('/tickets/:ticketId/messages', async (req, res) => {
+    const ticketId = parseInt(req.params.ticketId);
+    const skip = parseInt(req.query.skip) || 0;
+    const take = parseInt(req.query.take) || 50;
+    try {
+        const ticket = await getMessagesByTicket(ticketId, skip, take);
+        res.json({data: ticket});
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({message: 'Error fetching ticket details'});
+    }
+});
+
+// Update ticket status (mark as closed)
+router.put('/tickets/:ticketId/status', async (req, res) => {
+    const {ticketId} = req.params;
+    const {status} = req.body;
+    try {
+        const updatedTicket = await updateTicketStatus(parseInt(ticketId), status);
+        await createNotification(updatedTicket.userId, `${status === "OPEN" ? "تم فتح تذكرتك من جديد يمكنك ارسال المزيد من الاستفسارات" : "تم غلق تذكرتك من قبل المسئول"}`, `/dashboard/tickets/${ticketId}`, "TICKET_UPDATE",)
+
+        res.json({message: 'Ticket status updated', data: updatedTicket});
+    } catch (error) {
+        res.status(500).json({message: 'Error updating ticket status'});
+    }
+});
+
+// Send a message on a ticket
+router.post('/tickets/:ticketId/messages', async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const ticketId = parseInt(req.params.ticketId);
+        const {content} = req.body;
+        if (!content || content.trim() === '') {
+            return res.status(400).json({message: 'المحتوى مطلوب.'});
+        }
+        const message = await createMessage(userId, ticketId, content);
+        await createNotification(message.studentId, `لديك ردود جديد علي تذكرتك من قبل المسئول #${ticketId}`, `/dashboard/tickets/${ticketId}`, "TICKET_UPDATE",)
+
+        res.status(201).json({
+            message: 'تم إرسال الرسالة بنجاح.',
+            data: message,
+        });
+    } catch (error) {
+        console.log(error, "error")
+        res.status(500).json({message: 'خطأ في إرسال الرسالة.', error: error.message});
     }
 });
 
