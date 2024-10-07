@@ -20,8 +20,8 @@ import {
     updatePersonalInfo
 } from "../services/studentsServices.js";
 import {getApplicationById, getSpecificApplicationField} from "../services/adminServices.js";
-import {getUserGrants} from "./supervisor.js";
 import {createNotification} from "../services/utility.js";
+import {getUserGrants} from "../services/shared.js";
 
 const router = Router();
 
@@ -357,4 +357,148 @@ router.get('/applications/:appId/user-grant', async (req, res) => {
         res.status(500).json({message: 'حدث خطأ أثناء جلب  بيانات الطالب  '});
     }
 });
+// Backend Endpoint: /student/dashboard/applications-stats
+router.get('/dashboard/applications-stats', async (req, res) => {
+    try {
+        const studentId = req.user.id;
+
+        const totalApplications = await prisma.application.count({
+            where: {
+                studentId: studentId,
+                status: {
+                    not: 'DRAFT', // Exclude applications with status 'DRAFT'
+                },
+            },
+        });
+
+        const applicationsByStatus = await prisma.application.groupBy({
+            by: ['status'],
+            where: {
+                studentId: studentId,
+                status: {
+                    not: 'DRAFT', // Exclude 'DRAFT' status
+                },
+            },
+            _count: true,
+        });
+
+        res.json({totalApplications, applicationsByStatus});
+    } catch (error) {
+        res.status(500).json({error: error.message});
+    }
+});
+// Backend Endpoint: /student/dashboard/grants-stats
+router.get('/dashboard/grants-stats', async (req, res) => {
+    try {
+        const studentId = req.user.id;
+
+        // Total user grants
+        const totalUserGrants = await prisma.userGrant.count({
+            where: {
+                userId: studentId,
+            },
+        });
+
+        // Total payments amount and amount left
+        const totalPaymentsResult = await prisma.payment.aggregate({
+            _sum: {
+                amount: true,
+                amountPaid: true,
+            },
+            where: {
+                userGrant: {
+                    userId: studentId,
+                },
+            },
+        });
+
+        const totalPaymentsAmount = totalPaymentsResult._sum.amount || 0;
+        const totalAmountLeft = totalPaymentsResult._sum.amount - totalPaymentsResult._sum.amountPaid
+
+        // Total amount paid (from invoices)
+        const totalInvoicesResult = await prisma.invoice.aggregate({
+            _sum: {
+                amount: true,
+            },
+            where: {
+                payment: {
+                    userGrant: {
+                        userId: studentId,
+                    },
+                },
+            },
+        });
+
+        const totalAmountPaid = totalInvoicesResult._sum.amount || 0;
+
+        res.json({
+            totalUserGrants,
+            totalPaymentsAmount,
+            totalAmountLeft,
+            totalAmountPaid,
+        });
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({error: error.message});
+    }
+});
+// Backend Endpoint: /student/dashboard/next-payments
+router.get('/dashboard/next-payments', async (req, res) => {
+    try {
+        const studentId = req.user.id;
+
+        const nextPayments = await prisma.payment.findMany({
+            where: {
+                userGrant: {
+                    userId: studentId,
+                },
+                status: 'PENDING',
+            },
+            orderBy: {
+                dueDate: 'asc',
+            },
+            take: 4,
+            select: {
+                id: true,
+                amount: true,
+                dueDate: true,
+            },
+        });
+
+        res.json(nextPayments);
+    } catch (error) {
+        res.status(500).json({error: error.message});
+    }
+});
+// Backend Endpoint: /student/dashboard/recent-invoices
+router.get('/dashboard/recent-invoices', async (req, res) => {
+    try {
+        const studentId = req.user.id;
+
+        const recentInvoices = await prisma.invoice.findMany({
+            where: {
+                payment: {
+                    userGrant: {
+                        userId: studentId,
+                    },
+                },
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
+            take: 5,
+            select: {
+                id: true,
+                amount: true,
+                createdAt: true,
+            },
+        });
+
+        res.json(recentInvoices);
+    } catch (error) {
+        res.status(500).json({error: error.message});
+    }
+});
+
+
 export default router;

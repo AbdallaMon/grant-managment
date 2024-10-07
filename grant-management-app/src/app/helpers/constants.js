@@ -41,7 +41,7 @@ export const ApplicationStatus = {
     PENDING: "معلق",
     UNDER_REVIEW: "تحت المراجعة",
     UN_COMPLETE: "غير مكتمل",
-    UPDATED: "تم التحديث",
+    UPDATED: "محدث",
     APPROVED: "مقبول",
     REJECTED: "مرفوض"
 };

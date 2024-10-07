@@ -101,7 +101,6 @@ const NotificationsPage = () => {
                                             boxShadow: 2,
                                             transition: "transform 0.3s ease",
                                             "&:hover": {
-                                                transform: "scale(1.02)",
                                                 boxShadow: 4,
                                             },
                                         }}

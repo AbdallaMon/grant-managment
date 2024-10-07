@@ -1,69 +1,147 @@
-import prisma from '../prisma/prisma.js';
+import {Router} from "express";
+import {verifyTokenAndHandleAuthorization} from "../services/utility.js";
 
-const PayEveryType = {
-    1: "ONE_MONTHS",
-    2: "TWO_MONTHS",
-    3: "THREE_MONTHS",
-    4: "FOUR_MONTHS",
-    6: "SIX_MONTHS",
-    12: "ONE_YEAR",
-};
+const router = Router();
+router.use((req, res, next) => {
+    verifyTokenAndHandleAuthorization(req, res, next, "SUPERVISOR");
+});
+// Backend Endpoint: /dashboard/supervisor/payments-overview
+router.get('/dashboard/payments-overview', async (req, res) => {
+    try {
+        const supervisorId = req.user.id; // Get the supervisor's ID from the authenticated user
 
-export async function getUserGrants(appId) {
-    return await prisma.userGrant.findMany({
-        where: {applicationId: Number(appId)},
-        include: {
-            grant: {
-                select: {
-                    id: true, name: true
-                }
+        // Get pending payments for the current month related to the supervisor
+        const startOfMonth = new Date(new Date().setDate(1));
+        const endOfMonth = new Date(
+              new Date(startOfMonth).setMonth(startOfMonth.getMonth() + 1)
+        );
+
+        const paymentsOverview = await prisma.payment.findMany({
+            where: {
+                status: 'PENDING',
+                dueDate: {
+                    gte: startOfMonth,
+                    lt: endOfMonth,
+                },
+                userGrant: {
+                    supervisorId: supervisorId,
+                },
             },
-            payments: true,
-            user: {
-                select: {
-                    id: true,
-                    email: true,
-                    personalInfo: {
-                        select: {
-                            basicInfo: {
-                                select: {
-                                    name: true
-                                }
-                            }
-                        }
-                    }
-                }
+            select: {
+                id: true,
+                amount: true,
+                dueDate: true,
             },
-        }
-    });
-}
+        });
 
-export async function createUserGrant(body, appId) {
-    const {userId, payments, grantId, startDate, endDate, payEvery, totalAmounts, totalAmountLeft} = body
-    const userGrant = await prisma.userGrant.create({
-        data: {
-            userId: Number(userId),
-            grantId: Number(grantId),
-            applicationId: Number(appId),
-            startDate: new Date(startDate),
-            endDate: new Date(endDate),
-            totalAmounts,
-            payEvery: PayEveryType[payEvery],
-            payments: {
-                create: payments.map(payment => ({
-                    dueDate: new Date(payment.dueDate),
-                    amount: Number(payment.amount)
-                }))
-            }
-        },
-    });
-    if (userGrant) {
-        await prisma.grant.update({
-            where: {id: Number(grantId)}
-            , data: {
-                amountLeft: +totalAmountLeft - +totalAmounts
-            }
-        })
+        res.json(paymentsOverview);
+    } catch (error) {
+        res.status(500).json({error: error.message});
     }
-    return userGrant
-}
+});
+// Backend Endpoint: /dashboard/supervisor/students
+router.get('/dashboard/students', async (req, res) => {
+    try {
+        const supervisorId = req.user.id;
+
+        // Count all students associated with the supervisor through user grants
+        const totalStudents = await prisma.user.count({
+            where: {
+                role: "STUDENT",
+                userGrants: {
+                    some: {
+                        supervisorId: supervisorId,
+                    },
+                },
+            },
+        });
+
+
+        res.json({totalStudents});
+    } catch (error) {
+        console.log(error, "er");
+        res.status(500).json({error: error.message});
+    }
+});
+
+// Backend Endpoint: /dashboard/supervisor/applications-stats
+router.get('/dashboard/applications-stats', async (req, res) => {
+    try {
+        const supervisorId = req.user.id;
+
+        const totalApplications = await prisma.application.count({
+            where: {
+                status: {
+                    not: 'DRAFT',
+                },
+                student: {
+                    userGrants: {
+                        some: {
+                            supervisorId: supervisorId,
+                        },
+                    },
+                },
+            },
+        });
+
+        const applicationsByStatus = await prisma.application.groupBy({
+            by: ['status'],
+            where: {
+                status: {
+                    not: 'DRAFT',
+                },
+                student: {
+                    userGrants: {
+                        some: {
+                            supervisorId: supervisorId,
+                        },
+                    },
+                },
+            },
+            _count: true,
+        });
+
+        res.json({totalApplications, applicationsByStatus});
+    } catch (error) {
+        res.status(500).json({error: error.message});
+    }
+});
+// Backend Endpoint: /dashboard/supervisor/payments-stats
+router.get('/dashboard/payments-stats', async (req, res) => {
+    try {
+        const supervisorId = req.user.id;
+
+        // Total amount due (all payments under supervisor)
+        const totalAmountResult = await prisma.payment.aggregate({
+            _sum: {amount: true},
+            where: {
+                userGrant: {
+                    supervisorId: supervisorId,
+                },
+            },
+        });
+
+        const totalAmount = totalAmountResult._sum.amount || 0;
+
+        const totalAmountPaidResult = await prisma.invoice.aggregate({
+            _sum: {amount: true},
+            where: {
+                payment: {
+                    userGrant: {
+                        supervisorId: supervisorId,
+                    }
+                },
+            },
+        });
+
+        const totalAmountPaid = totalAmountPaidResult._sum.amount || 0;
+        console.log(totalAmount, 'total')
+        res.json({totalAmount, totalAmountPaid});
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({error: error.message});
+    }
+});
+
+
+export default router;

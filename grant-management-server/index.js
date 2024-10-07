@@ -11,10 +11,11 @@ import studentRoutes from './routes/student.js';
 import adminRoutes from './routes/admin.js';
 import sharedRoutes from './routes/shared.js';
 import utilityRoutes from './routes/utility.js'; // Import utility routes
+import supervisorRoutes from './routes/supervisor.js'; // Import utility routes
+import sponsorRoutes from './routes/sponsor.js'; // Import utility routes
 
 import {initSocket} from './services/socket.js';
 import {deleteFiles, uploadFiles, verifyTokenUsingReq} from "./services/utility.js";
-import router from "./routes/utility.js"; // Import socket initialization
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -55,9 +56,18 @@ app.post('/delete-files', async (req, res) => {
 });
 app.use('/auth', authRoutes);
 app.use('/student', studentRoutes);
+app.use('/supervisor', supervisorRoutes);
 app.use('/admin', adminRoutes);
+app.use('/sponsor', sponsorRoutes);
+
 app.use('/shared', sharedRoutes);
 app.use('/utility', utilityRoutes); // Use utility routes
+
+
+// routes/admin.js
+// server.js or your routes file
+// Backend Endpoint: /api/users-by-role
+
 
 httpServer.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

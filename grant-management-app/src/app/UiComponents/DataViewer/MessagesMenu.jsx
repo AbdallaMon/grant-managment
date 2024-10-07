@@ -5,10 +5,13 @@ import {
     Menu,
     MenuItem,
     List,
+    ListItemAvatar,
+    Avatar,
     ListItemText,
     Divider,
     Box,
     Link as MuiLink,
+    Typography,
 } from '@mui/material';
 import {FaEnvelope} from 'react-icons/fa';
 import Link from 'next/link';
@@ -120,22 +123,47 @@ const MessagesIcon = () => {
                   </Badge>
               </IconButton>
               <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-                  <List sx={{width: '300px'}}>
+                  <List sx={{width: '350px'}}>
                       {!messages || messages.length === 0 ? (
                             <MenuItem>لا يوجد رسائل جديدة</MenuItem>
                       ) : (
                             messages.map((message) => (
-                                  <MenuItem
-                                        key={message.id}
-                                        component={Link}
-                                        href={`/dashboard/chats?userId=${message.senderId}`}
-                                        onClick={handleClose}
-                                  >
-                                      <ListItemText
-                                            primary={getSenderDisplayName(message.sender)}
-                                            secondary={message.content}
-                                      />
-                                  </MenuItem>
+                                  <React.Fragment key={message.id}>
+                                      <MenuItem
+                                            component={Link}
+                                            href={`/dashboard/chats?userId=${message.senderId}`}
+                                            onClick={handleClose}
+                                            sx={{
+                                                transition: 'background-color 0.3s ease',
+                                                '&:hover': {
+                                                    backgroundColor: 'rgba(30, 96, 145, 0.05)',
+                                                },
+                                            }}
+                                      >
+                                          <ListItemAvatar>
+                                              <Avatar>
+                                                  {getSenderDisplayName(message.sender)[0]}
+                                              </Avatar>
+                                          </ListItemAvatar>
+                                          <ListItemText
+                                                primary={
+                                                    <Typography variant="subtitle1" fontWeight="bold">
+                                                        {getSenderDisplayName(message.sender)}
+                                                    </Typography>
+                                                }
+                                                secondary={
+                                                    <Typography
+                                                          variant="body2"
+                                                          sx={{color: 'text.secondary'}}
+                                                          noWrap
+                                                    >
+                                                        {message.content}
+                                                    </Typography>
+                                                }
+                                          />
+                                      </MenuItem>
+                                      <Divider/>
+                                  </React.Fragment>
                             ))
                       )}
                   </List>

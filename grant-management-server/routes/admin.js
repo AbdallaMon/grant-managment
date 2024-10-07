@@ -270,4 +270,177 @@ router.get('/grants/applications/pending', async (req, res) => {
 });
 
 
+//dashboard
+router.get('/dashboard/users-by-role', async (req, res) => {
+    try {
+        const usersByRole = await prisma.user.groupBy({
+            by: ['role'],
+            _count: true,
+        });
+        res.json(usersByRole);
+    } catch (error) {
+        res.status(500).json({error: error.message});
+    }
+});
+// Backend Endpoint: /api/applications-stats
+router.get('/dashboard/applications-stats', async (req, res) => {
+    try {
+        const totalApplications = await prisma.application.count({
+            where: {
+                status: {
+                    not: 'DRAFT', // Exclude applications with status 'DRAFT'
+                },
+            },
+        });
+
+        const applicationsByStatus = await prisma.application.groupBy({
+            by: ['status'],
+            where: {
+                status: {
+                    not: 'DRAFT', // Exclude 'DRAFT' status
+                },
+            },
+            _count: true,
+        });
+
+        res.json({totalApplications, applicationsByStatus});
+    } catch (error) {
+        res.status(500).json({error: error.message});
+    }
+});
+// Backend Endpoint: /api/grants-stats
+router.get('/dashboard/grants-stats', async (req, res) => {
+    try {
+        const totalGrants = await prisma.grant.count();
+
+        const totalAmountResult = await prisma.grant.aggregate({
+            _sum: {amount: true},
+        });
+        const totalAmountLeftResult = await prisma.grant.aggregate({
+            _sum: {amountLeft: true},
+        });
+        const totalMoneySpentResult = await prisma.invoice.aggregate({
+            _sum: {amount: true},
+        });
+
+        const totalAmount = totalAmountResult._sum.amount || 0;
+        const totalAmountLeft = totalAmountLeftResult._sum.amountLeft || 0;
+        const totalMoneySpent = totalMoneySpentResult._sum.amount || 0;
+
+        res.json({totalGrants, totalAmount, totalAmountLeft, totalMoneySpent});
+    } catch (error) {
+        res.status(500).json({error: error.message});
+    }
+});
+// Backend Endpoint: /api/payments-overview
+router.get('/dashboard/payments-overview', async (req, res) => {
+    try {
+        // Get pending payments for the current month
+        const startOfMonth = new Date(new Date().setDate(1));
+        const endOfMonth = new Date(
+              new Date(startOfMonth).setMonth(startOfMonth.getMonth() + 1)
+        );
+
+        const paymentsOverview = await prisma.payment.findMany({
+            where: {
+                status: 'PENDING',
+                dueDate: {
+                    gte: startOfMonth,
+                    lt: endOfMonth,
+                },
+            },
+            select: {
+                id: true,
+                amount: true,
+                dueDate: true,
+            },
+        });
+        res.json(paymentsOverview);
+    } catch (error) {
+        res.status(500).json({error: error.message});
+    }
+});
+
+
+// Backend Endpoint: /api/admin/recent-activities
+// Backend Endpoint: /recent-activities
+router.get('/dashboard/recent-activities', async (req, res) => {
+    try {
+        // Latest Applications
+        const latestApplications = await prisma.application.findMany({
+            orderBy: {createdAt: 'desc'},
+            take: 5,
+            include: {
+                student: {
+                    select: {
+                        personalInfo: {
+                            select: {
+                                basicInfo: {
+                                    select: {name: true, fatherName: true},
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        // Recent Invoices
+        const recentInvoices = await prisma.invoice.findMany({
+            orderBy: {createdAt: 'desc'},
+            take: 5,
+            include: {
+                payment: {
+                    select: {
+                        userGrant: {
+                            select: {
+                                user: {
+                                    select: {
+                                        personalInfo: {
+                                            select: {
+                                                basicInfo: {
+                                                    select: {name: true, fatherName: true},
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        // Recent Open Tickets
+        const recentTickets = await prisma.ticket.findMany({
+            where: {status: 'OPEN'},
+            orderBy: {createdAt: 'desc'},
+            take: 5,
+            include: {
+                user: {
+                    select: {
+                        personalInfo: {
+                            select: {
+                                basicInfo: {
+                                    select: {name: true, fatherName: true},
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        res.json({
+            latestApplications,
+            recentInvoices,
+            recentTickets,
+        });
+    } catch (error) {
+        res.status(500).json({error: error.message});
+    }
+});
+
+
 export default router;

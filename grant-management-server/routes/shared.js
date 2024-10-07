@@ -14,9 +14,8 @@ import {
     getUser, markApplicationUnComplete, markApplicationUnderReview, rejectApplication
 } from "../services/adminServices.js";
 import {getPersonalInfo} from "../services/studentsServices.js";
-import {createUserGrant, getUserGrants} from "./supervisor.js";
 import {createNotification} from "../services/utility.js";
-import {getPendingPaymentsByMonth, processPayment} from "../services/shared.js";
+import {createUserGrant, getPendingPaymentsByMonth, getUserGrants, processPayment} from "../services/shared.js";
 import dayjs from "dayjs";
 
 const router = Router();

@@ -58,7 +58,7 @@ const NotificationsIcon = () => {
         if (open) {
             const handleOpenNotificationPaper = async () => {
                 try {
-                    const urlPath = user.role === 'ADMIN' ? `${url}/utility/notification/admins/${user.id}` : `${url}/notification/users/${user.id}`;
+                    const urlPath = user.role === 'ADMIN' ? `${url}/utility/notification/admins/${user.id}` : `${url}/utility/notification/users/${user.id}`;
                     await fetch(urlPath, {method: 'POST'});
                     handleMarkAsRead();
                 } catch (error) {

@@ -188,7 +188,7 @@ const ChatPage = () => {
                     display="flex"
                     flexDirection={isSmallScreen ? 'column' : 'row'}
                     height={isSmallScreen ? '100vh' : '80vh'}
-                    p={2}
+                    p={{xs: 1, md: 2}}
               >
                   {/* Left Column - User List */}
                   {(!isSmallScreen || !queryUserId) && (
@@ -280,7 +280,7 @@ const ChatPage = () => {
                       {selectedUser ? (
                             <>
                                 <Box
-                                      p={2}
+                                      p={{xs: 1, md: 2}}
                                       sx={{borderBottom: '1px solid #ccc'}}
                                       display="flex"
                                       alignItems="center"

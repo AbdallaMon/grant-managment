@@ -179,15 +179,20 @@ export function handlePrismaError(res, error) {
 export const verifyTokenAndHandleAuthorization = (req, res, next, role) => {
 
     const token = req.cookies.token
-
     if (!token) {
         return res.status(401).json({message: 'يجب عليك تسجيل الدخول اولا'});
     }
 
     try {
         const decoded = jwt.verify(token, SECRET_KEY);
+        console.log(decoded)
+
         if (role === "SHARED") {
             if (decoded.role !== "ADMIN" && decoded.role !== "SUPERVISOR") {
+                return res.status(403).json({message: 'غير مصرح لك بالوصول'});
+            }
+        } else if (role === "OTHER") {
+            if (decoded.role !== "SPONSOR" && decoded.role !== "INDIVIDUAL") {
                 return res.status(403).json({message: 'غير مصرح لك بالوصول'});
             }
         } else {
