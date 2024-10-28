@@ -4,6 +4,8 @@ import {useEffect} from "react";
 import {toast} from "react-toastify";
 import {Failed, Success} from "@/app/UiComponents/feedback/loaders/toast/ToastUpdate";
 import {useAuth} from "@/app/providers/AuthProvider";
+import {Box} from "@mui/material";
+import colors from "@/app/helpers/colors";
 
 let toastId;
 
@@ -34,11 +36,17 @@ export default function Layout({supervisor, admin, student, sponsor}) {
     if (!user || !user.role) return null;
     const role = user?.role;
     return (
-          <div className={"min-h-screen bg-bgSecondary py-20"}>
+          <Box sx={
+              {
+                  minHeight: "100vh",
+                  py: 10,
+                  backgroundColor: colors.bgSecondary
+              }
+          }>
               {
                   role === "ADMIN" ? admin : role === "STUDENT" ? student : role === "SUPERVISOR" ? supervisor : sponsor
               }
-          </div>
+          </Box>
 
     );
 }

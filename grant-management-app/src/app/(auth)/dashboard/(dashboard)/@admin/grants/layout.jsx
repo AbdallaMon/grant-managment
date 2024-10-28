@@ -1,5 +1,8 @@
 import {BasicTabs} from "@/app/UiComponents/DataViewer/BasicTabs";
 
+export const metadata = {
+    title: "منح الطلاب"
+}
 export default function Layout({children}) {
     return (
           <>
@@ -37,6 +40,6 @@ function GrantTabs() {
 
         {label: "المنح المرفوضة", href: "/dashboard/grants/rejected"},
     ]
-    
+
     return <BasicTabs tabs={tabs}/>
 }

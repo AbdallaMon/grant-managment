@@ -43,9 +43,9 @@ export function Form({
     const formRef = useRef();
     return (
           <Box
-                className=" my-4"
                 sx={{
                     p: {xs: 2, md: 4},
+                    my: 3
                 }}
           >
               <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={locales}>
@@ -66,7 +66,10 @@ export function Form({
                       >
                           {formTitle}
                       </Typography>
-                      <Typography variant="subtitle1" className="mb-4 font-bold ">
+                      <Typography variant="subtitle1" sx={{
+                          fontWeight: "bold",
+                          mb: 2
+                      }}>
                           {subTitle}
                       </Typography>
                       <Grid container spacing={gridGap}>

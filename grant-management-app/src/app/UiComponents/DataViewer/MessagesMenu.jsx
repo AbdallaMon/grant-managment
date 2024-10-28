@@ -17,8 +17,7 @@ import {FaEnvelope} from 'react-icons/fa';
 import Link from 'next/link';
 import io from 'socket.io-client';
 import {useAuth} from '@/app/providers/AuthProvider';
-import {useParams, useSearchParams} from "next/navigation";
-import useSoundPermission from "@/app/helpers/hooks/useSoundPermission";
+import {useSearchParams} from "next/navigation";
 
 const url = process.env.NEXT_PUBLIC_URL;
 
@@ -41,7 +40,6 @@ const MessagesIcon = () => {
             return sender.email;
         }
     };
-    const canPlaySound = useSoundPermission();
     const messageSound = typeof Audio !== "undefined" && new Audio('/message-sound.mp3');
 
     useEffect(() => {
@@ -82,7 +80,7 @@ const MessagesIcon = () => {
                     return [message, ...filteredMessages];
                 });
                 setUnreadCount((prev) => prev + 1);
-                if (messageSound && canPlaySound) {
+                if (messageSound) {
                     messageSound.play().catch((error) => {
                         console.error('Error playing message sound:', error);
                     });

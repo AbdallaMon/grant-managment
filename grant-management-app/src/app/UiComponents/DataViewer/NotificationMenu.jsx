@@ -5,7 +5,6 @@ import Link from 'next/link';
 import io from 'socket.io-client';
 import {useAuth} from "@/app/providers/AuthProvider";
 import {NotificationType} from "@/app/helpers/constants";
-import useSoundPermission from "@/app/helpers/hooks/useSoundPermission";
 
 const url = process.env.NEXT_PUBLIC_URL;
 
@@ -16,7 +15,6 @@ const NotificationsIcon = () => {
     const [anchorEl, setAnchorEl] = useState(null); // For MUI Menu (dropdown)
     const open = Boolean(anchorEl);
     const notificationSound = typeof Audio !== "undefined" && new Audio('/notification-sound.mp3');
-    const canPlaySound = useSoundPermission();
 
     useEffect(() => {
         const fetchUnreadNotifications = async () => {
@@ -49,7 +47,7 @@ const NotificationsIcon = () => {
         socket.on('notification', (notification) => {
             setNotifications((prev) => [notification, ...prev]);
             setUnreadCount((prev) => prev + 1); // Increase unread count
-            if (notificationSound && canPlaySound) {
+            if (notificationSound) {
                 notificationSound.play().catch((error) => {
                     console.error('Error playing notification sound:', error);
                 });

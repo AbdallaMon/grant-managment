@@ -14,7 +14,7 @@ const FullScreenLoader = () => {
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    zIndex: 9999,
+                    zIndex: 99969,
                 }}
           >
               <CircularProgress/>

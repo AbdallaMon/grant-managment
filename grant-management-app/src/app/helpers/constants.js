@@ -12,8 +12,8 @@ import {
 } from 'react-icons/fa';
 
 
-export const initialPageLimit = 1
-export const totalLimitPages = [1, 20, 50, 100]
+export const initialPageLimit = 10
+export const totalLimitPages = [10, 20, 50, 100]
 
 export const ProgramType = {
     BACH: "بكالريوس",
@@ -28,12 +28,6 @@ export const Role = {
     INDIVIDUAL: "حساب افراد"
 };
 
-// Task Status in Arabic
-const TaskStatus = {
-    PENDING: "معلق",
-    IN_PROGRESS: "قيد التنفيذ",
-    COMPLETED: "مكتمل"
-};
 
 // Application Status in Arabic
 export const ApplicationStatus = {
@@ -54,18 +48,11 @@ export const StatusColor = {
     APPROVED: "success",
     REJECTED: "error"
 };
-// Student Type in Arabic
-export const StudentType = {
-    NEW: "طالب جديد",
-    CURRENT: "طالب حالي"
-};
-
 // Ticket Status in Arabic
 export const TicketStatus = {
     OPEN: "مفتوح",
     CLOSED: "مغلق"
 };
-
 
 // Study Source in Arabic
 export const StudySource = {
@@ -107,26 +94,11 @@ export const GpaType = {
     PERCENTAGE: "النسبة المئوية"
 };
 
-// Payment Status in Arabic
-export const PaymentStatus = {
-    PENDING: "معلق",
-    PAID: "مدفوع",
-    OVERDUE: "متأخر"
-};
 
 // Grant Type in Arabic
 export const GrantType = {
     SPONSOR: "جهة",
     INDIVIDUAL: "كفيل"
-};
-
-// File Type in Arabic
-export const FileType = {
-    ID: "هوية",
-    ACADEMIC: "أكاديمي",
-    MEDICAL: "طبي",
-    SUPPORTING: "داعم",
-    OTHER: "آخر"
 };
 
 // Field Type in Arabic

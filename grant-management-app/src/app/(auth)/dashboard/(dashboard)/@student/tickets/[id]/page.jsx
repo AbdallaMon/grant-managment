@@ -9,7 +9,7 @@ import {
     CircularProgress,
     Box,
     Divider,
-    Paper, Container,
+    Paper, Container, Chip,
 } from '@mui/material';
 import LoadingOverlay from '@/app/UiComponents/feedback/loaders/LoadingOverlay';
 import {getData} from "@/app/helpers/functions/getData";
@@ -85,10 +85,8 @@ const StudentTicketDetails = ({params: {id: ticketId}}) => {
                 'Content-Type': 'application/json',
             },
         });
-        console.log(response, "response")
         if (response?.status === 201) {
             const resData = await response.json();
-            console.log(resData, "resData")
             setMessages((prevMessages) => prevMessages.map((msg) => (msg.id === tempMessage.id ? resData.data : msg)));
         } else {
             setMessages((prevMessages) => prevMessages.filter((msg) => msg.id !== tempMessage.id));
@@ -125,14 +123,17 @@ const StudentTicketDetails = ({params: {id: ticketId}}) => {
                             backgroundColor: "background.default",
                         }}>
                       <CardContent sx={{flexGrow: 1, overflowY: "auto", p: {xs: 2, md: 4}}}>
-                          {/* Display Title and Content */}
-                          <Typography variant="h5" gutterBottom sx={{fontWeight: "bold", color: "primary.main"}}>
-                              {ticketTitle}
-                          </Typography>
-                          <Typography variant="body1" color="textSecondary" sx={{mb: 2}}>
-                              {ticketContent}
-                          </Typography>
-                          <Divider/>
+                          <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2}}>
+                              <Box>
+                                  <Typography variant="h5" sx={{fontWeight: 'bold'}}>{ticketTitle}</Typography>
+                                  <Chip label={ticketStatus === "OPEN" ? "مفتوحة" : "مغلقة"}
+                                        color={ticketStatus === 'OPEN' ? 'success' : 'error'}
+                                        sx={{mt: 1}}/>
+                              </Box>
+              
+                          </Box>
+                          <Typography variant="body1" color="textSecondary">{ticketContent}</Typography>
+                          <Divider sx={{my: 2}}/>
 
                           {loading && messages.length === 0 ? (
                                 <LoadingOverlay/>

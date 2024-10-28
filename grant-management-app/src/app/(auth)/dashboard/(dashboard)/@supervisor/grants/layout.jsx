@@ -1,5 +1,8 @@
 import {BasicTabs} from "@/app/UiComponents/DataViewer/BasicTabs";
 
+export const metadata = {
+    title: "منح الطلاب"
+}
 export default function Layout({children}) {
     return (
           <>

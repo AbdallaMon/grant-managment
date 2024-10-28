@@ -5,13 +5,14 @@ import {
     Card,
     CardContent,
     Typography,
-    IconButton,
-    Grid,
+
     Divider,
     CardActionArea,
     Avatar,
     Badge,
+    Tooltip,
 } from "@mui/material";
+import {Grid2 as Grid} from "@mui/material";
 import {
     IoIosNotifications as NotificationsIcon,
     IoMdChatbubbles as MessageIcon,
@@ -25,7 +26,12 @@ import {useAuth} from "@/app/providers/AuthProvider";
 import FullScreenLoader from "@/app/UiComponents/feedback/loaders/FullscreenLoader";
 import {NotificationType} from "@/app/helpers/constants";
 import dayjs from "dayjs";
+import "dayjs/locale/ar";
+import relativeTime from "dayjs/plugin/relativeTime";
 import Link from "next/link";
+
+dayjs.extend(relativeTime);
+dayjs.locale("ar");
 
 const NotificationsPage = () => {
     const {user} = useAuth();
@@ -67,41 +73,46 @@ const NotificationsPage = () => {
     const getNotificationIcon = (type) => {
         switch (type) {
             case "MESSAGE":
-                return <MessageIcon/>;
+                return <MessageIcon aria-label="رسالة"/>;
             case "APPLICATION_APPROVED":
             case "APPLICATION_COMPLETED":
             case "PAYMENT_COMPLETED":
-                return <SuccessIcon/>;
+                return <SuccessIcon aria-label="تمت الموافقة"/>;
             case "APPLICATION_REJECTED":
             case "APPLICATION_UN_COMPLETE":
-                return <ErrorIcon/>;
+                return <ErrorIcon aria-label="مرفوض"/>;
             case "APPLICATION_UPDATE":
             case "APPLICATION_RESPONSE":
             case "PAYMENT_DUE":
-                return <WarningIcon/>;
+                return <WarningIcon aria-label="تنبيه"/>;
             default:
-                return <NotificationsIcon/>;
+                return <NotificationsIcon aria-label="إشعار"/>;
         }
     };
 
     return (
-          <Box p={4} sx={{backgroundColor: "background.default", minHeight: "100vh"}}>
+          <Box p={4} sx={{backgroundColor: "background.default",}}>
               <Typography variant="h4" fontWeight="bold" mb={4}>
                   الإشعارات
               </Typography>
               {notifications.length > 0 ? (
                     <Grid container spacing={3}>
                         {notifications.map((notification) => (
-                              <Grid item xs={12} md={6} xl={4} key={notification.id}>
+                              <Grid size={{
+                                  xs: 12, md: 6, xl: 4
+                              }} key={notification.id}>
                                   <Card
                                         variant="outlined"
                                         sx={{
                                             backgroundColor: "#fff",
                                             borderRadius: "12px",
                                             boxShadow: 2,
+                                            height: "100%",
                                             transition: "transform 0.3s ease",
+                                            transform: notification.isRead ? 'none' : 'scale(1.02)',
                                             "&:hover": {
                                                 boxShadow: 4,
+                                                transform: "scale(1.03)",
                                             },
                                         }}
                                   >
@@ -109,12 +120,14 @@ const NotificationsPage = () => {
                                             component={notification.href ? Link : "div"}
                                             href={notification.href || "#"}
                                             sx={{textDecoration: "none"}}
+                                            onClick={() => {/* Update notification read status here */
+                                            }}
                                       >
                                           <CardContent>
                                               <Box display="flex" alignItems="center" mb={2}>
                                                   <Badge
                                                         color={getNotificationTypeColor(notification.type)}
-                                                        variant="dot"
+                                                        variant={notification.isRead ? 'standard' : 'dot'}
                                                         overlap="circular"
                                                         anchorOrigin={{
                                                             vertical: "bottom",
@@ -128,15 +141,20 @@ const NotificationsPage = () => {
                                                                 color: "#fff",
                                                             }}
                                                       >
-                                                          {getNotificationIcon(notification.type)}
+                                                          <Tooltip title={NotificationType[notification.type]}
+                                                                   placement="top">
+                                                              {getNotificationIcon(notification.type)}
+                                                          </Tooltip>
                                                       </Avatar>
                                                   </Badge>
                                                   <Box>
-                                                      <Typography variant="subtitle1" fontWeight="bold">
+                                                      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
                                                           {notification.content}
                                                       </Typography>
                                                       <Typography variant="body2" color="textSecondary">
-                                                          {dayjs(notification.createdAt).format("DD MMMM YYYY, HH:mm")}
+                                                          {dayjs(notification.createdAt).isAfter(dayjs().subtract(1, 'day'))
+                                                                ? dayjs(notification.createdAt).fromNow()
+                                                                : dayjs(notification.createdAt).format("DD MMMM YYYY, HH:mm")}
                                                       </Typography>
                                                   </Box>
                                               </Box>

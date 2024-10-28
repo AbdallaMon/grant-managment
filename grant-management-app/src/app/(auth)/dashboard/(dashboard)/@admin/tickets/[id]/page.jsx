@@ -13,7 +13,7 @@ import {
     Paper,
     Modal,
     Fade,
-    Backdrop, Container,
+    Backdrop, Container, Chip,
 } from '@mui/material';
 import {useRouter} from 'next/navigation';
 import LoadingOverlay from '@/app/UiComponents/feedback/loaders/LoadingOverlay';
@@ -144,20 +144,27 @@ const AdminTicketDetails = ({params: {id: ticketId}}) => {
                             minHeight: "400px",
                             display: "flex",
                             flexDirection: "column",
-                            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
                             borderRadius: "12px",
                             backgroundColor: "background.default",
+                            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)"
                         }}
                   >
                       <CardContent sx={{flexGrow: 1, overflowY: "auto", p: {xs: 2, md: 4}}}>
-                          {/* Display Title and Content */}
-                          <Typography variant="h5" gutterBottom sx={{fontWeight: "bold", color: "primary.main"}}>
-                              {ticketTitle}
-                          </Typography>
-                          <Typography variant="body1" color="textSecondary" sx={{mb: 2}}>
-                              {ticketContent}
-                          </Typography>
-                          <Divider sx={{mb: 2}}/>
+                          <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2}}>
+                              <Box>
+                                  <Typography variant="h5" sx={{fontWeight: 'bold'}}>{ticketTitle}</Typography>
+                                  <Chip label={ticketStatus === "OPEN" ? "مفتوحة" : "مغلقة"}
+                                        color={ticketStatus === 'OPEN' ? 'success' : 'error'}
+                                        sx={{mt: 1}}/>
+                              </Box>
+                              {ticketStatus === "OPEN" &&
+                                    <Button variant="contained" color="secondary"
+                                            onClick={() => setConfirmCloseOpen(true)}>
+                                        اغلاق التذكرة
+                                    </Button>}
+                          </Box>
+                          <Typography variant="body1" color="textSecondary">{ticketContent}</Typography>
+                          <Divider sx={{my: 2}}/>
 
                           {loading && messages.length === 0 ? (
                                 <LoadingOverlay/>
@@ -255,15 +262,6 @@ const AdminTicketDetails = ({params: {id: ticketId}}) => {
                                         {sendingMessage ? <CircularProgress size={24}/> : "إرسال"}
                                     </Button>
                                 </Box>
-                                <Button
-                                      variant="contained"
-                                      color="secondary"
-                                      onClick={handleOpenCloseModal}
-                                      disabled={ticketStatus !== "OPEN"}
-                                      sx={{mx: 2, my: 2, alignSelf: "center"}}
-                                >
-                                    إغلاق التذكرة
-                                </Button>
                             </>
                       ) : (
                             <Typography variant="subtitle1" sx={{p: 2, textAlign: "center"}}>
@@ -271,7 +269,6 @@ const AdminTicketDetails = ({params: {id: ticketId}}) => {
                             </Typography>
                       )}
 
-                      {/* Confirmation Modal */}
                       <Modal
                             open={confirmCloseOpen}
                             onClose={handleCloseModal}
