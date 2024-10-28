@@ -8,7 +8,7 @@ import SponsorRecentInvoices from "@/app/UiComponents/dashboard/sponsor/SponsorR
 
 export default function SupervisorPage() {
     return <>
-        <Container maxWidth="xl">
+        <>
             <Box sx={{my: 4}}>
                 <Masonry columns={{xs: 1, md: 2}} spacing={2}>
                     <SponsorGrantsStats/>
@@ -17,6 +17,6 @@ export default function SupervisorPage() {
                     <SponsorRecentInvoices/>
                 </Masonry>
             </Box>
-        </Container>
+        </>
     </>
 }

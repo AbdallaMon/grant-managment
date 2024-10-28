@@ -5,6 +5,7 @@ import {useAuth} from "@/app/providers/AuthProvider";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import AuthForm from "@/app/UiComponents/formComponents/forms/AuthForm";
+import {Button, Typography} from "@mui/material";
 
 export default function LoginPage() {
     const {setLoading} = useToastContext();
@@ -24,8 +25,20 @@ export default function LoginPage() {
         }
     }
 
-    const subTitle = <Link href={"/register"} className="font-[500] flex justify-center mb-2 mt-1">انشاء حساب
-        جديد؟</Link>;
+    const subTitle = (
+          <Typography
+                variant="body2"
+                color="secondary"
+                align="center"
+                sx={{mt: 1, mb: 2, fontWeight: 500}}
+                component={Link}
+                href="/register"
+
+          >
+              انشاء حساب جديد؟
+          </Typography>
+    );
+
     return (
           <>
               <AuthForm
@@ -35,7 +48,7 @@ export default function LoginPage() {
                     onSubmit={handleLogin}
                     subTitle={subTitle}
               >
-                  <Link href={"/reset"} className={"text-secondary"}>نسيت كلمة السر ؟</Link>
+                  <Button component={Link} href={"/reset"} color="secondary">نسيت كلمة السر ؟</Button>
               </AuthForm>
           </>
     );

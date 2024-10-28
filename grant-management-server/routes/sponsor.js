@@ -1,11 +1,47 @@
 import {Router} from "express";
-import {verifyTokenAndHandleAuthorization} from "../services/utility.js";
+import {getPagination, verifyTokenAndHandleAuthorization} from "../services/utility.js";
+import {getUser} from "../services/adminServices.js";
+import {getPersonalInfo} from "../services/studentsServices.js";
 
 const router = Router();
 
 router.use((req, res, next) => {
     verifyTokenAndHandleAuthorization(req, res, next, "OTHER");
 });
+
+
+router.get('/students', async (req, res) => {
+    const searchParams = req.query;
+    const {limit, skip} = getPagination(req);
+
+    try {
+        const {users, total} = await getUser(searchParams, limit, skip);
+        const totalPages = Math.ceil(total / limit);
+
+        if (!users) {
+            return res.status(404).json({message: 'لا يوجد طلاب'});
+        }
+        res.status(200).json({data: users, totalPages, total});
+    } catch (error) {
+        console.error('Error fetching personal info:', error);
+        res.status(500).json({message: 'حدث خطأ أثناء جلب  الطلاب'});
+    }
+});
+
+router.get('/students/:studentId', async (req, res) => {
+    const {studentId} = req.params
+    try {
+        if (!studentId) {
+            return res.status(404).json({message: 'لا يوجد طالب بهذا المعرف'});
+        }
+        const studentPersonalInfo = await getPersonalInfo(studentId)
+        res.status(200).json({data: studentPersonalInfo});
+    } catch (error) {
+        console.error('Error fetching personal info:', error);
+        res.status(500).json({message: 'حدث خطأ أثناء جلب  الطالب'});
+    }
+})
+
 // Backend Endpoint: /sponsor/dashboard/students
 router.get('/dashboard/students', async (req, res) => {
     try {

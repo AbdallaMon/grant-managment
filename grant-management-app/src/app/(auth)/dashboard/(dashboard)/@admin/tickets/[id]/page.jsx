@@ -13,13 +13,14 @@ import {
     Paper,
     Modal,
     Fade,
-    Backdrop,
+    Backdrop, Container,
 } from '@mui/material';
 import {useRouter} from 'next/navigation';
 import LoadingOverlay from '@/app/UiComponents/feedback/loaders/LoadingOverlay';
 import {useAuth} from "@/app/providers/AuthProvider";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
+import dayjs from "dayjs";
 
 const MESSAGES_BATCH_SIZE = 50;
 
@@ -135,149 +136,184 @@ const AdminTicketDetails = ({params: {id: ticketId}}) => {
     }, [ticketId]);
 
     return (
-          <Card sx={{
-              position: 'relative',
-              minHeight: '400px',
-              display: 'flex',
-              flexDirection: 'column'
-          }}>
-              <CardContent sx={{flexGrow: 1, overflowY: 'auto'}}>
-                  {/* Display Title and Content */}
-                  <Typography variant="h5" gutterBottom>
-                      {ticketTitle}
-                  </Typography>
-                  <Typography variant="body1" color="textSecondary" sx={{mb: 2}}>
-                      {ticketContent}
-                  </Typography>
-                  <Divider/>
+          <Container maxWidth="lg">
+              <Box px={{xs: 2, md: 4}}>
+                  <Card
+                        sx={{
+                            position: "relative",
+                            minHeight: "400px",
+                            display: "flex",
+                            flexDirection: "column",
+                            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                            borderRadius: "12px",
+                            backgroundColor: "background.default",
+                        }}
+                  >
+                      <CardContent sx={{flexGrow: 1, overflowY: "auto", p: {xs: 2, md: 4}}}>
+                          {/* Display Title and Content */}
+                          <Typography variant="h5" gutterBottom sx={{fontWeight: "bold", color: "primary.main"}}>
+                              {ticketTitle}
+                          </Typography>
+                          <Typography variant="body1" color="textSecondary" sx={{mb: 2}}>
+                              {ticketContent}
+                          </Typography>
+                          <Divider sx={{mb: 2}}/>
 
-                  {loading && messages.length === 0 ? (
-                        <LoadingOverlay/>
-                  ) : (
-                        <>
-                            {hasMore && (
-                                  <Box sx={{textAlign: 'center', my: 2}}>
-                                      <Button variant="outlined" onClick={() => fetchMessages(false)}>
-                                          {loading ? <CircularProgress size={24}/> : 'عرض المزيد من الرسائل'}
+                          {loading && messages.length === 0 ? (
+                                <LoadingOverlay/>
+                          ) : (
+                                <>
+                                    {hasMore && (
+                                          <Box sx={{textAlign: "center", my: 2}}>
+                                              <Button
+                                                    variant="outlined"
+                                                    onClick={() => fetchMessages(false)}
+                                                    sx={{padding: "6px 12px"}}
+                                              >
+                                                  {loading ? <CircularProgress size={24}/> : "عرض المزيد من الرسائل"}
+                                              </Button>
+                                          </Box>
+                                    )}
+
+                                    <Box
+                                          sx={{
+                                              height: "48vh",
+                                              overflowY: "auto",
+                                              p: 1,
+                                              backgroundColor: "background.paper",
+                                              borderRadius: 1,
+                                              border: "1px solid #e0e0e0",
+                                          }}
+                                    >
+                                        {messages.map((message) => (
+                                              <Box
+                                                    key={message.id}
+                                                    sx={{
+                                                        display: "flex",
+                                                        justifyContent:
+                                                              message.senderId === user.id ? "flex-end" : "flex-start",
+                                                        opacity: message.pending ? 0.5 : 1,
+                                                        my: 1,
+                                                        transition: "opacity 0.3s ease",
+                                                    }}
+                                              >
+                                                  <Paper
+                                                        sx={{
+                                                            p: 2,
+                                                            borderRadius: "8px",
+                                                            backgroundColor:
+                                                                  message.senderId === user.id ? "#e0f7fa" : "#f1f8e9",
+                                                            maxWidth: "75%",
+                                                            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                                                        }}
+                                                  >
+                                                      <Typography variant="body1">{message.content}</Typography>
+                                                      <Typography
+                                                            variant="caption"
+                                                            sx={{display: 'block', textAlign: 'right'}}>
+
+                                                          {dayjs(message.createdAt).format('DD/MM/YYYY hh:mm A')}
+                                                      </Typography>
+                                                  </Paper>
+                                              </Box>
+                                        ))}
+                                        <div ref={messagesEndRef}/>
+                                    </Box>
+                                </>
+                          )}
+                      </CardContent>
+
+                      {/* Message Input and Close Ticket Button */}
+                      {ticketStatus === "OPEN" ? (
+                            <>
+                                <Box
+                                      sx={{
+                                          p: 2,
+                                          borderTop: "1px solid #ccc",
+                                          display: "flex",
+                                          alignItems: "center",
+                                      }}
+                                >
+                                    <TextField
+                                          fullWidth
+                                          variant="outlined"
+                                          placeholder="اكتب رسالتك هنا..."
+                                          value={newMessageContent}
+                                          onChange={(e) => setNewMessageContent(e.target.value)}
+                                          multiline
+                                          rows={2}
+                                          onKeyPress={handleKeyPress}
+                                          sx={{flexGrow: 1}}
+                                    />
+                                    <Button
+                                          variant="contained"
+                                          color="primary"
+                                          onClick={handleSendMessage}
+                                          disabled={sendingMessage}
+                                          sx={{ml: 2}}
+                                    >
+                                        {sendingMessage ? <CircularProgress size={24}/> : "إرسال"}
+                                    </Button>
+                                </Box>
+                                <Button
+                                      variant="contained"
+                                      color="secondary"
+                                      onClick={handleOpenCloseModal}
+                                      disabled={ticketStatus !== "OPEN"}
+                                      sx={{mx: 2, my: 2, alignSelf: "center"}}
+                                >
+                                    إغلاق التذكرة
+                                </Button>
+                            </>
+                      ) : (
+                            <Typography variant="subtitle1" sx={{p: 2, textAlign: "center"}}>
+                                {"هذه التذكرة مغلقة ولا يمكن إرسال رسائل جديدة."}
+                            </Typography>
+                      )}
+
+                      {/* Confirmation Modal */}
+                      <Modal
+                            open={confirmCloseOpen}
+                            onClose={handleCloseModal}
+                            closeAfterTransition
+                            BackdropComponent={Backdrop}
+                            BackdropProps={{timeout: 500}}
+                      >
+                          <Fade in={confirmCloseOpen}>
+                              <Box
+                                    sx={{
+                                        position: "absolute",
+                                        top: "50%",
+                                        left: "50%",
+                                        transform: "translate(-50%, -50%)",
+                                        width: 400,
+                                        bgcolor: "background.paper",
+                                        boxShadow: 24,
+                                        borderRadius: 1,
+                                        p: 4,
+                                        outline: "none",
+                                    }}
+                              >
+                                  <Typography variant="h6" gutterBottom>
+                                      تأكيد إغلاق التذكرة
+                                  </Typography>
+                                  <Typography variant="body1" sx={{mb: 2}}>
+                                      هل أنت متأكد من أنك تريد إغلاق هذه التذكرة؟
+                                  </Typography>
+                                  <Box sx={{display: "flex", justifyContent: "space-between"}}>
+                                      <Button variant="contained" color="primary" onClick={handleCloseModal}>
+                                          إلغاء
+                                      </Button>
+                                      <Button variant="contained" color="secondary" onClick={handleCloseTicket}>
+                                          إغلاق
                                       </Button>
                                   </Box>
-                            )}
-                            <Box sx={{
-                                height: "55vh",
-                                overflow: "auto",
-                            }}>
-                                {messages.map((message) => (
-                                      <Box
-                                            key={message.id}
-                                            sx={{
-                                                display: 'flex',
-                                                flexDirection: 'column',
-                                                alignItems: message.senderId === user.id ? 'flex-end' : 'flex-start', // Admin messages align right
-                                                opacity: message.pending ? 0.5 : 1,
-                                                my: 1,
-                                            }}
-                                      >
-                                          <Paper
-                                                sx={{
-                                                    p: 1,
-                                                    borderRadius: 1,
-                                                    backgroundColor: message.senderId === user.id ? '#e0f7fa' : '#f1f8e9',
-                                                    maxWidth: '80%',
-                                                }}
-                                          >
-                                              <Typography variant="body1">{message.content}</Typography>
-                                              <Typography variant="caption" sx={{display: 'block', textAlign: 'right'}}>
-                                                  {new Date(message.createdAt).toLocaleString('ar-EG')}
-                                              </Typography>
-                                          </Paper>
-                                      </Box>
-                                ))}
-                                <div ref={messagesEndRef}/>
-                            </Box>
-                        </>
-                  )}
-              </CardContent>
-
-              {/* Message Input and Close Ticket Button */}
-              {ticketStatus === 'OPEN' ? (
-                    <>
-                        <Box sx={{p: 2, borderTop: '1px solid #ccc', display: 'flex', alignItems: 'center'}}>
-                            <TextField
-                                  fullWidth
-                                  variant="outlined"
-                                  placeholder="اكتب رسالتك هنا..."
-                                  value={newMessageContent}
-                                  onChange={(e) => setNewMessageContent(e.target.value)}
-                                  multiline
-                                  rows={2}
-                                  onKeyPress={handleKeyPress}
-                            />
-                            <Button
-                                  variant="contained"
-                                  color="primary"
-                                  onClick={handleSendMessage}
-                                  disabled={sendingMessage}
-                                  sx={{mx: 2,}}
-                            >
-                                {sendingMessage ? <CircularProgress size={24}/> : 'إرسال'}
-                            </Button>
-                        </Box>
-                        <Button
-                              variant="contained"
-                              color="secondary"
-                              onClick={handleOpenCloseModal}
-                              disabled={ticketStatus !== 'OPEN'}
-                              sx={{mx: 2, my: 2, width: "fit-content"}}
-                        >
-                            إغلاق التذكرة
-                        </Button>
-                    </>
-              ) : (
-                    <Typography variant="subtitle1" sx={{p: 2, textAlign: 'center'}}>
-                        {'هذه التذكرة مغلقة ولا يمكن إرسال رسائل جديدة.'}
-                    </Typography>
-              )}
-
-              {/* Confirmation Modal */}
-              <Modal
-                    open={confirmCloseOpen}
-                    onClose={handleCloseModal}
-                    closeAfterTransition
-                    BackdropComponent={Backdrop}
-                    BackdropProps={{timeout: 500}}
-              >
-                  <Fade in={confirmCloseOpen}>
-                      <Box
-                            sx={{
-                                position: 'absolute',
-                                top: '50%',
-                                left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                                width: 400,
-                                bgcolor: 'background.paper',
-                                boxShadow: 24,
-                                p: 4,
-                                outline: 'none',
-                            }}
-                      >
-                          <Typography variant="h6" gutterBottom>
-                              تأكيد إغلاق التذكرة
-                          </Typography>
-                          <Typography variant="body1" sx={{mb: 2}}>
-                              هل أنت متأكد من أنك تريد إغلاق هذه التذكرة؟
-                          </Typography>
-                          <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
-                              <Button variant="contained" color="primary" onClick={handleCloseModal}>
-                                  إلغاء
-                              </Button>
-                              <Button variant="contained" color="secondary" onClick={handleCloseTicket}>
-                                  إغلاق
-                              </Button>
-                          </Box>
-                      </Box>
-                  </Fade>
-              </Modal>
-          </Card>
+                              </Box>
+                          </Fade>
+                      </Modal>
+                  </Card>
+              </Box>
+          </Container>
     );
 };
 

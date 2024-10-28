@@ -46,6 +46,7 @@ const ChatPage = () => {
                 credentials: 'include',
             });
             const data = await response.json();
+            console.log(data, "data")
             setUsers(data.data);
             setLoading(false)
         };

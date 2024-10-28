@@ -23,10 +23,10 @@ import {BsPerson} from "react-icons/bs";
 const UserSelectorWithAction = ({route, label, item, renderKeys, searchFilter}) => {
     const [data, setData] = useState([]);
     const [users, setUsers] = useState([]);
+    const [selectedUser, setSelectedUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [snackbarMessage, setSnackbarMessage] = useState(null);
     const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-    const [selectedUser, setSelectedUser] = useState(null);
     const {loading: submitLoading, setLoading: setSubmitLoading} = useToastContext()
 
     useEffect(() => {

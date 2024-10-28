@@ -10,7 +10,7 @@ import {
     ListItem,
     ListItemText,
     ListItemIcon,
-    Link,
+    Link, useTheme,
 } from '@mui/material';
 import {Masonry} from '@mui/lab';
 import {
@@ -28,6 +28,8 @@ const RecentActivities = () => {
         recentInvoices: [],
         recentTickets: [],
     });
+    const theme = useTheme()
+
     const [loading, setLoading] = useState(true);
 
     const fetchRecentActivities = async () => {
@@ -40,27 +42,31 @@ const RecentActivities = () => {
     }, []);
 
     const {latestApplications, recentInvoices, recentTickets} = data;
-
     return (
           < >
-              <Card sx={{position: 'relative', minHeight: '300px'}}>
+              <Card sx={{
+                  position: 'relative',
+                  minHeight: '300px',
+                  backgroundColor: theme.palette.background.default,
+                  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                  borderRadius: '12px',
+                  padding: {xs: 2, md: 4},
+              }}>
                   <CardContent>
-                      <Typography variant="h6" gutterBottom align="center">
+                      <Typography variant="h6" gutterBottom align="center"
+                                  sx={{fontWeight: 'bold', color: theme.palette.primary.main}}>
                           {'الفواتير الأخيرة'}
                       </Typography>
                       <List>
                           {recentInvoices.map((invoice) => (
-                                <ListItem key={invoice.id} alignItems="flex-start">
-
+                                <ListItem key={invoice.id} alignItems="flex-start" sx={{padding: '12px 0'}}>
                                     <ListItemText
                                           primary={
-                                              <Typography variant="subtitle1" component="span">
+                                              <Typography variant="subtitle1" component="span" sx={{fontWeight: '500'}}>
                                                   {`الاسم: ${
-                                                        invoice.payment?.userGrant?.user?.personalInfo?.basicInfo?.name ||
-                                                        'غير متوفر'
+                                                        invoice.payment?.userGrant?.user?.personalInfo?.basicInfo?.name || 'غير متوفر'
                                                   } ${
-                                                        invoice.payment?.userGrant?.user?.personalInfo?.basicInfo?.fatherName ||
-                                                        ''
+                                                        invoice.payment?.userGrant?.user?.personalInfo?.basicInfo?.fatherName || ''
                                                   }`}
                                               </Typography>
                                           }
@@ -70,18 +76,15 @@ const RecentActivities = () => {
                                                       {`المبلغ: ${invoice.amount}`}
                                                   </Typography>
                                                   <br/>
-                                                  <Link
-                                                        href={`/dashboard/invoices/${invoice.id}`}
-                                                        variant="body2"
-                                                        color="primary"
-                                                  >
+                                                  <Link href={`/dashboard/invoices/${invoice.id}`} variant="body2"
+                                                        color="primary">
                                                       {`رقم الفاتورة: ${invoice.invoiceNumber}`}
                                                   </Link>
                                               </>
                                           }
                                     />
                                     <ListItemIcon sx={{minWidth: 40}}>
-                                        <DescriptionIcon size={24}/>
+                                        <DescriptionIcon sx={{color: theme.palette.primary.main}} size={24}/>
                                     </ListItemIcon>
                                 </ListItem>
                           ))}
@@ -91,21 +94,28 @@ const RecentActivities = () => {
               </Card>
 
               {/* Latest Applications */}
-              <Card sx={{position: 'relative', minHeight: '300px'}}>
+              <Card sx={{
+                  position: 'relative',
+                  minHeight: '300px',
+                  backgroundColor: theme.palette.background.default,
+                  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                  borderRadius: '12px',
+                  padding: {xs: 2, md: 4},
+              }}>
                   <CardContent>
-                      <Typography variant="h6" gutterBottom align="center">
+                      <Typography variant="h6" gutterBottom align="center"
+                                  sx={{fontWeight: 'bold', color: theme.palette.primary.main}}>
                           {'أحدث الطلبات'}
                       </Typography>
                       <List>
                           {latestApplications.map((app) => (
-                                <ListItem key={app.id} alignItems="flex-start">
-
+                                <ListItem key={app.id} alignItems="flex-start" sx={{padding: '12px 0'}}>
                                     <ListItemText
                                           primary={
-                                              <Typography variant="subtitle1" component="span">
-                                                  {`الاسم: ${
-                                                        app.student?.personalInfo?.basicInfo?.name || 'غير متوفر'
-                                                  } ${app.student?.personalInfo?.basicInfo?.fatherName || ''}`}
+                                              <Typography variant="subtitle1" component="span" sx={{fontWeight: '500'}}>
+                                                  {`الاسم: ${app.student?.personalInfo?.basicInfo?.name || 'غير متوفر'} ${
+                                                        app.student?.personalInfo?.basicInfo?.fatherName || ''
+                                                  }`}
                                               </Typography>
                                           }
                                           secondary={
@@ -114,18 +124,15 @@ const RecentActivities = () => {
                                                       {`الحالة: ${StatusLabels[app.status] || app.status}`}
                                                   </Typography>
                                                   <br/>
-                                                  <Link
-                                                        href={`/dashboard/apps/${app.id}/${app.studentId}`}
-                                                        variant="body2"
-                                                        color="primary"
-                                                  >
+                                                  <Link href={`/dashboard/apps/view/${app.id}/${app.studentId}`}
+                                                        variant="body2" color="primary">
                                                       {`رقم الطلب: ${app.id}`}
                                                   </Link>
                                               </>
                                           }
                                     />
                                     <ListItemIcon sx={{minWidth: 40}}>
-                                        <AccessTimeIcon size={24}/>
+                                        <AccessTimeIcon sx={{color: theme.palette.primary.main}} size={24}/>
                                     </ListItemIcon>
                                 </ListItem>
                           ))}
@@ -135,18 +142,25 @@ const RecentActivities = () => {
               </Card>
 
               {/* Recent Open Tickets */}
-              <Card sx={{position: 'relative', minHeight: '300px'}}>
+              <Card sx={{
+                  position: 'relative',
+                  minHeight: '300px',
+                  backgroundColor: theme.palette.background.default,
+                  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                  borderRadius: '12px',
+                  padding: {xs: 2, md: 4},
+              }}>
                   <CardContent>
-                      <Typography variant="h6" gutterBottom align="center">
+                      <Typography variant="h6" gutterBottom align="center"
+                                  sx={{fontWeight: 'bold', color: theme.palette.primary.main}}>
                           {'التذاكر المفتوحة'}
                       </Typography>
                       <List>
                           {recentTickets.map((ticket) => (
-                                <ListItem key={ticket.id} alignItems="flex-start">
-
+                                <ListItem key={ticket.id} alignItems="flex-start" sx={{padding: '12px 0'}}>
                                     <ListItemText
                                           primary={
-                                              <Typography variant="subtitle1" component="span">
+                                              <Typography variant="subtitle1" component="span" sx={{fontWeight: '500'}}>
                                                   {`المرسل: ${
                                                         ticket.user?.personalInfo?.basicInfo?.name || 'غير متوفر'
                                                   } ${ticket.user?.personalInfo?.basicInfo?.fatherName || ''}`}
@@ -158,18 +172,15 @@ const RecentActivities = () => {
                                                       {`الموضوع: ${ticket.title}`}
                                                   </Typography>
                                                   <br/>
-                                                  <Link
-                                                        href={`/dashboard/tickets/${ticket.id}`}
-                                                        variant="body2"
-                                                        color="primary"
-                                                  >
+                                                  <Link href={`/dashboard/tickets/${ticket.id}`} variant="body2"
+                                                        color="primary">
                                                       {`رقم التذكرة: ${ticket.id}`}
                                                   </Link>
                                               </>
                                           }
                                     />
                                     <ListItemIcon sx={{minWidth: 40}}>
-                                        <SupportAgentIcon size={24}/>
+                                        <SupportAgentIcon sx={{color: theme.palette.primary.main}} size={24}/>
                                     </ListItemIcon>
                                 </ListItem>
                           ))}

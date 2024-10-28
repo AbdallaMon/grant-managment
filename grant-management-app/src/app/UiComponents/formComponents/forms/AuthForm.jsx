@@ -1,5 +1,5 @@
 import {useForm} from "react-hook-form";
-import {Button, Typography} from "@mui/material";
+import {Button, Typography, Box, Paper, Grid2 as Grid} from "@mui/material";
 import InputField from "@/app/UiComponents/FormComponents/MUIInputs/InputField";
 
 export default function AuthForm({
@@ -8,67 +8,65 @@ export default function AuthForm({
                                      btnText,
                                      formTitle,
                                      subTitle,
-                                     formStyle,
                                      variant,
                                      children,
                                  }) {
-    const {formState, register, handleSubmit, watch, trigger, control} =
-          useForm();
+    const {formState, register, handleSubmit, watch, trigger, control} = useForm();
     const {errors} = formState;
+
     return (
-
-          <form
-                noValidate
-                onSubmit={handleSubmit(onSubmit)}
-
-                className={
-                    "flex flex-col items-center bg-bgPrimary justify-center w-full  p-5 py-6 rounded shadow-md  sm:max-w-[400px] md:max-w-[450px] max-w-[500px] h-fit m-auto  "
-                }
-                style={{
-                    ...formStyle,
+          <Paper
+                elevation={6}
+                sx={{
+                    padding: {xs: 2, md: 4},
+                    maxWidth: 500,
+                    margin: "auto",
+                    borderRadius: 2,
+                    backgroundColor: "background.default"
+                    , minWidth: {md: 400, lg: 500}
                 }}
           >
-              <Typography
-                    variant="h4"
-                    className="mb-4 font-bold text-primary"
-              >
+              <Typography variant="h4" align="center">
                   {formTitle}
               </Typography>
+
               {subTitle && (
                     <Typography
                           variant="subtitle1"
-                          className="mb-4 font-bold text-secondary"
+                          align="center"
                     >
                         {subTitle}
                     </Typography>
               )}
-              <div className={"w-full flex flex-col gap-3 "}>
-                  {inputs.map((input) => {
-                            return (
-                                  <InputField
-                                        key={input.data.id}
-                                        input={input}
-                                        register={register}
-                                        errors={errors}
-                                        variant={variant}
-                                        watch={watch}
-                                        trigger={trigger}
-                                  />
-                            );
-                        }
-                  )}
-                  {children}
-              </div>
-              <Button
-                    type="submit"
-                    variant="contained"
-                    size="large"
-                    color="primary"
-                    className={" w-full  p-3 capitalize  font-bold"}
-              >
-                  {btnText}
-              </Button>
 
-          </form>
+              <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{mt: 2}}>
+                  <Grid container spacing={2}>
+                      {inputs.map((input) => (
+                            <Grid size={12} key={input.data.id}>
+                                <InputField
+                                      input={input}
+                                      register={register}
+                                      errors={errors}
+                                      variant={variant}
+                                      watch={watch}
+                                      trigger={trigger}
+                                />
+                            </Grid>
+                      ))}
+                  </Grid>
+
+                  {children && <Box sx={{mt: 2}}>{children}</Box>}
+
+                  <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        sx={{mt: 1.5, py: 1.5}}
+                  >
+                      {btnText}
+                  </Button>
+              </Box>
+          </Paper>
     );
 }

@@ -27,6 +27,9 @@ router.get('/dashboard/payments-overview', async (req, res) => {
                     supervisorId: supervisorId,
                 },
             },
+            orderBy: {
+                dueDate: 'asc', // Sort by dueDate in ascending order (old to new)
+            },
             select: {
                 id: true,
                 amount: true,
@@ -43,19 +46,18 @@ router.get('/dashboard/payments-overview', async (req, res) => {
 router.get('/dashboard/students', async (req, res) => {
     try {
         const supervisorId = req.user.id;
-
         // Count all students associated with the supervisor through user grants
         const totalStudents = await prisma.user.count({
             where: {
                 role: "STUDENT",
-                userGrants: {
+                applications: {
                     some: {
                         supervisorId: supervisorId,
+                        status: "APPROVED"
                     },
                 },
             },
         });
-
 
         res.json({totalStudents});
     } catch (error) {
@@ -135,7 +137,6 @@ router.get('/dashboard/payments-stats', async (req, res) => {
         });
 
         const totalAmountPaid = totalAmountPaidResult._sum.amount || 0;
-        console.log(totalAmount, 'total')
         res.json({totalAmount, totalAmountPaid});
     } catch (error) {
         console.log(error)

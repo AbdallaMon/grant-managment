@@ -360,7 +360,11 @@ router.get('/dashboard/payments-overview', async (req, res) => {
                 amount: true,
                 dueDate: true,
             },
+            orderBy: {
+                dueDate: 'asc', // Sort by dueDate in ascending order (old to new)
+            },
         });
+
         res.json(paymentsOverview);
     } catch (error) {
         res.status(500).json({error: error.message});
@@ -450,13 +454,13 @@ router.get('/dashboard/recent-activities', async (req, res) => {
 
 //tickets
 router.get('/tickets/', async (req, res) => {
-    const {status, skip = 0, take = 10} = req.query;
     try {
-        const {tickets, totalTickets} = await getAllTickets(status, parseInt(skip), parseInt(take));
-        res.json({data: {tickets, totalTickets}});
+        const {limit, skip} = getPagination(req);
+        const {tickets, total} = await getAllTickets(req.query, parseInt(skip), parseInt(limit));
+        const totalPages = Math.ceil(+total / +limit);
+        res.json({data: tickets, total, totalPages});
     } catch (error) {
         console.log(error)
-
         res.status(500).json({message: 'Error fetching tickets'});
     }
 });
@@ -483,9 +487,9 @@ router.put('/tickets/:ticketId/status', async (req, res) => {
         const updatedTicket = await updateTicketStatus(parseInt(ticketId), status);
         await createNotification(updatedTicket.userId, `${status === "OPEN" ? "تم فتح تذكرتك من جديد يمكنك ارسال المزيد من الاستفسارات" : "تم غلق تذكرتك من قبل المسئول"}`, `/dashboard/tickets/${ticketId}`, "TICKET_UPDATE",)
 
-        res.json({message: 'Ticket status updated', data: updatedTicket});
+        res.json({message: 'تم اغلاق التذكرة بنجاح', data: updatedTicket});
     } catch (error) {
-        res.status(500).json({message: 'Error updating ticket status'});
+        res.status(500).json({message: 'حدثت مشكلة ما برجاء اعد المحاولة لاحقا'});
     }
 });
 

@@ -7,7 +7,7 @@ import {
     List,
     ListItem,
     ListItemText,
-    Divider,
+    Divider, useTheme,
 } from '@mui/material';
 import LoadingOverlay from '@/app/UiComponents/feedback/loaders/LoadingOverlay';
 import {useAuth} from '@/app/providers/AuthProvider';
@@ -17,7 +17,7 @@ const SponsorRecentInvoices = () => {
     const [invoices, setInvoices] = useState([]);
     const [loading, setLoading] = useState(true);
     const {user} = useAuth();
-
+    const theme = useTheme()
     const fetchRecentInvoices = async () => {
         const res = await getData({
             url: `sponsor/dashboard/recent-invoices`,
@@ -35,7 +35,14 @@ const SponsorRecentInvoices = () => {
     }, [user]);
 
     return (
-          <Card sx={{position: 'relative', minHeight: '300px'}}>
+          <Card sx={{
+              position: 'relative',
+              minHeight: '300px',
+              backgroundColor: theme.palette.background.default,
+              boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+              borderRadius: '12px',
+              padding: {xs: 2, md: 4},
+          }}>
               <CardContent>
                   <Typography variant="h6" gutterBottom>
                       {'الفواتير الأخيرة'}

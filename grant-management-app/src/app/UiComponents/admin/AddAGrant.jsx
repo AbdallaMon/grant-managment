@@ -329,7 +329,7 @@ function AddAGrant({setData, item, onClose, userId, setUserGrants}) {
                     sx={{mt: 2}}
                     disabled={isSubmitDisabled}
               >
-                  إرسال البيانات
+                  حفظ المنحة
               </Button>
 
               {/* Snackbar for Errors */}

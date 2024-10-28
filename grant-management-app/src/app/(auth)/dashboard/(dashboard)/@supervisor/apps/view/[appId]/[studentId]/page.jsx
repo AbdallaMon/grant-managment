@@ -14,6 +14,7 @@ export default function page({params}) {
                               route="shared/grants/applications/student"/>
               <ApplicationWithProfileViewer item={{id: params.appId, studentId: params.studentId}}
                                             route="shared/grants/applications" isAdmin={false}
+                                            rerender={true}
               />
           </Container>
     )

@@ -40,6 +40,7 @@ const inputs = [
         },
 
     }, {
+        acceptOnly: "image",
         data: {
             id: "personalPhoto",
             label: "صورة شخصية",

@@ -12,18 +12,15 @@ export function initSocket(httpServer) {
     });
 
     io.on('connection', (socket) => {
-        console.log('A user connected.');
 
         // Join user room based on their userId
         socket.on('join-user-room', ({userId}) => {
             socket.join(userId.toString());
-            console.log(`User with ID ${userId} joined their room`);
         });
 
         // Handle sending messages
         socket.on('sendMessage', async (data) => {
             const {content, senderId, receiverId, tempId} = data;
-            console.log(data, "data send")
             // Create the message in the database
             const message = await prisma.directMessage.create({
                 data: {
@@ -62,7 +59,6 @@ export function initSocket(httpServer) {
         // Admin users join their individual room based on their userId
         socket.on('join-admin-room', ({userId}) => {
             socket.join(userId.toString());
-            console.log(`Admin with ID ${userId} joined their room`);
         });
     });
 }

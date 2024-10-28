@@ -26,7 +26,7 @@ const SearchComponent = ({
     const fetchSearchResults = async (query) => {
         setLoading(true);
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/${apiEndpoint}&query=${query}&filters=${JSON.stringify(localFilters)}`, {credentials: "include"});
+            const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/utility/${apiEndpoint}&query=${query}&filters=${JSON.stringify(localFilters)}`, {credentials: "include"});
             const result = await response.json();
             setSearchResults(result.data);
         } catch (error) {

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Card, CardContent, Typography} from '@mui/material';
+import {Card, CardContent, Typography, useTheme} from '@mui/material';
 import {Bar} from 'react-chartjs-2';
 import LoadingOverlay from '@/app/UiComponents/feedback/loaders/LoadingOverlay';
 import {ApplicationStatus} from '@/app/helpers/constants';
@@ -20,7 +20,7 @@ const SupervisorApplicationsStats = () => {
     const [applicationsByStatus, setApplicationsByStatus] = useState([]);
     const [loading, setLoading] = useState(true);
     const {user} = useAuth();
-
+    const theme = useTheme()
     const fetchApplicationsStats = async () => {
         const res = await getData({url: `supervisor/dashboard/applications-stats`, setLoading});
         if (res) {
@@ -49,44 +49,58 @@ const SupervisorApplicationsStats = () => {
     };
 
     return (
-          <Card sx={{position: 'relative', minHeight: '400px'}}>
-              <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                      {'إجمالي الطلبات'}
-                  </Typography>
-                  {loading ? (
-                        <LoadingOverlay/>
-                  ) : (
-                        <>
-                            <Typography variant="subtitle1">{`الإجمالي: ${totalApplications}`}</Typography>
-                            {applicationsByStatus.length > 0 ? (
-                                  <Bar
-                                        data={applicationsByStatusChartData}
-                                        options={{
-                                            responsive: true,
-                                            plugins: {
-                                                legend: {display: false},
-                                                tooltip: {enabled: true},
-                                                datalabels: {
-                                                    anchor: 'end',
-                                                    align: 'top',
-                                                    formatter: (value) => value,
-                                                    font: {
-                                                        weight: 'bold',
-                                                    },
+          <Card sx={{
+              position: 'relative',
+              minHeight: '300px',
+              backgroundColor: theme.palette.background.default,
+              boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+              borderRadius: '12px',
+              padding: {xs: 2, md: 4},
+          }}> <CardContent>
+              <Typography variant="h6" gutterBottom>
+                  {'إجمالي الطلبات'}
+              </Typography>
+              {loading ? (
+                    <LoadingOverlay/>
+              ) : (
+                    <>
+                        <Typography variant="subtitle1"
+                                    sx={{
+                                        fontWeight: 600,
+                                        fontSize: '1rem',
+                                        color: theme.palette.primary.main,
+                                        letterSpacing: '0.5px',
+                                        marginBottom: '12px',
+                                    }}
+                        >{`الإجمالي: ${totalApplications}`}</Typography>
+                        {applicationsByStatus.length > 0 ? (
+                              <Bar
+                                    data={applicationsByStatusChartData}
+                                    options={{
+                                        responsive: true,
+                                        plugins: {
+                                            legend: {display: false},
+                                            tooltip: {enabled: true},
+                                            datalabels: {
+                                                anchor: 'end',
+                                                align: 'top',
+                                                formatter: (value) => value,
+                                                font: {
+                                                    weight: 'bold',
                                                 },
                                             },
-                                            scales: {
-                                                y: {beginAtZero: true, precision: 0},
-                                            },
-                                        }}
-                                  />
-                            ) : (
-                                  <Typography>{'لا توجد بيانات'}</Typography>
-                            )}
-                        </>
-                  )}
-              </CardContent>
+                                        },
+                                        scales: {
+                                            y: {beginAtZero: true, precision: 0},
+                                        },
+                                    }}
+                              />
+                        ) : (
+                              <Typography>{'لا توجد بيانات'}</Typography>
+                        )}
+                    </>
+              )}
+          </CardContent>
           </Card>
     );
 };

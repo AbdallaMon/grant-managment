@@ -29,7 +29,9 @@ export function GrantListLinksAndChildren({children, id, uncomplete}) {
               <Grid
                     size={{xs: 12, lg: 4}}
                     sx={(theme) => ({
-                        backgroundColor: theme.palette.background.default,
+                        backgroundColor: "#3d70681a",
+                        borderRadius: "12px",
+                        boxShadow: "0 0 3px 1px #3d706840",
                         p: {xs: 2, lg: 4},
                         position: "relative",
                     })}

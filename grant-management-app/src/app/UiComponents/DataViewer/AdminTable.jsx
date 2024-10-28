@@ -9,7 +9,7 @@ import {
     TableHead,
     TableRow,
     Backdrop,
-    Paper, Button, Link
+    Paper, Button, Link, useTheme
 } from '@mui/material';
 import EditModal from "@/app/UiComponents/models/EditModal";
 import DeleteModal from "@/app/UiComponents/models/DeleteModal";
@@ -56,9 +56,10 @@ export default function AdminTable({
                                        setTotal, noPagination = false,
                                        checkChanges,
                                        editButtonText = "تعديل" // Default value is "Edit"
-                                       , checkDates, totalPages, handleBeforeSubmit
+                                       , checkDates, totalPages, handleBeforeSubmit, renderFormTitle, editFormButton
                                    }) {
     const ExtraComponent = extraComponent;
+    const theme = useTheme()
     return (
           <Box sx={{padding: '16px'}}>
               <>
@@ -68,20 +69,34 @@ export default function AdminTable({
                               <TableRow>
                                   {columns.map((column) => (
                                         <TableCell key={column.name}
-                                                   sx={{fontWeight: 'bold', backgroundColor: '#f0f0f0'}}>
+                                                   sx={{
+                                                       fontWeight: 'bold',
+                                                       backgroundColor: theme.palette.primary.main,
+                                                       color: theme.palette.primary.contrastText
+                                                   }}>
                                             {column.label}
                                         </TableCell>
                                   ))}
                                   {withEdit && <TableCell sx={{
                                       fontWeight: 'bold',
-                                      backgroundColor: '#f0f0f0'
+                                      backgroundColor: theme.palette.primary.main,
+                                      color: theme.palette.primary.contrastText
                                   }}>{editButtonText}</TableCell>}
                                   {withDelete && <TableCell
-                                        sx={{fontWeight: 'bold', backgroundColor: '#f0f0f0'}}>خذف</TableCell>}
+                                        sx={{
+                                            fontWeight: 'bold', backgroundColor: theme.palette.primary.main,
+                                            color: theme.palette.primary.contrastText
+                                        }}>خذف</TableCell>}
                                   {withArchive && <TableCell
-                                        sx={{fontWeight: 'bold', backgroundColor: '#f0f0f0'}}>ارشفة</TableCell>}
+                                        sx={{
+                                            fontWeight: 'bold', backgroundColor: theme.palette.primary.main,
+                                            color: theme.palette.primary.contrastText
+                                        }}>ارشفة</TableCell>}
                                   {ExtraComponent && <TableCell
-                                        sx={{fontWeight: 'bold', backgroundColor: '#f0f0f0'}}>اضافي</TableCell>}
+                                        sx={{
+                                            fontWeight: 'bold', backgroundColor: theme.palette.primary.main,
+                                            color: theme.palette.primary.contrastText
+                                        }}>اضافي</TableCell>}
                               </TableRow>
                           </TableHead>
                           <TableBody>
@@ -115,6 +130,8 @@ export default function AdminTable({
                                                         handleBeforeSubmit={handleBeforeSubmit}
                                                         checkChanges={checkChanges}
                                                         extraEditParams={extraEditParams}
+                                                        renderFormTitle={renderFormTitle}
+                                                        editFormButton={editFormButton}
                                                   /> </TableCell>
                                         )}
                                         {withDelete && (

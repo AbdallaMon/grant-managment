@@ -12,8 +12,8 @@ import {
 } from 'react-icons/fa';
 
 
-export const initialPageLimit = 20
-export const totalLimitPages = [20, 50, 100]
+export const initialPageLimit = 1
+export const totalLimitPages = [1, 20, 50, 100]
 
 export const ProgramType = {
     BACH: "بكالريوس",
@@ -213,8 +213,8 @@ export const grantLinks = [
         text: "معلومات الأقارب",
         icon: <FaUsers/>,  // Siblings Info Icon
         meta: {
-            title: "معلومات الأقارب",
-            description: "تفاصيل عن الأقارب في نفس البرنامج"
+            title: "معلومات الاخوة",
+            description: "تفاصيل عن الاخوة"
         }
     },
     {

@@ -76,8 +76,8 @@ export default function ResidenceInfo({id, extraParams}) {
                 return <LoadingState/>;
             case submitted:
                 return <SubmissionConfirmation next={{
-                    text: "الذهاب لملء نموذج الملفات الداعمة",
-                    url: "supporting-files"
+                    text: "الذهاب لملء نموذج معلومات الاخوة",
+                    url: "siblings"
                 }} appId={id}/>;
 
             default:

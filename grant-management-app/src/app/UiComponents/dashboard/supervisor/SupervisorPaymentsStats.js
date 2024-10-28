@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Card, CardContent, Typography} from '@mui/material';
+import {Card, CardContent, Typography, useTheme} from '@mui/material';
 import {Bar} from 'react-chartjs-2';
 import LoadingOverlay from '@/app/UiComponents/feedback/loaders/LoadingOverlay';
 import {getData} from '@/app/helpers/functions/getData';
@@ -19,7 +19,7 @@ const SupervisorPaymentsStats = () => {
     const [totalAmountPaid, setTotalAmountPaid] = useState(0);
     const [loading, setLoading] = useState(true);
     const {user} = useAuth();
-
+    const theme = useTheme()
     const fetchPaymentsStats = async () => {
         const res = await getData({url: `supervisor/dashboard/payments-stats`, setLoading});
         if (res) {
@@ -46,37 +46,43 @@ const SupervisorPaymentsStats = () => {
     };
 
     return (
-          <Card sx={{position: 'relative', minHeight: '400px'}}>
-              <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                      {'إجمالي المستحقات والمدفوعات'}
-                  </Typography>
-                  {loading ? (
-                        <LoadingOverlay/>
-                  ) : (
-                        <Bar
-                              data={paymentsChartData}
-                              options={{
-                                  responsive: true,
-                                  plugins: {
-                                      legend: {display: false},
-                                      tooltip: {enabled: true},
-                                      datalabels: {
-                                          anchor: 'end',
-                                          align: 'top',
-                                          formatter: (value) => value,
-                                          font: {
-                                              weight: 'bold',
-                                          },
+          <Card sx={{
+              position: 'relative',
+              minHeight: '300px',
+              backgroundColor: theme.palette.background.default,
+              boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+              borderRadius: '12px',
+              padding: {xs: 2, md: 4},
+          }}> <CardContent>
+              <Typography variant="h6" gutterBottom>
+                  {'إجمالي المستحقات والمدفوعات'}
+              </Typography>
+              {loading ? (
+                    <LoadingOverlay/>
+              ) : (
+                    <Bar
+                          data={paymentsChartData}
+                          options={{
+                              responsive: true,
+                              plugins: {
+                                  legend: {display: false},
+                                  tooltip: {enabled: true},
+                                  datalabels: {
+                                      anchor: 'end',
+                                      align: 'top',
+                                      formatter: (value) => value,
+                                      font: {
+                                          weight: 'bold',
                                       },
                                   },
-                                  scales: {
-                                      y: {beginAtZero: true, precision: 0},
-                                  },
-                              }}
-                        />
-                  )}
-              </CardContent>
+                              },
+                              scales: {
+                                  y: {beginAtZero: true, precision: 0},
+                              },
+                          }}
+                    />
+              )}
+          </CardContent>
           </Card>
     );
 };

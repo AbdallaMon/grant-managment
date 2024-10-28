@@ -38,7 +38,6 @@ const CreateModal = ({
             formData = {...formData, ...extraSubmitData}
         }
         const result = await handleRequestSubmit(formData, setLoading, `${href}`, false, "جاري الانشاء");
-        console.log(result, "results")
         if (result.status === 200) {
             if (handleSubmit) {
                 handleSubmit(result.data);

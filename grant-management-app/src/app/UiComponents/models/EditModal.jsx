@@ -14,7 +14,7 @@ const EditModal = ({
                        setData,
                        href,
                        checkChanges = false,
-                       handleBeforeSubmit, extraEditParams
+                       handleBeforeSubmit, extraEditParams, renderFormTitle, editFormButton = "حفظ التغيرات"
                    }) => {
     const {setLoading} = useToastContext()
     const [open, setOpen] = useState(false)
@@ -33,7 +33,7 @@ const EditModal = ({
             }
         }
         if (handleBeforeSubmit) dataToSubmit = await handleBeforeSubmit(formData)
-
+        if (extraEditParams === undefined) extraEditParams = ""
         const result = await handleRequestSubmit(dataToSubmit, setLoading, `${href}/${item.id}${extraEditParams}`, false, "جاري التعديل", null, "PUT");
         if (result.status === 200) {
             if (setData) {
@@ -76,7 +76,6 @@ const EditModal = ({
                                 onSubmit={onSubmit}
                                 inputs={prefilledInputs.map(input => {
                                           const defaultValue = getPropertyValue(item, input.data.key ? input.data.key : input.data.id, input.data.enum, input.data.type, input.useDefault && input.data.defaultValue)
-                                          console.log(defaultValue, "defaultValue")
                                           return {
                                               ...input,
                                               data: {
@@ -86,8 +85,8 @@ const EditModal = ({
                                           }
                                       }
                                 )}
-                                formTitle={`تعديل ${item.title || item.name || item.id}`}
-                                btnText="حفظ التغيرات"
+                                formTitle={renderFormTitle ? renderFormTitle(item) : `تعديل ${item.title || item.name || item.id}`}
+                                btnText={editFormButton}
                           >
                           </Form>
 

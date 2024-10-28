@@ -10,7 +10,7 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Paper,
+    Paper, useTheme,
 } from '@mui/material';
 import LoadingOverlay from '@/app/UiComponents/feedback/loaders/LoadingOverlay';
 import {useAuth} from '@/app/providers/AuthProvider';
@@ -20,7 +20,7 @@ const SponsorNextPayments = () => {
     const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(true);
     const {user} = useAuth();
-
+    const theme = useTheme()
     const fetchNextPayments = async () => {
         const res = await getData({
             url: `sponsor/dashboard/next-payments`,
@@ -38,7 +38,14 @@ const SponsorNextPayments = () => {
     }, [user]);
 
     return (
-          <Card sx={{position: 'relative', minHeight: '300px'}}>
+          <Card sx={{
+              position: 'relative',
+              minHeight: '300px',
+              backgroundColor: theme.palette.background.default,
+              boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+              borderRadius: '12px',
+              padding: {xs: 2, md: 4},
+          }}>
               <CardContent>
                   <Typography variant="h6" gutterBottom>
                       {'جدول الدفعات القادمة'}
@@ -47,12 +54,31 @@ const SponsorNextPayments = () => {
                         <LoadingOverlay/>
                   ) : payments.length > 0 ? (
                         <TableContainer component={Paper}>
-                            <Table size="small">
+                            <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell align="right">{'الطالب'}</TableCell>
-                                        <TableCell align="right">{'المبلغ'}</TableCell>
-                                        <TableCell align="right">{'تاريخ الاستحقاق'}</TableCell>
+                                        <TableCell align="right"
+
+                                                   sx={{
+                                                       fontWeight: 'bold',
+                                                       backgroundColor: theme.palette.primary.main,
+                                                       color: theme.palette.primary.contrastText,
+                                                   }}
+                                        >{'الطالب'}</TableCell>
+                                        <TableCell align="right"
+                                                   sx={{
+                                                       fontWeight: 'bold',
+                                                       backgroundColor: theme.palette.primary.main,
+                                                       color: theme.palette.primary.contrastText,
+                                                   }}
+                                        >{'المبلغ'}</TableCell>
+                                        <TableCell align="right"
+                                                   sx={{
+                                                       fontWeight: 'bold',
+                                                       backgroundColor: theme.palette.primary.main,
+                                                       color: theme.palette.primary.contrastText,
+                                                   }}
+                                        >{'تاريخ الاستحقاق'}</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>

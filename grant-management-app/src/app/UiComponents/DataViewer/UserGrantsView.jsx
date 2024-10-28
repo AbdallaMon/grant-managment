@@ -19,7 +19,7 @@ const UserGrantsView = ({item, route, isStudent}) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [expandedGrants, setExpandedGrants] = useState([]);
-
+    const [application, setApplication] = useState(null)
     // Fetch user grants
     useEffect(() => {
         const fetchUserGrants = async () => {
@@ -27,8 +27,10 @@ const UserGrantsView = ({item, route, isStudent}) => {
             if (!response || !response.data) {
                 setError("فشل في جلب البيانات");
             }
-            setUserGrants(response.data);
-            setExpandedGrants(response.data.map(() => true));
+            console.log(response.data)
+            setUserGrants(response.data.grants);
+            setApplication(response.data.application)
+            setExpandedGrants(response.data.grants.map(() => true));
         };
 
         fetchUserGrants();
@@ -51,8 +53,7 @@ const UserGrantsView = ({item, route, isStudent}) => {
 
     return (
           <Box>
-              {userGrants.length === 0 && <Typography>لا يوجد منح لهذا المستخدم.</Typography>}
-              {!isStudent &&
+              {userGrants?.length > 0 && !isStudent &&
                     <Box mb={4}>
                         <Typography variant="h5" fontWeight="bold">معلومات المستخدم</Typography>
                         <Divider sx={{my: 2}}/>
@@ -60,19 +61,25 @@ const UserGrantsView = ({item, route, isStudent}) => {
                         <Typography>البريد الإلكتروني: {userGrants[0]?.user?.email || "غير متوفر"}</Typography>
                     </Box>
               }
-              <Typography variant="h4" mb={2}>المنح المتاحه</Typography>
-              {(!isStudent && (item.studentId || item.userId)) &&
-                    <Box my={3}>
+              {application?.status === "APPROVED" &&
+                    <>
+                        <Typography variant="h4" mb={2}>المنح المتاحه</Typography>
+                        {userGrants.length === 0 && <Typography>لا يوجد منح لهذا المستخدم.</Typography>}
+                        {(!isStudent && (item.studentId || item.userId)) &&
+                              <Box my={3}>
 
-                        <DrawerWithContent item={item} component={AddAGrant}
-                                           extraData={{
-                                               userId: item.studentId || item.userId,
-                                               label: "اضافة منحة جديدة"
-                                               , setUserGrants: setUserGrants
-                                           }}/>
-                    </Box>
+                                  <DrawerWithContent item={item} component={AddAGrant}
+                                                     extraData={{
+                                                         userId: item.studentId || item.userId,
+                                                         label: "اضافة منحة جديدة"
+                                                         , setUserGrants: setUserGrants
+                                                     }}/>
+                              </Box>
+                        }
+                    </>
+
               }
-              {userGrants.map((userGrant, index) => (
+              {userGrants?.map((userGrant, index) => (
                     <Card key={index} variant="outlined" sx={{
                         mb: 4,
                         backgroundColor: "#f4f6f8", // Different background to distinguish each grant

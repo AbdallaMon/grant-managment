@@ -19,6 +19,7 @@ import {simpleModalStyle} from "@/app/helpers/constants";
 import dayjs from "dayjs";
 
 import {studentInputs} from "@/app/helpers/constantInputs";
+import Link from "next/link";
 
 const inputs = studentInputs
 
@@ -103,8 +104,8 @@ export default function ProfileComponent({isApplication, id}) {
                   <Typography variant="h6" gutterBottom>
                       هذه البيانات مسجلة من وقت التسجيل ان كنت لا تريد تعديلها اذهب الي قسم اخر
                   </Typography>
-                  <Button href={`/dashboard/applications/drafts/${id}/scholarship-info`}>
-                      اذغط هنا للذهاب لملئ بيانات نوع المنحة المطلوبه
+                  <Button href={`/dashboard/applications/drafts/${id}/scholarship-info`} component={Link}>
+                      اضغط هنا للذهاب لملئ بيانات نوع المنحة المطلوبه
                   </Button>
               </div>}
               <Button variant="contained" color="primary" onClick={toggleEditMode}>

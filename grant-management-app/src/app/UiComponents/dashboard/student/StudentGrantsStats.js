@@ -1,6 +1,6 @@
 // components/StudentGrantsStats.js
 import React, {useEffect, useState} from 'react';
-import {Card, CardContent, Typography, Divider} from '@mui/material';
+import {Card, CardContent, Typography, Divider, useTheme} from '@mui/material';
 import LoadingOverlay from '@/app/UiComponents/feedback/loaders/LoadingOverlay';
 import {useAuth} from '@/app/providers/AuthProvider';
 import {getData} from '@/app/helpers/functions/getData';
@@ -19,6 +19,7 @@ const StudentGrantsStats = () => {
         totalAmountLeft: 0,
         totalAmountPaid: 0
     });
+    const theme = useTheme()
     const [loading, setLoading] = useState(true);
     const {user} = useAuth();
 
@@ -47,9 +48,15 @@ const StudentGrantsStats = () => {
             },
         ],
     };
-
     return (
-          <Card sx={{position: 'relative', minHeight: '300px'}}>
+          <Card sx={{
+              position: 'relative',
+              minHeight: '300px',
+              backgroundColor: theme.palette.background.default,
+              boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+              borderRadius: '12px',
+              padding: {xs: 2, md: 4},
+          }}>
               <CardContent>
                   <Typography variant="h6" gutterBottom>
                       {'إحصائيات المنح'}
@@ -58,7 +65,14 @@ const StudentGrantsStats = () => {
                         <LoadingOverlay/>
                   ) : stats ? (
                         <>
-                            <Typography variant="subtitle1">{`إجمالي عدد المنح: ${stats.totalUserGrants}`}</Typography>
+                            <Typography variant="subtitle1" sx={{
+                                fontWeight: 600,
+                                fontSize: '1rem',
+                                color: theme.palette.primary.main,
+                                letterSpacing: '0.5px',
+                                marginBottom: '12px',
+                            }}
+                            >{`إجمالي عدد المنح: ${stats.totalUserGrants}`}</Typography>
                             <Divider sx={{my: 1}}/>
                             <Bar
                                   data={paymentsChartData}

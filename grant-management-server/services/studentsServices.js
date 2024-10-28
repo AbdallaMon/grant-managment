@@ -146,8 +146,8 @@ export const createDraftApplicationModel = async (appId, model, inputData) => {
             });
         case 'siblings':
             inputData.studyYear = +inputData.studyYear
+            if (inputData.grantAmount === "") inputData.grantAmount = null
             if (inputData.grantAmount) inputData.grantAmount = +inputData.grantAmount;
-
             return await prisma.application.update({
                 where: {id: Number(appId), status: 'DRAFT'},
                 data: {
@@ -282,6 +282,8 @@ export const updateApplicationModel = async (appId, model, inputData) => {
             if (inputData.studyYear) {
                 inputData.studyYear = +inputData.studyYear
             }
+            if (inputData.grantAmount === "") inputData.grantAmount = null
+
             if (inputData.grantAmount) {
                 inputData.grantAmount = +inputData.grantAmount;
             }

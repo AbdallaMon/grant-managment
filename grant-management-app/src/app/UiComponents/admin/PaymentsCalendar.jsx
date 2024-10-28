@@ -7,6 +7,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import {getData} from "@/app/helpers/functions/getData";
 import AdminTable from "@/app/UiComponents/DataViewer/AdminTable";
 import {useAuth} from "@/app/providers/AuthProvider";
+import {useRouter, useSearchParams} from "next/navigation";
 
 const localizer = momentLocalizer(moment);
 
@@ -27,6 +28,8 @@ const inputs = [
     }
 ]
 const columns = [
+    {name: "id", label: "رقم الدفعة"},
+    ,
     {
         name: "userGrant.applicationId", label: "معرف  طلب المنحة", linkCondition: (item) => {
             return `/dashboard/apps/view/${item.userGrant.applicationId}/${item.userGrant.userId}`;
@@ -46,6 +49,9 @@ const PaymentCalendar = () => {
     const [payments, setPayments] = useState([]); // Payments fetched from the API
     const [filteredPayments, setFilteredPayments] = useState([]); // Payments filtered by selected date
     const [loading, setLoading] = useState(true); // Loading state for data fetching
+    const router = useRouter();
+    const searchParams = useSearchParams()
+    const paymentId = searchParams.get("paymentId")
     const fetchPayments = async (month) => {
         const extraParams = user.role !== "ADMIN" ? `userId=${user.id}&` : "";
         const response = await getData({
@@ -53,13 +59,19 @@ const PaymentCalendar = () => {
             setLoading
         });
         setPayments(response.data || []);
-        setFilteredPayments(response.data || []); // Initially set filtered payments to all payments
+        if (paymentId) {
+            setFilteredPayments(response.data.filter((payment) => payment.id == paymentId))
+            const newSearchParams = new URLSearchParams(searchParams);
+            newSearchParams.delete("paymentId");
+            router.replace(`?${newSearchParams.toString()}`);
+        } else {
+            setFilteredPayments(response.data || []);
+        }
     };
 
     useEffect(() => {
         fetchPayments(currentMonth); // Fetch payments when the month changes
     }, [currentMonth]);
-
     const handleDateSelect = (slotInfo) => {
         const selectedDateString = moment(slotInfo.start).format('YYYY-MM-DD');
         const filtered = payments.filter(payment => moment(payment.dueDate).format('YYYY-MM-DD') === selectedDateString);
@@ -107,7 +119,7 @@ const PaymentCalendar = () => {
                                 setCurrentMonth(newMonth);
                             }
                         }}
-                        onSelectEvent={handleDateSelect} // Handle day click (slotInfo is event info)
+                        onSelectEvent={handleDateSelect}
                         selectable
                         style={{height: 500, minWidth: 800}}
                         popup
@@ -124,9 +136,10 @@ const PaymentCalendar = () => {
                     withEdit={true}
                     editHref={"shared/payments/pay"}
                     editButtonText={"دفع"}
+                    renderFormTitle={(item) => `الدفعة رقم # ${item.id}`}
                     inputs={inputs}
                     extraEditParams={extraParams}
-
+                    editFormButton="دفع"
               />
           </Container>
     );

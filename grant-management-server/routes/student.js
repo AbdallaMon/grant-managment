@@ -137,16 +137,20 @@ router.post('/applications/draft/:appId', async (req, res) => {
 router.put('/applications/draft/:appId', async (req, res) => {
     const {appId} = req.params;
     const {model} = req.query;
+    console.log(req.params, "req.params")
     const inputData = req.body;
     try {
         if (!model) {
-            return res.status(400).json({message: "بارامتر النموذج مطلوب"});
+            return res.status(400).json({message: "Model is required"});
         }
         if (!inputData) {
             return res.status(400).json({message: "بيانات المدخلات مطلوبة"});
         }
         const updatedData = await updateApplicationModel(appId, model, inputData);
-        res.status(200).json({message: "تم تحديث البيانات بنجاح", data: updatedData[model]});
+        res.status(200).json({
+            message: "تم تحديث البيانات بنجاح",
+            data: model === "siblings" ? updatedData : updatedData[model]
+        });
     } catch (error) {
         console.log(error, "خطأ في تحديث بيانات نموذج طلب المسودة");
         handlePrismaError(res, error);
@@ -504,15 +508,10 @@ router.get('/dashboard/recent-invoices', async (req, res) => {
 router.get('/tickets', async (req, res) => {
     try {
         const userId = req.user.id;
-        const skip = parseInt(req.query.skip) || 0; // Starting point for records
-        const take = parseInt(req.query.take) || 10; // Number of records to return
-
-        const [tickets, totalTickets] = await getTicketsByUser(userId, skip, take);
-
-        res.json({
-            message: 'تم جلب التذاكر بنجاح.',
-            data: {tickets, totalTickets},
-        });
+        const {limit, skip} = getPagination(req);
+        const [tickets, total] = await getTicketsByUser(userId, +skip, +limit);
+        const totalPages = Math.ceil(+total / +limit);
+        res.json({data: tickets, total, totalPages});
     } catch (error) {
         console.log(error, "err")
         res.status(500).json({message: 'خطأ في جلب التذاكر.', error: error.message});
@@ -534,7 +533,7 @@ router.post('/tickets', async (req, res) => {
 
         const ticket = await createTicket(userId, title, content);
         await createNotification(null, `تم انشاء تذكرة جديدة بعنوان ${title}`, `/dashboard/tickets/${ticket.id}`, "NEW_TICKET", true)
-        res.status(201).json({
+        res.status(200).json({
             message: 'تم إنشاء التذكرة بنجاح.',
             data: ticket,
         });

@@ -16,7 +16,7 @@ import {
     Divider,
     List,
     ListItem,
-    ListItemText,
+    ListItemText, useTheme,
 } from '@mui/material';
 import {Role, ApplicationStatus} from '@/app/helpers/constants';
 import {Bar} from 'react-chartjs-2';
@@ -25,11 +25,14 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 import {Chart} from 'chart.js';
 import LoadingOverlay from '@/app/UiComponents/feedback/loaders/LoadingOverlay';
 import {getData} from "@/app/helpers/functions/getData";
+import Grid from "@mui/material/Grid2";
+
+import CustomTable from "@/app/UiComponents/dashboard/CustomTable";
 
 // Register the ChartDataLabels plugin
 Chart.register(ChartDataLabels);
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042']; // Chart Colors
+const COLORS = ["#45cb85", '#3b82f6', '#c084f9', '#249782'];
 
 const OverviewStats = () => {
     // Users by Role
@@ -51,6 +54,7 @@ const OverviewStats = () => {
     // Payments Overview
     const [paymentsOverview, setPaymentsOverview] = useState([]);
     const [paymentsLoading, setPaymentsLoading] = useState(false);
+    const theme = useTheme()
 
     // Fetch Users by Role
     const fetchUsersByRole = async () => {
@@ -149,168 +153,220 @@ const OverviewStats = () => {
             },
         ],
     };
-
+    const columns = [
+        {
+            name: "id",
+            label: "رقم الدفع",
+            type: "href",
+            linkCondition: (item) => `/dashboard/payments?paymentId=${item.id}`
+        },
+        {name: "amount", label: "المبلغ"},
+        {name: "dueDate", label: "تاريخ الاستحقاق"},
+    ];
     return (
           <>
               {/* Users by Role */}
-              <Card sx={{position: 'relative', minHeight: '200px'}}>
-                  <CardContent>
-                      <Typography variant="h6" gutterBottom align="right">
-                          {'المستخدمين'}
-                      </Typography>
-                      {usersLoading ? (
-                            <LoadingOverlay/>
-                      ) : usersByRole.length > 0 ? (
-                            <>
-                                <List>
+              <Card sx={{
+                  position: 'relative',
+                  minHeight: '300px',
+                  backgroundColor: theme.palette.background.default,
+                  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                  borderRadius: '12px',
+                  padding: {xs: 2, md: 4},
+              }}> <CardContent>
+                  <Typography variant="h6" gutterBottom align="right">
+                      {'المستخدمين'}
+                  </Typography>
+                  {usersLoading ? (
+                        <LoadingOverlay/>
+                  ) : usersByRole.length > 0 ? (
+                        <>
+                            <List>
+                                <Grid container spacing={2}>
                                     {usersByRole.map((role) => (
-                                          <ListItem
-                                                key={role.role}
-                                                sx={{display: 'flex', justifyContent: 'flex-end'}}
+                                          <Grid size={6} key={role.role}
                                           >
-                                              <ListItemText
-                                                    primaryTypographyProps={{
-                                                        variant: 'subtitle1',
-                                                        align: 'right',
+                                              <ListItem
+                                                    sx={{
+                                                        display: 'flex',
+                                                        justifyContent: 'flex-end',
+                                                        backgroundColor: theme.palette.primary.main,
+                                                        color: theme.palette.primary.contrastText,
+                                                        borderRadius: 1,
+                                                        padding: '12px 16px',
+                                                        boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.1)',
+                                                        transition: 'transform 0.2s ease-in-out',
                                                     }}
-                                                    primary={`${Role[role.role] || role.role}: ${role._count}`}
-                                              />
-                                          </ListItem>
+                                              >
+                                                  <ListItemText
+                                                        primaryTypographyProps={{
+                                                            variant: 'subtitle1',
+                                                            align: 'right',
+                                                            fontWeight: 500,
+                                                            color: theme.palette.primary.contrastText,
+                                                        }}
+                                                        primary={`${Role[role.role] || role.role}: ${role._count}`}
+                                                  />
+                                              </ListItem>
+                                          </Grid>
                                     ))}
-                                </List>
-                                <Divider sx={{my: 1}}/>
-                                <Typography variant="subtitle1" align="right">
-                                    {'إجمالي المستخدمين'}: {totalUsers}
-                                </Typography>
-                            </>
-                      ) : (
-                            <Typography align="right">{'لا توجد بيانات'}</Typography>
-                      )}
-                  </CardContent>
+                                </Grid>
+                            </List>
+                            <Divider sx={{my: 1}}/>
+                            <Typography variant="subtitle1" align="right"
+
+                                        sx={{
+                                            fontWeight: 600,
+                                            fontSize: '1rem',
+                                            color: theme.palette.primary.main,
+                                            letterSpacing: '0.5px',
+                                            marginBottom: '12px',
+                                        }}
+                            >
+                                {'إجمالي المستخدمين'}: {totalUsers}
+                            </Typography>
+                        </>
+                  ) : (
+                        <Typography align="right"
+                                    sx={{
+                                        fontWeight: 600,
+                                        fontSize: '1rem',
+                                        color: theme.palette.primary.main,
+                                        letterSpacing: '0.5px',
+                                        marginBottom: '12px',
+                                    }}
+                        >{'لا توجد بيانات'}</Typography>
+                  )}
+              </CardContent>
               </Card>
 
               {/* Payments Overview */}
-              <Card sx={{position: 'relative', minHeight: '300px'}}>
-                  <CardContent>
-                      <Typography variant="h6" gutterBottom>
-                          {'الدفعات المستحقة لهذا الشهر'}
-                      </Typography>
-                      {paymentsLoading ? (
-                            <LoadingOverlay/>
-                      ) : paymentsOverview.length > 0 ? (
-                            <>
-                                <TableContainer component={Paper}>
-                                    <Table size="small">
-                                        <TableHead>
-                                            <TableRow>
-                                                <TableCell align="right">{'رقم الدفعة'}</TableCell>
-                                                <TableCell align="right">{'المبلغ'}</TableCell>
-                                                <TableCell align="right">{'تاريخ الاستحقاق'}</TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {paymentsOverview.map((payment) => (
-                                                  <TableRow key={payment.id}>
-                                                      <TableCell align="right">{payment.id}</TableCell>
-                                                      <TableCell align="right">{payment.amount}</TableCell>
-                                                      <TableCell align="right">
-                                                          {new Date(payment.dueDate).toLocaleDateString('ar-EG')}
-                                                      </TableCell>
-                                                  </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
-                                <Typography variant="subtitle1" sx={{mt: 2}}>
-                                    {'إجمالي المبلغ المستحق لهذا الشهر'}:{' '}
-                                    {paymentsOverview.reduce(
-                                          (sum, payment) => sum + payment.amount,
-                                          0
-                                    )}
-                                </Typography>
-                            </>
-                      ) : (
-                            <Typography>{'لا توجد دفعات معلقة لهذا الشهر'}</Typography>
-                      )}
-                  </CardContent>
+              <Card sx={{
+                  position: 'relative',
+                  minHeight: '300px',
+                  backgroundColor: theme.palette.background.default,
+                  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                  borderRadius: '12px',
+                  padding: {xs: 2, md: 4},
+              }}> <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                      {'الدفعات المستحقة لهذا الشهر'}
+                  </Typography>
+                  <CustomTable columns={columns} data={paymentsOverview} loading={paymentsLoading}/>
+              </CardContent>
               </Card>
 
               {/* Applications By Status */}
-              <Card sx={{position: 'relative', minHeight: '400px'}}>
-                  <CardContent>
-                      <Typography variant="h6" gutterBottom>
-                          {'إجمالي الطلبات'}
-                      </Typography>
-                      {applicationsLoading ? (
-                            <LoadingOverlay/>
-                      ) : (
-                            <>
-                                <Typography variant="subtitle1">{`الإجمالي: ${totalApplications}`}</Typography>
-                                {applicationsByStatus.length > 0 ? (
-                                      <Bar
-                                            data={applicationsByStatusChartData}
-                                            options={{
-                                                responsive: true,
-                                                plugins: {
-                                                    legend: {display: false},
-                                                    tooltip: {enabled: true},
-                                                    datalabels: {
-                                                        anchor: 'center',
-                                                        align: 'center',
-                                                        formatter: (value) => value,
-                                                        font: {
-                                                            weight: 'bold',
-                                                        },
+              <Card sx={{
+                  position: 'relative',
+                  minHeight: '300px',
+                  backgroundColor: theme.palette.background.default,
+                  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                  borderRadius: '12px',
+                  padding: {xs: 2, md: 4},
+              }}> <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                      {'إجمالي الطلبات'}
+                  </Typography>
+                  {applicationsLoading ? (
+                        <LoadingOverlay/>
+                  ) : (
+                        <>
+                            <Typography variant="subtitle1"
+                                        sx={{
+                                            fontWeight: 600,
+                                            fontSize: '1rem',
+                                            color: theme.palette.primary.main,
+                                            letterSpacing: '0.5px',
+                                            marginBottom: '12px',
+                                        }}
+                            >{`الإجمالي: ${totalApplications}`}</Typography>
+                            {applicationsByStatus.length > 0 ? (
+                                  <Bar
+                                        data={applicationsByStatusChartData}
+                                        options={{
+                                            responsive: true,
+                                            plugins: {
+                                                legend: {display: false},
+                                                tooltip: {enabled: true},
+                                                datalabels: {
+                                                    anchor: 'center',
+                                                    align: 'center',
+                                                    formatter: (value) => value,
+                                                    font: {
+                                                        weight: 'bold',
                                                     },
                                                 },
-                                                scales: {
-                                                    y: {beginAtZero: true, precision: 0},
-                                                },
-                                            }}
-                                      />
-                                ) : (
-                                      <Typography>{'لا توجد بيانات'}</Typography>
-                                )}
-                            </>
-                      )}
-                  </CardContent>
+                                            },
+                                            scales: {
+                                                y: {beginAtZero: true, precision: 0},
+                                            },
+                                        }}
+                                  />
+                            ) : (
+                                  <Typography
+                                        sx={{
+                                            fontWeight: 600,
+                                            fontSize: '1rem',
+                                            color: theme.palette.primary.main,
+                                            letterSpacing: '0.5px',
+                                            marginBottom: '12px',
+                                        }}
+                                  >{'لا توجد بيانات'}</Typography>
+                            )}
+                        </>
+                  )}
+              </CardContent>
               </Card>
 
-              {/* Total Spending and Grants */}
-              <Card sx={{position: 'relative', minHeight: '400px'}}>
-                  <CardContent>
-                      <Typography variant="h6" gutterBottom>
-                          {'إجمالي الإنفاق والمنح'}
-                      </Typography>
-                      {grantsLoading ? (
-                            <LoadingOverlay/>
-                      ) : (
-                            <>
-                                <Typography variant="subtitle1">{`إجمالي المنح: ${totalGrants}`}</Typography>
-                                <Bar
-                                      data={spendingChartData}
-                                      options={{
-                                          responsive: true,
-                                          plugins: {
-                                              legend: {display: false},
-                                              tooltip: {enabled: true},
-                                              datalabels: {
-                                                  anchor: 'center',
-                                                  align: 'center',
-                                                  formatter: (value) => value,
-                                                  font: {
-                                                      weight: 'bold',
-                                                  },
+              <Card sx={{
+                  position: 'relative',
+                  minHeight: '300px',
+                  backgroundColor: theme.palette.background.default,
+                  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                  borderRadius: '12px',
+                  padding: {xs: 2, md: 4},
+              }}> <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                      {'إجمالي الإنفاق والمنح'}
+                  </Typography>
+                  {grantsLoading ? (
+                        <LoadingOverlay/>
+                  ) : (
+                        <>
+                            <Typography variant="subtitle1"
+                                        sx={{
+                                            fontWeight: 600,
+                                            fontSize: '1rem',
+                                            color: theme.palette.primary.main,
+                                            letterSpacing: '0.5px',
+                                            marginBottom: '12px',
+                                        }}
+                            >{`إجمالي المنح: ${totalGrants}`}</Typography>
+                            <Bar
+                                  data={spendingChartData}
+                                  options={{
+                                      responsive: true,
+                                      plugins: {
+                                          legend: {display: false},
+                                          tooltip: {enabled: true},
+                                          datalabels: {
+                                              anchor: 'center',
+                                              align: 'center',
+                                              formatter: (value) => value,
+                                              font: {
+                                                  weight: 'bold',
                                               },
                                           },
-                                          scales: {
-                                              y: {beginAtZero: true, precision: 0},
-                                          },
-                                      }}
-                                />
-                            </>
-                      )}
-                  </CardContent>
+                                      },
+                                      scales: {
+                                          y: {beginAtZero: true, precision: 0},
+                                      },
+                                  }}
+                            />
+                        </>
+                  )}
+              </CardContent>
               </Card>
 
           </>

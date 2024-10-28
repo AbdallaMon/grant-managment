@@ -8,7 +8,6 @@ const SupervisorStudentsList = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const {user} = useAuth();
-
     const fetchStudents = async () => {
         try {
             const res = await getData({

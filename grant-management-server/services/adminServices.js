@@ -6,7 +6,24 @@ export async function getUser(searchParams, limit, skip, role = "STUDENT") {
     const filters = JSON.parse(searchParams.filters);
     let where = {role};
     if (searchParams.supervisorId) {
-        where.supervisorId = Number(searchParams.supervisorId)
+        where.userGrants = {
+            some: {
+                supervisorId: Number(searchParams.supervisorId)
+            }
+        }
+    }
+    if (searchParams.sponsorId) {
+        where.userGrants = {
+            some: {
+                grant: {
+                    viewAccessUsers: {
+                        some: {
+                            id: Number(searchParams.sponsorId),
+                        },
+                    },
+                },
+            },
+        };
     }
     if (filters.query) {
         where.id = Number(filters.query.id)
@@ -613,8 +630,12 @@ export async function markApplicationUnderReview(appId, supervisorId) {
     return updatedApplication;
 }
 
-export const getAllTickets = async (status, skip, take) => {
-    const filter = status && status !== "all" ? {status} : {};
+export const getAllTickets = async (searchParams, skip, take) => {
+    const filters = JSON.parse(searchParams.filters);
+    let filter = {}
+    if (filters && filters.status !== "all") {
+        filter = {status: filters.status}
+    }
     const tickets = await prisma.ticket.findMany({
         where: filter,
         select: {
@@ -631,8 +652,8 @@ export const getAllTickets = async (status, skip, take) => {
         },
     });
 
-    const totalTickets = await prisma.ticket.count({where: filter});
-    return {tickets, totalTickets};
+    const total = await prisma.ticket.count({where: filter});
+    return {tickets, total};
 };
 
 
@@ -643,12 +664,5 @@ export const updateTicketStatus = async (ticketId, newStatus) => {
     });
 };
 
-export const createMessage = async (ticketId, senderId, content) => {
-    return prisma.message.create({
-        data: {
-            ticketId,
-            senderId,
-            content,
-        },
-    });
-};
+//tasks
+// services/taskService.js

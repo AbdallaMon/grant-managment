@@ -46,7 +46,8 @@ export default function ApplicationWithProfileViewer({
                                                          setData,
                                                          view = false,
                                                          isAdmin = true,
-                                                         isStudent = false
+                                                         isStudent = false,
+                                                         rerender
                                                      }) {
     route = isStudent ? "student" : `${route}/student`
 
@@ -72,7 +73,6 @@ export default function ApplicationWithProfileViewer({
             setLoadingApplication(true);
             const url = isStudent ? `student/applications/${item.id}/approved` : `${route}/${item.id}`
             const response = await getData({url, setLoading: setLoadingApplication})
-            console.log(response, "response")
             setApplication(response.data);
         };
 
@@ -372,7 +372,6 @@ export default function ApplicationWithProfileViewer({
                       حالة الطلب: {ApplicationStatus[status]}
                   </Typography>
               </Alert>
-
               {loadingPersonalInfo ? (
                     <CircularProgress/>
               ) : (
@@ -411,6 +410,7 @@ export default function ApplicationWithProfileViewer({
                                           route={route}
                                           view={view}
                                           application={application}
+                                          rerender={rerender}
                     />
               }
           </Box>
@@ -697,7 +697,7 @@ function CreateNewUpdate({appId, setData}) {
     )
 }
 
-function RenderActionsButtons({isAdmin, route, appId, onClose, setData, item, view, application}) {
+function RenderActionsButtons({isAdmin, route, appId, onClose, setData, item, view, application, rerender}) {
     return (
           <>
               <Alert severity="warning">
@@ -709,8 +709,9 @@ function RenderActionsButtons({isAdmin, route, appId, onClose, setData, item, vi
                             {application.status !== "APPROVED" &&
                                   <>
                                       <ApproveByAdmin route={route} setData={setData} appId={appId} onClose={onClose}
-                                                      application={application}/>
-                                      <MarkUnderReview route={route} setData={setData} appId={appId} onClose={onClose}/>
+                                                      application={application} rerender={rerender}/>
+                                      <MarkUnderReview route={route} setData={setData} appId={appId} onClose={onClose}
+                                                       rerender={rerender}/>
                                   </>
                             }
                         </>
@@ -719,7 +720,8 @@ function RenderActionsButtons({isAdmin, route, appId, onClose, setData, item, vi
                         <>
                             {
                                   application.status !== "APPROVED" &&
-                                  <ApproveBySupervisor route={route} setData={setData} appId={appId} onClose={onClose}/>
+                                  <ApproveBySupervisor route={route} setData={setData} appId={appId} onClose={onClose}
+                                                       rerender={rerender}/>
                             }
                         </>
                   }
@@ -730,7 +732,7 @@ function RenderActionsButtons({isAdmin, route, appId, onClose, setData, item, vi
                                          setData: setData,
                                          appId: item.id,
                                          otherOnClose: onClose,
-                                         improvement: true
+                                         improvement: true, rerender: rerender
                                      }}/>
                   <DrawerWithContent item={item} component={MarkAsUnCompleteAndAskForImprovement}
                                      extraData={{
@@ -738,22 +740,22 @@ function RenderActionsButtons({isAdmin, route, appId, onClose, setData, item, vi
                                          label: "طلب اضافة تحسينات",
                                          setData: setData,
                                          appId: item.id,
-                                         otherOnClose: onClose
+                                         otherOnClose: onClose, rerender: rerender
                                      }}/>
 
                   {(!view && application.status !== "APPROVED") &&
-                        <RejectApplication route={route} setData={setData} appId={appId} onClose={onClose}/>
+                        <RejectApplication route={route} setData={setData} appId={appId} onClose={onClose}
+                                           rerender={rerender}/>
                   }
               </Box>
           </>
     )
 }
 
-function ApproveByAdmin({route, appId, onClose, setData, application}) {
+function ApproveByAdmin({route, appId, onClose, setData, application, rerender}) {
     const [user, setUser] = useState(null)
     const [error, setError] = useState(null)
     const {setLoading} = useToastContext()
-    console.log(application, "applicationx")
 
     async function confirm() {
         if (!user && !application.supervisorId) {
@@ -766,8 +768,16 @@ function ApproveByAdmin({route, appId, onClose, setData, application}) {
             notAdmin: application.supervisorId
         }, setLoading, `${route}/${appId}`, false, "جاري الموافقه علي الطلب")
         if (request.status === 200) {
-            setData((oldData) => oldData.filter((item) => item.id !== appId))
-            onClose()
+            if (setData) {
+                setData((oldData) => oldData.filter((item) => item.id !== appId))
+            }
+            if (rerender) {
+                window.location.reload()
+            }
+            if (onClose) {
+
+                onClose()
+            }
             return request
         }
     }
@@ -812,7 +822,7 @@ function ApproveByAdmin({route, appId, onClose, setData, application}) {
     )
 }
 
-function ApproveBySupervisor({route, appId, onClose, setData}) {
+function ApproveBySupervisor({route, appId, onClose, setData, rerender}) {
     const {setLoading} = useToastContext()
 
     async function confirm() {
@@ -820,8 +830,17 @@ function ApproveBySupervisor({route, appId, onClose, setData}) {
             action: "approve", notAdmin: true,
         }, setLoading, `${route}/${appId}`, false, "جاري الموافقه علي الطلب")
         if (request.status === 200) {
-            setData((oldData) => oldData.filter((item) => item.id !== appId))
-            onClose()
+            if (setData) {
+                setData((oldData) => oldData.filter((item) => item.id !== appId))
+            }
+            if (rerender) {
+                window.location.reload()
+            }
+            if (onClose) {
+
+
+                onClose()
+            }
             return request
         }
     }
@@ -837,7 +856,7 @@ function ApproveBySupervisor({route, appId, onClose, setData}) {
     )
 }
 
-function RejectApplication({route, appId, onClose, setData}) {
+function RejectApplication({route, appId, onClose, setData, rerender}) {
     const [error, setError] = useState(null)
     const {setLoading} = useToastContext()
     const [rejectReason, setRejectReason] = useState(null)
@@ -851,10 +870,17 @@ function RejectApplication({route, appId, onClose, setData}) {
             rejectReason,
             action: "reject"
         }, setLoading, `${route}/${appId}`, false, "جاري رفض الطلب")
-        console.log(request, "request")
         if (request.status === 200) {
-            setData((oldData) => oldData.filter((item) => item.id !== appId))
-            onClose()
+            if (setData) {
+                setData((oldData) => oldData.filter((item) => item.id !== appId))
+            }
+            if (rerender) {
+                window.location.reload()
+            }
+            if (onClose) {
+
+                onClose()
+            }
             return request
         }
     }
@@ -900,7 +926,15 @@ function RejectApplication({route, appId, onClose, setData}) {
     )
 }
 
-function MarkAsUnCompleteAndAskForImprovement({route, appId, onClose, setData, otherOnClose, improvement = false}) {
+function MarkAsUnCompleteAndAskForImprovement({
+                                                  route,
+                                                  appId,
+                                                  onClose,
+                                                  setData,
+                                                  otherOnClose,
+                                                  improvement = false,
+                                                  rerender
+                                              }) {
     const [title, setTitle] = useState("");
     const [message, setMessage] = useState("");
     const [type, setType] = useState("TEXT");
@@ -951,9 +985,20 @@ function MarkAsUnCompleteAndAskForImprovement({route, appId, onClose, setData, o
             action: !improvement ? "uncomplete" : "uncomplete_with_edit"
         }, setLoading, `${route}/${appId}`, false, "جاري تعين هذا الطلب كغير مكتمل")
         if (request.status === 200) {
-            setData((oldData) => oldData.filter((item) => item.id !== appId))
-            onClose()
-            otherOnClose()
+            if (setData) {
+                setData((oldData) => oldData.filter((item) => item.id !== appId))
+            }
+            if (rerender) {
+                window.location.reload()
+            }
+            if (onClose) {
+
+                onClose()
+            }
+            if (otherOnClose) {
+
+                otherOnClose()
+            }
         }
     };
 
@@ -1087,7 +1132,7 @@ function MarkAsUnCompleteAndAskForImprovement({route, appId, onClose, setData, o
 }
 
 
-function MarkUnderReview({route, appId, onClose, setData}) {
+function MarkUnderReview({route, appId, onClose, setData, rerender}) {
     const [user, setUser] = useState(null)
     const [error, setError] = useState(null)
     const {setLoading} = useToastContext()
@@ -1101,8 +1146,16 @@ function MarkUnderReview({route, appId, onClose, setData}) {
             action: "review"
         }, setLoading, `${route}/${appId}`, false, "جاري تعين مشرف")
         if (request.status === 200) {
-            setData((oldData) => oldData.filter((item) => item.id !== appId))
-            onClose()
+            if (setData) {
+                setData((oldData) => oldData.filter((item) => item.id !== appId))
+            }
+            if (rerender) {
+                window.location.reload()
+            }
+            if (onClose) {
+
+                onClose()
+            }
             return request
         }
     }

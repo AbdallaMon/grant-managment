@@ -5,6 +5,7 @@ import {useRouter} from "next/navigation";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import AuthForm from "@/app/UiComponents/formComponents/forms/AuthForm";
+import {Typography} from "@mui/material";
 
 export default function ResetPage({searchParams: {token}}) {
     const {setLoading} = useToastContext();
@@ -27,7 +28,17 @@ export default function ResetPage({searchParams: {token}}) {
         }
     }
 
-    const subTitle = <Link href={"/login"} className="font-[500] flex justify-center mb-2 mt-1"> تسجيل الدخول؟</Link>;
+    const subTitle = (
+          <Typography
+                variant="body2"
+                color="secondary"
+                align="center"
+                sx={{mt: 1, mb: 2, fontWeight: 500}}
+                component={Link}
+                href="/login"
+          >
+              تسجيل الدخول؟ </Typography>
+    );
     return (
           <>
               <AuthForm

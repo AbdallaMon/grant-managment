@@ -32,7 +32,7 @@ export default function RootLayout({children}) {
               <ToastProvider>
                   <AuthProvider>
                       <Navbar/>
-                      {/*<DotsLoader/>*/}
+                      <DotsLoader/>
                       {children}
                   </AuthProvider>
               </ToastProvider>

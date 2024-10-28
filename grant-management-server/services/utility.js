@@ -202,7 +202,6 @@ export const verifyTokenAndHandleAuthorization = (req, res, next, role) => {
         req.user = decoded;
         next();
     } catch (error) {
-        console.log("error in middleware", error)
         return res.status(401).json({message: 'انتهت جلسة تسجيل الدخول'});
     }
 };
@@ -262,7 +261,28 @@ export async function searchData(body) {
         if (parsedFilters.type) {
             where.type = parsedFilters.type;
         }
+        if (parsedFilters.supervisorId) {
+            where.userGrants = {
+                some: {
+                    supervisorId: Number(parsedFilters.supervisorId)
+                }
+            }
+        }
+        if (parsedFilters.sponsorId) {
+            where.userGrants = {
+                some: {
+                    grant: {
+                        viewAccessUsers: {
+                            some: {
+                                id: Number(parsedFilters.sponsorId),
+                            },
+                        },
+                    },
+                },
+            };
+        }
     }
+
 
     const selectFields = {
         user: {
@@ -322,27 +342,21 @@ export async function getNotifications(searchParams, limit, skip, unread = true)
     if (unread) {
         where.isRead = false
     }
-    console.log(unread, "unread")
     const notifications = await prisma.notification.findMany({
         where: where,
         skip,
         take: limit,
+        orderBy: {
+            createdAt: 'desc',
+        },
     });
     const total = await prisma.notification.count({where: where});
     return {notifications, total};
 }
 
-export async function markNotificationAsRead(notificationId) {
-    const notification = await prisma.notification.update({
-        where: {id: Number(notificationId)},
-        data: {isRead: true},
-    });
-    return notification;
-}
 
 export async function markLatestNotificationsAsRead(userId) {
     const where = {isRead: false, userId: Number(userId)}
-    console.log(userId, "userId in unread")
     const notifications = await prisma.notification.updateMany({
         where,
         data: {isRead: true}
@@ -391,11 +405,9 @@ export async function createNotification(userId, content, href, type, isAdmin) {
         });
         adminUsers.forEach((admin) => {
             io.to(admin.id.toString()).emit('notification', notification);
-            console.log(`Notification emitted to admin with ID ${admin.id}`);
         });
     } else if (userId) {
         io.to(userId.toString()).emit('notification', notification);
-        console.log('Notification emitted to user:', userId);
     }
     return notification;
 }

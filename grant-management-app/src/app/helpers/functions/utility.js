@@ -30,8 +30,7 @@ export const getPropertyValue = (item, propertyPath, enums, type, defaultValue,)
     }, item);
     if (defaultValue) value = defaultValue
 
-    if ((propertyPath.toLowerCase().includes('date') || (propertyPath.toLowerCase().includes('year')) && dayjs(value).isValid()) || type === "date") {
-        console.log(value, "value")
+    if ((propertyPath.toLowerCase().includes('date') || type === "date") && dayjs(value).isValid()) {
         return dayjs(value).format('YYYY-MM-DD');
     }
     if (enums && type === "boolean") {

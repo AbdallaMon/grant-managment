@@ -4,9 +4,7 @@ import AdminTable from "@/app/UiComponents/DataViewer/AdminTable";
 import {Box} from "@mui/material";
 import {GrantType} from "@/app/helpers/constants";
 import FilterSelect from "@/app/UiComponents/formComponents/FilterSelect";
-import CreateModal from "@/app/UiComponents/models/CreateModal";
-import DrawerWithContent from "@/app/UiComponents/DataViewer/DrawerWithContent";
-import UserSelectorWithAction from "@/app/UiComponents/admin/UserSelectorWithAction";
+
 import {convertEnumToOptions} from "@/app/helpers/functions/utility";
 
 const columns = [

@@ -48,7 +48,6 @@ export async function getPendingPaymentsByMonth(startOfMonth, endOfMonth, status
             dueDate: 'asc'
         }
     });
-    console.log(payments, "pa")
     return payments;
 }
 
@@ -112,7 +111,7 @@ const PayEveryType = {
 };
 
 export async function getUserGrants(appId) {
-    return await prisma.userGrant.findMany({
+    const grants = await prisma.userGrant.findMany({
         where: {applicationId: Number(appId)},
         include: {
             grant: {
@@ -138,15 +137,34 @@ export async function getUserGrants(appId) {
             },
         }
     });
+    const application = await prisma.application.findUnique({
+        where: {
+            id: Number(appId)
+        }, select: {
+            status: true
+        }
+    })
+    return {application, grants}
 }
 
 export async function createUserGrant(body, appId) {
     const {userId, payments, grantId, startDate, endDate, payEvery, totalAmounts, totalAmountLeft} = body
+    const application = await prisma.application.findUnique({
+        where: {
+            id: Number(appId)
+        }, select: {
+            supervisorId: true
+        }
+    })
+    if (!application.supervisorId) {
+        throw new Error("هذة المنحة غير مرتبطه بمشرف يجب تعين مشرف اولا قبل اتخاذ اي اجراء")
+    }
     const userGrant = await prisma.userGrant.create({
         data: {
             userId: Number(userId),
             grantId: Number(grantId),
             applicationId: Number(appId),
+            supervisorId: application.supervisorId,
             startDate: new Date(startDate),
             endDate: new Date(endDate),
             totalAmounts,

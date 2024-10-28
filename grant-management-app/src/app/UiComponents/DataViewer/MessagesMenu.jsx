@@ -17,6 +17,8 @@ import {FaEnvelope} from 'react-icons/fa';
 import Link from 'next/link';
 import io from 'socket.io-client';
 import {useAuth} from '@/app/providers/AuthProvider';
+import {useParams, useSearchParams} from "next/navigation";
+import useSoundPermission from "@/app/helpers/hooks/useSoundPermission";
 
 const url = process.env.NEXT_PUBLIC_URL;
 
@@ -26,7 +28,8 @@ const MessagesIcon = () => {
     const [messages, setMessages] = useState([]);
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
-
+    const searchParams = useSearchParams()
+    const userId = searchParams.get("userId")
     const getSenderDisplayName = (sender) => {
         if (sender.personalInfo?.basicInfo) {
             const name = sender.personalInfo.basicInfo.name || '';
@@ -38,6 +41,8 @@ const MessagesIcon = () => {
             return sender.email;
         }
     };
+    const canPlaySound = useSoundPermission();
+    const messageSound = typeof Audio !== "undefined" && new Audio('/message-sound.mp3');
 
     useEffect(() => {
         const fetchLastMessages = async () => {
@@ -47,8 +52,6 @@ const MessagesIcon = () => {
                 });
                 const data = await response.json();
                 setMessages(data.data);
-
-                // Update unread count based on messages with status SENT
                 const unreadMessagesCount = data.data.filter(
                       (message) => message.status === 'SENT'
                 ).length;
@@ -69,14 +72,22 @@ const MessagesIcon = () => {
         socket.emit('join-user-room', {userId: user.id});
 
         socket.on('newMessage', (message) => {
-            setMessages((prev) => {
-                // Remove any existing message from the same sender
-                const filteredMessages = prev.filter(
-                      (msg) => msg.senderId !== message.senderId
-                );
-                return [message, ...filteredMessages];
-            });
-            setUnreadCount((prev) => prev + 1);
+            if (userId && +userId === +message.senderId) {
+            } else {
+                setMessages((prev) => {
+                    // Remove any existing message from the same sender
+                    const filteredMessages = prev.filter(
+                          (msg) => msg.senderId !== message.senderId
+                    );
+                    return [message, ...filteredMessages];
+                });
+                setUnreadCount((prev) => prev + 1);
+                if (messageSound && canPlaySound) {
+                    messageSound.play().catch((error) => {
+                        console.error('Error playing message sound:', error);
+                    });
+                }
+            }
         });
 
         return () => {
@@ -86,14 +97,12 @@ const MessagesIcon = () => {
 
     const handleOpen = async (event) => {
         setAnchorEl(event.currentTarget);
-        // On open, make a request to mark messages with status SENT as DELIVERED
         try {
             const response = await fetch(`${url}/utility/messages/mark-as-delivered`, {
                 method: 'POST',
                 credentials: 'include',
             });
             if (response.ok) {
-                // Update messages status locally
                 setMessages((prevMessages) =>
                       prevMessages.map((message) => {
                           if (message.status === 'SENT') {
@@ -102,7 +111,7 @@ const MessagesIcon = () => {
                           return message;
                       })
                 );
-                setUnreadCount(0); // Reset unread count
+                setUnreadCount(0);
             } else {
                 console.error('Failed to mark messages as delivered');
             }

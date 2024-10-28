@@ -6,7 +6,7 @@ import CreateModal from "@/app/UiComponents/models/CreateModal";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import {StudySource} from "@/app/helpers/constants";
-import {Button} from "@mui/material";
+import {Box, Button} from "@mui/material";
 import Link from "next/link";
 import {useGrantLinks} from "@/app/providers/GrantLinksProvider";
 
@@ -152,8 +152,8 @@ export default function SiblingsPage({id, extraParams, route}) {
     ];
     const {nonFilledLinks, setNotFilledLinks} = useGrantLinks()
     useEffect(() => {
-        if (data.length > 0) {
-            const nowNonFilled = nonFilledLinks.filter((item) => item.key !== "siblings")
+        if (data.length > 0 && nonFilledLinks) {
+            const nowNonFilled = nonFilledLinks?.filter((item) => item.key !== "siblings")
             setNotFilledLinks(nowNonFilled)
         }
     }, [data])
@@ -173,15 +173,17 @@ export default function SiblingsPage({id, extraParams, route}) {
 
     return (
           <div>
-              <CreateModal
-                    setData={setData}
-                    label={"اضافة قريب جديد"}
-                    inputs={inputs}
-                    href={`student/applications/draft/${id}?model=siblings`}
-                    extraProps={{formTitle: "اضافة قريب جديد", btnText: "اضافة"}}
-                    setTotal={setTotal}
-                    handleBeforeSubmit={handleBeforeSubmit}
-              />
+              <Box width="fit-content" mx={2}>
+                  <CreateModal
+                        setData={setData}
+                        label={"اضافة اخ جديد"}
+                        inputs={inputs}
+                        href={`student/applications/draft/${id}?model=siblings`}
+                        extraProps={{formTitle: "اضافة اخ جديد", btnText: "اضافة"}}
+                        setTotal={setTotal}
+                        handleBeforeSubmit={handleBeforeSubmit}
+                  />
+              </Box>
               <AdminTable
                     withEdit={true}
                     data={data}
@@ -198,9 +200,10 @@ export default function SiblingsPage({id, extraParams, route}) {
                     checkChanges={true}
                     totalPages={totalPages}
                     handleBeforeSubmit={handleBeforeSubmit}
-                    editHref={"student/applications/draft/apps/siblings"}
+                    editHref={"student/applications/draft"}
                     withDelete={true}
-                    deleteHref={"student/applications/draft/apps/siblings"}
+                    deleteHref={"student/applications/draft"}
+                    extraEditParams="?model=siblings"
               />
               {data && data.length > 0 &&
                     <Button component={Link} href={`/dashboard/applications/${route}/${id}/supporting-files`}

@@ -27,7 +27,7 @@ const roleBasedLinks = {
         {name: "لوحة التحكم", route: "dashboard"},
         {name: "المستخدمين", route: "users"},
         {name: "المنح", route: "grants"},
-        {name: "الشكاوي", route: "complaints"},
+        {name: "الشكاوي", route: "tickets"},
         {name: "مهام المشرفين", route: "tasks"},
         {name: "الدفعات", route: "payments"},
         {name: "الفواتير", route: "invoices"},
@@ -45,12 +45,15 @@ const roleBasedLinks = {
         {name: "لوحة التحكم", route: "dashboard"},
         {name: "المنح الدراسية", route: "grants"},
         {name: "الملف الشخصي", route: "profile"},
+        {name: "الشكاوي", route: "tickets"},
     ],
     SPONSOR: [
         {name: "لوحة التحكم", route: "dashboard"},
+        {name: "الطلاب", route: "students"},
     ],
     DONOR: [
         {name: "لوحة التحكم", route: "dashboard"},
+        {name: "الطلاب", route: "students"},
     ],
 };
 
