@@ -137,7 +137,6 @@ router.post('/applications/draft/:appId', async (req, res) => {
 router.put('/applications/draft/:appId', async (req, res) => {
     const {appId} = req.params;
     const {model} = req.query;
-    console.log(req.params, "req.params")
     const inputData = req.body;
     try {
         if (!model) {

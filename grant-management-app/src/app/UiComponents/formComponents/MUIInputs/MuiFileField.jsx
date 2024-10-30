@@ -34,7 +34,7 @@ export default function MuiFileField({
                 setPreview(null)
                 return;
             }
-            if (!file.type.startsWith("image/") || file.type !== "application/pdf") {
+            if (!file.type.startsWith("image/") && file.type !== "application/pdf") {
                 setError("نوع الملف غير مدعوم (يجب ان يكون الملف صورة او pdf");
                 setValue(id, null)
                 setPreview(null)
@@ -52,8 +52,7 @@ export default function MuiFileField({
 
         }
     };
-
-    const isPdf = preview && preview.includes(".pdf");
+    const isPdf = preview && preview.startsWith("data:application/pdf");
     const renderPreview = () => {
         if (!preview) return null;
 

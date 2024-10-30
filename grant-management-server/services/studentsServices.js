@@ -421,7 +421,6 @@ export const submitApplication = async (appId) => {
 
 export async function getPendingFieldsAndRequests(appId, status) {
     const application = await prisma.application.findUnique({where: {id: Number(appId), status}})
-    console.log(application, "application")
     if (!application) throw new Error("ليس هناك طلب بهذه الحاله")
     const askedFields = await prisma.askedField.findMany({
         where: {

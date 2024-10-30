@@ -30,16 +30,17 @@ initSocket(httpServer); // Initialize socket.io with the server
 
 app.use(express.json());
 app.use(cookieParser());
-app.use('/uploads', express.static('uploads')); // Serve static files
+// app.use('/uploads', express.static('uploads')); // Serve static files
 
 // Routes
 app.post('/upload', verifyTokenUsingReq, async (req, res) => {
     try {
         const fileUrls = await uploadFiles(req, res);
+        console.log("files uploaded")
         res.status(200).json({data: fileUrls, message: 'تم رفع ملفاتك جاري اتمام عملية التخزين'});
     } catch (err) {
         console.log(err, 'Error uploading files');
-        res.status(500).json({message: 'Failed to upload files', error: err.message});
+        res.status(500).json({message: 'حدثت مشكلة غير متوفعة حاول مره اخري بعد قليل', error: err.message});
     }
 });
 

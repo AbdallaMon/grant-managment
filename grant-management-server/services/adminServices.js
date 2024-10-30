@@ -146,7 +146,6 @@ export async function createNonStudentUser(user, role) {
 }
 
 export async function editNonStudentUser(user, userId) {
-    console.log(user, "user")
     let hashedPassword = undefined
     if (user.password) {
         hashedPassword = bcrypt.hashSync(user.password, 8);

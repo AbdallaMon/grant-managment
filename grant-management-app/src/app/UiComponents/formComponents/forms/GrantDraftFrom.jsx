@@ -124,22 +124,27 @@ export function GrantDraftFrom({
         }
     }, [saved]);
     const onSubmit = async (formData) => {
-        if (handleBeforeUpdate) {
-            formData = await handleBeforeUpdate(formData, currentData)
-        }
-        const request = await handleRequestSubmit(
-              formData,
-              setLoading,
-              `student/applications/draft/${appId}?model=${current}`,
-              isFileUpload,
-              "جاري الحفظ",
-              null,
-              !currentData ? "POST" : "PUT"
-        );
-        if (request.status === 200) {
-            setSubmitted(true);
-            const nowNonFilled = nonFilledLinks.filter((item) => item.key !== current)
-            setNotFilledLinks(nowNonFilled)
+        try {
+
+            if (handleBeforeUpdate) {
+                formData = await handleBeforeUpdate(formData, currentData)
+            }
+            const request = await handleRequestSubmit(
+                  formData,
+                  setLoading,
+                  `student/applications/draft/${appId}?model=${current}`,
+                  isFileUpload,
+                  "جاري الحفظ",
+                  null,
+                  !currentData ? "POST" : "PUT"
+            );
+            if (request.status === 200) {
+                setSubmitted(true);
+                const nowNonFilled = nonFilledLinks.filter((item) => item.key !== current)
+                setNotFilledLinks(nowNonFilled)
+            }
+        } catch (e) {
+
         }
     };
 

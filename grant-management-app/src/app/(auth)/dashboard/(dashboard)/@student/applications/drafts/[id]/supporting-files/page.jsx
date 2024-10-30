@@ -85,6 +85,7 @@ export default function SupportingFiles({params: {id}}) {
         const request = await handleRequestSubmit(formData, setLoading, "upload", true, "جاري رفع  ملفاتك")
         if (request.status === 200)
             return request.data
+        throw new Error("حدثت مشكلة اثناء رفع الملفات")
     }
 
     return (

@@ -3,6 +3,8 @@
 import {useEffect} from "react";
 import {useRouter} from "next/navigation";
 import {useAuth} from "@/app/providers/AuthProvider";
+import {Box} from "@mui/material";
+import colors from "@/app/helpers/colors";
 
 export default function HandleAuth({children}) {
     const {isLoggedIn} = useAuth()
@@ -27,10 +29,18 @@ export default function HandleAuth({children}) {
 
     return (
           <>
-              <div className={"flex bg-bgSecondary p-3  w-full h-full min-h-screen "}>
+              <Box sx={{
+                  backgroundColor: colors.bgSecondary,
+
+                  p: 1.5,
+                  display: "flex",
+                  width: "100%",
+                  minHeight: "100vh"
+
+              }}>
 
                   {children}
-              </div>
+              </Box>
           </>
     );
 }

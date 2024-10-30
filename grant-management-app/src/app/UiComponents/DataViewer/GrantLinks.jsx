@@ -85,7 +85,21 @@ function GrantCard({item, appId, uncomplete = false}) {
     }
 
     return (
-          <Grid size={{xs: 4, md: 2, lg: 4}} sx={{display: 'flex'}}>
+          <Grid size={{xs: 4, md: 2, lg: 4}} sx={(theme) => ({
+
+              boxShadow: 3,
+              transition: 'transform 0.2s ease-in-out',
+              backgroundColor: isFilled
+                    ? theme.palette.secondary.main
+                    : theme.palette.background.paper,
+              '&:hover': {
+                  transform: 'scale(1.05)',
+              },
+              border: isActive
+                    ? `1px solid ${theme.palette.secondary.main}`
+                    : 'none',
+              borderRadius: 1
+          })}>
               <Box component={Link}
                    href={`/dashboard/applications/${uncomplete ? "uncomplete" : "drafts"}/${appId}/${item.href}`}
                    sx={{textDecoration: 'none', width: '100%'}}>
@@ -94,21 +108,12 @@ function GrantCard({item, appId, uncomplete = false}) {
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
-                            justifyContent: 'space-between',
                             padding: {xs: 1, md: 2},
                             textAlign: 'center',
-                            boxShadow: 3,
+                            boxShadow: 0,
                             height: '100%',
-                            transition: 'transform 0.2s ease-in-out',
-                            backgroundColor: isFilled
-                                  ? theme.palette.secondary.main
-                                  : theme.palette.background.paper, // Background color based on isFilled
-                            '&:hover': {
-                                transform: 'scale(1.05)',
-                            },
-                            border: isActive
-                                  ? `1px solid ${theme.palette.secondary.main}`
-                                  : 'none',
+                            backgroundColor: "transparent"
+
                         })}
                   >
                       <CardMedia
