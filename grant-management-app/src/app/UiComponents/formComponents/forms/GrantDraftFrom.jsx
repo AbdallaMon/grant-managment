@@ -1,5 +1,5 @@
 "use client"
-import {Form} from "@/app/UiComponents/formComponents/forms/Form";
+import {MainForm} from "@/app/UiComponents/formComponents/forms/MainForm";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import {useEffect, useState} from "react";
@@ -179,7 +179,7 @@ export function GrantDraftFrom({
             default:
                 return (
                       <Box mt={4}>
-                          <Form inputs={prefilledInputs} onSubmit={onSubmit} {...formProps} />
+                          <MainForm inputs={prefilledInputs} onSubmit={onSubmit} {...formProps} />
                       </Box>
                 );
         }

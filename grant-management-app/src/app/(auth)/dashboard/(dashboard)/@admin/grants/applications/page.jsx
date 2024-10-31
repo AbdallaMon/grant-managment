@@ -34,7 +34,7 @@ export default function Applications() {
     } = useDataFetcher("admin/grants/applications/pending", false);
     return (
           <Box mt={2}>
-              <Box display="flex" width="fit-content" gap={2} px={2}>
+              <Box display="flex" width="fit-content" gap={2} px={2} flexWrap="wrap">
                   <SearchComponent
                         apiEndpoint="search?model=user"
                         setFilters={setFilters}

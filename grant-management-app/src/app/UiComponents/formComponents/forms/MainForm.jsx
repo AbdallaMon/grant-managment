@@ -1,35 +1,34 @@
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
 import {useForm} from "react-hook-form";
-import {Box, Button, Typography} from "@mui/material";
-import Grid from "@mui/material/Grid2"
-import TextAreaField from "@/app/UiComponents/FormComponents/MUIInputs/TextAreaField";
-import {MuiSelect} from "@/app/UiComponents/FormComponents/MUIInputs/MuiSelect";
-import {MuiDatePicker} from "@/app/UiComponents/FormComponents/MUIInputs/MuiDatePicker";
-import MuiSwitchField from "@/app/UiComponents/FormComponents/MUIInputs/MuiSwitchField";
+import {Box, Button, Typography, Grid2 as Grid} from "@mui/material";
+import MuiTextAreaField from "@/app/UiComponents/formComponents/MUIInputs/MuiTextAreaField";
+import {MuiAutoCompleteSelect} from "@/app/UiComponents/formComponents/MUIInputs/MuiAutoCompleteSelect";
+import {MDatePicker} from "@/app/UiComponents/formComponents/MUIInputs/MDatePicker";
+import MuiSwitch from "@/app/UiComponents/formComponents/MUIInputs/MuiSwitch";
 import {useRef} from "react";
-import SelectField from "@/app/UiComponents/FormComponents/MUIInputs/SelectField";
-import InputField from "@/app/UiComponents/FormComponents/MUIInputs/InputField";
+import SimpleSelect from "@/app/UiComponents/formComponents/MUIInputs/SimpleSelect";
+import MuiInputField from "@/app/UiComponents/formComponents/MUIInputs/MuiInputField";
 import MuiFileField from "@/app/UiComponents/formComponents/MUIInputs/MuiFileField";
 
 const locales = ["en-gb"];
 
-export function Form({
-                         formStyle,
-                         onSubmit,
-                         inputs,
-                         variant,
-                         formTitle,
-                         subTitle,
-                         btnText,
-                         differentButton,
-                         children,
-                         extraData,
-                         disabled,
-                         reFetch,
-                         gridGap = 2,
-                         removeButton = false,
-                     }) {
+export function MainForm({
+                             formStyle,
+                             onSubmit,
+                             inputs,
+                             variant,
+                             formTitle,
+                             subTitle,
+                             btnText,
+                             differentButton,
+                             children,
+                             extraData,
+                             disabled,
+                             reFetch,
+                             gridGap = 2,
+                             removeButton = false,
+                         }) {
     const {
         formState,
         register,
@@ -124,7 +123,7 @@ function RenderInputs({
     switch (input.data.type) {
         case "SelectField":
             return (
-                  <SelectField
+                  <SimpleSelect
                         key={input.data.id}
                         select={input}
                         register={register}
@@ -135,7 +134,7 @@ function RenderInputs({
             );
         case "textarea":
             return (
-                  <TextAreaField
+                  <MuiTextAreaField
                         errors={errors}
                         input={input}
                         register={register}
@@ -146,7 +145,7 @@ function RenderInputs({
             );
         case "select":
             return (
-                  <MuiSelect
+                  <MuiAutoCompleteSelect
                         errors={errors}
                         register={register}
                         variant={variant}
@@ -161,7 +160,7 @@ function RenderInputs({
             );
         case "date":
             return (
-                  <MuiDatePicker
+                  <MDatePicker
                         input={input}
                         control={control}
                         key={input.data.id}
@@ -173,7 +172,7 @@ function RenderInputs({
             );
         case "switch":
             return (
-                  <MuiSwitchField
+                  <MuiSwitch
                         register={register}
                         control={control}
                         input={input}
@@ -182,7 +181,7 @@ function RenderInputs({
             );
         case "number":
             return (
-                  <InputField
+                  <MuiInputField
                         key={input.data.id}
                         input={input}
                         register={register}
@@ -211,7 +210,7 @@ function RenderInputs({
             />
         default:
             return (
-                  <InputField
+                  <MuiInputField
                         key={input.data.id}
                         input={input}
                         register={register}

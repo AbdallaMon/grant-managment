@@ -34,9 +34,8 @@ export default function HandleAuth({children}) {
 
                   p: 1.5,
                   display: "flex",
-                  width: "100%",
-                  minHeight: "100vh"
-
+                  minHeight: "100vh",
+                  justifyContent: "center"
               }}>
 
                   {children}

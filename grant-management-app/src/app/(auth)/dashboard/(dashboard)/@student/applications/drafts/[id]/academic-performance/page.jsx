@@ -76,10 +76,11 @@ export default function AcademicPerformance({params: {id}}) {
         if (PUT && !data.transcript[0]) return data;
         const formData = new FormData()
         formData.append('transcript', data.transcript[0]);
-
+        console.log(data, "data")
         const transcriptFile = await handleRequestSubmit(formData, setLoading, "upload", true, "جاري رفع ملف الشهادة")
         if (transcriptFile.status === 200)
             return {...data, transcript: transcriptFile.data.transcript}
+        throw new Error("حدثت مشكلة اثناء رفع الملفات")
     }
 
     return (

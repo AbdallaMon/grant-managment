@@ -63,7 +63,7 @@ export default function GrantPage() {
 
     return (
           <Box mt={2}>
-              <Box display="flex" width="fit-content" gap={2} px={2}>
+              <Box display="flex" width="fit-content" gap={2} px={2} flexWrap="wrap">
                   <FilterSelect options={convertEnumToOptions(GrantType)} label={"نوع المنحة"}
                                 loading={false}
                                 param={"type"}

@@ -1,7 +1,6 @@
 import {useEffect, useState} from "react";
-import Grid from "@mui/material/Grid2";
-import {FormControl, MenuItem, Select, TextField, FormHelperText} from "@mui/material";
-import InputField from "@/app/UiComponents/formComponents/MUIInputs/InputField";
+import {FormControl, MenuItem, Select, TextField, FormHelperText, Grid2 as Grid} from "@mui/material";
+import MuiInputField from "@/app/UiComponents/formComponents/MUIInputs/MuiInputField";
 
 export default function GpaField({errors, register, setValue, input}) {
     const [gpaType, setGpaType] = useState(input.data.defaultValue?.gpaType);
@@ -21,7 +20,7 @@ export default function GpaField({errors, register, setValue, input}) {
               <Grid container spacing={2}>
                   <Grid size={6}>
                       <FormControl fullWidth margin="none" error={Boolean(errors.gpaType)}>
-                          <InputField>نوع المعدل الاكاديمي</InputField>
+                          <MuiInputField>نوع المعدل الاكاديمي</MuiInputField>
                           <Select
                                 {...register("gpaType", {required: "هذه الخانة مطلوبة"})}
                                 value={gpaType}

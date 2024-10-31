@@ -10,16 +10,16 @@ import {
 } from "@mui/material";
 import {Controller} from "react-hook-form";
 
-export function MuiSelect({
-                              select,
-                              variant,
-                              control,
-                              errors,
-                              extraData,
-                              disabled,
-                              triggerValue,
-                              reFetch,
-                          }) {
+export function MuiAutoCompleteSelect({
+                                          select,
+                                          variant,
+                                          control,
+                                          errors,
+                                          extraData,
+                                          disabled,
+                                          triggerValue,
+                                          reFetch,
+                                      }) {
     return (
           <MUIAutoComplete
                 select={select}

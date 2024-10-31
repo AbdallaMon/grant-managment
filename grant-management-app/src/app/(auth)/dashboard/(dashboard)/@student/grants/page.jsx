@@ -4,9 +4,8 @@ import {
     Button,
     Typography,
     Card,
-    CardContent, Modal, Fade,
+    CardContent, Modal, Fade, Grid2 as Grid
 } from "@mui/material";
-import Grid from "@mui/material/grid2"
 import FullScreenLoader from "@/app/UiComponents/feedback/loaders/FullscreenLoader";
 import useDataFetcher from "@/app/helpers/hooks/useDataFetcher";
 import PaginationWithLimit from "@/app/UiComponents/DataViewer/PaginationWithLimit";
@@ -63,11 +62,13 @@ function CreateNewAppModel() {
     const [open, setOpen] = useState(false)
     const {setLoading} = useToastContext()
     const router = useRouter()
+    const [clicked, setClicked] = useState(false)
 
     async function handleSubmit() {
         const response = await handleRequestSubmit({}, setLoading, "student/applications/draft", false, "جاري الانشاء وسيتم تحويلك بعد لحظات")
         if (response.status === 200) {
             const id = response.id
+            setClicked(true)
             router.push("/dashboard/applications/drafts/" + id)
         }
     }
@@ -94,7 +95,9 @@ function CreateNewAppModel() {
                       </Typography>
                       <Box sx={{display: 'flex', justifyContent: 'flex-end', marginTop: '16px'}}>
                           <Button variant="contained" color="primary"
-                                  onClick={handleSubmit}>
+                                  onClick={handleSubmit}
+                                  disabled={!!clicked}
+                          >
                               نعم
                           </Button>
                           <Button variant="contained" onClick={handleClose} sx={{marginLeft: '8px'}} color="error">

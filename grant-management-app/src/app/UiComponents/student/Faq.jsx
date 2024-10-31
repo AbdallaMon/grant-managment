@@ -3,8 +3,7 @@ import React, {useState} from "react";
 import {
     Box,
     Typography,
-    Checkbox,
-    FormControlLabel,
+
     Paper,
     List,
     ListItemText,

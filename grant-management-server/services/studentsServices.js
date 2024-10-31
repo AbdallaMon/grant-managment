@@ -119,7 +119,9 @@ export const createDraftApplicationModel = async (appId, model, inputData) => {
                 throw new Error("المعدل التراكمي يجب ان يكون اكبر من 0 واقل من او يساوي 100 اذا كان نوعه معدل مئوي")
             }
             return await prisma.application.update({
-                where: {id: Number(appId), status: 'DRAFT'},
+                where: {
+                    id: Number(appId), status: "DRAFT",
+                },
                 data: {
                     academicPerformance: {
                         create: {
@@ -149,7 +151,7 @@ export const createDraftApplicationModel = async (appId, model, inputData) => {
             if (inputData.grantAmount === "") inputData.grantAmount = null
             if (inputData.grantAmount) inputData.grantAmount = +inputData.grantAmount;
             return await prisma.application.update({
-                where: {id: Number(appId), status: 'DRAFT'},
+                where: {id: Number(appId), status: {in: ['DRAFT', 'UN_COMPLETE']}},
                 data: {
                     siblings: {
                         create: inputData,
@@ -197,7 +199,9 @@ export const updateApplicationModel = async (appId, model, inputData) => {
                 })
             }
             const update = await prisma.application.update({
-                where: {id: Number(appId), status: 'DRAFT'},
+                where: {
+                    id: Number(appId), status: {in: ['DRAFT', 'UN_COMPLETE']},
+                },
                 data: {
                     supportingFiles: {
                         update: inputData
@@ -210,7 +214,9 @@ export const updateApplicationModel = async (appId, model, inputData) => {
             return update;
         case 'scholarshipInfo':
             return await prisma.application.update({
-                where: {id: Number(appId), status: 'DRAFT'},
+                where: {
+                    id: Number(appId), status: {in: ['DRAFT', 'UN_COMPLETE']},
+                },
                 data: {
                     scholarshipInfo: {
                         update: {
@@ -243,7 +249,9 @@ export const updateApplicationModel = async (appId, model, inputData) => {
             }
 
             const updatedApplication = await prisma.application.update({
-                where: {id: Number(appId)},
+                where: {
+                    id: Number(appId), status: {in: ['DRAFT', 'UN_COMPLETE']},
+                },
                 data: {
                     academicPerformance: {
                         update: {
@@ -270,7 +278,9 @@ export const updateApplicationModel = async (appId, model, inputData) => {
             if (inputData.motherStatus !== "ALIVE") inputData.motherIncome = 0;
 
             return await prisma.application.update({
-                where: {id: Number(appId), status: 'DRAFT'},
+                where: {
+                    id: Number(appId), status: {in: ['DRAFT', 'UN_COMPLETE']},
+                },
                 data: {
                     residenceInfo: {
                         update: inputData
@@ -305,12 +315,16 @@ export const updateApplicationModel = async (appId, model, inputData) => {
             return updated;
         case 'commitment':
             return await prisma.application.update({
-                where: {id: Number(appId), status: 'DRAFT'},
+                where: {
+                    id: Number(appId), status: {in: ['DRAFT', 'UN_COMPLETE']},
+                },
                 data: {commitment: inputData}
             });
         case 'grantShipTerms':
             return await prisma.application.update({
-                where: {id: Number(appId), status: 'DRAFT'},
+                where: {
+                    id: Number(appId), status: {in: ['DRAFT', 'UN_COMPLETE']},
+                },
                 data: {grantShipTerms: inputData}
             });
         default:

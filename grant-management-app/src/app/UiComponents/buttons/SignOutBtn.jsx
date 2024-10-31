@@ -6,7 +6,7 @@ import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import {useAuth} from "@/app/providers/AuthProvider";
 
-export default function LogoutButton({fit}) {
+export default function SignOutBtn({fit}) {
     const {setLoading} = useToastContext();
     const {setUser, setIsLoggedIn} = useAuth()
     const router = useRouter();

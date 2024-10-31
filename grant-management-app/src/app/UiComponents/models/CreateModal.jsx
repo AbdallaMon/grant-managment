@@ -9,7 +9,7 @@ import {
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import {simpleModalStyle} from "@/app/helpers/constants";
-import {Form} from "@/app/UiComponents/formComponents/forms/Form";
+import {MainForm} from "@/app/UiComponents/formComponents/forms/MainForm";
 
 
 const CreateModal = ({
@@ -73,12 +73,12 @@ const CreateModal = ({
               >
                   <Fade in={open}>
                       <Box sx={{...simpleModalStyle}}>
-                          <Form
+                          <MainForm
                                 onSubmit={onSubmit}
                                 inputs={inputs}
                                 {...extraProps}
                           >
-                          </Form>
+                          </MainForm>
                       </Box>
                   </Fade>
               </Modal>

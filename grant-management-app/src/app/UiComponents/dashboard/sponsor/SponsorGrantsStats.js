@@ -1,10 +1,9 @@
 // components/SponsorGrantsStats.js
 import React, {useEffect, useState} from 'react';
-import {Card, CardContent, Typography, useTheme} from '@mui/material';
+import {Card, CardContent, Typography, useTheme, Grid2 as Grid} from '@mui/material';
 import LoadingOverlay from '@/app/UiComponents/feedback/loaders/LoadingOverlay';
 import {useAuth} from '@/app/providers/AuthProvider';
 import {getData} from '@/app/helpers/functions/getData';
-import Grid from "@mui/material/Grid2";
 
 const SponsorGrantsStats = () => {
     const [stats, setStats] = useState(null);

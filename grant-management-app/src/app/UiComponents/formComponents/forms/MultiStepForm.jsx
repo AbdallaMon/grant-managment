@@ -14,11 +14,12 @@ import {
     InputLabel,
     FormControl,
     CircularProgress,
-    Grid, InputAdornment
+    Grid2 as Grid, InputAdornment
 } from '@mui/material';
-import {handleRequestSubmit} from "@/helpers/functions/handleSubmit";
-import {useToastContext} from "@/providers/ToastLoadingProvider";
+
 import PasswordField from "@/app/UiComponents/FormComponents/MUIInputs/PasswordField";
+import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
+import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 
 const fetchOptions = async (id) => {
     const response = await fetch(`/api/index?id=${id}`);
@@ -153,53 +154,53 @@ const MultiStepForm = () => {
         return (
               <Box>
                   <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{xs: 12, sm: 6}}>
                           <Typography variant="body1" fontWeight="bold">Name</Typography>
                           <Typography variant="body2">{data.name}</Typography>
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{xs: 12, sm: 6}}>
                           <Typography variant="body1" fontWeight="bold">Emirates ID</Typography>
                           <Typography variant="body2">{data.emiratesId}</Typography>
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{xs: 12, sm: 6}}>
                           <Typography variant="body1" fontWeight="bold">Email</Typography>
                           <Typography variant="body2">{data.email}</Typography>
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{xs: 12, sm: 6}}>
                           <Typography variant="body1" fontWeight="bold">Education</Typography>
                           <Typography variant="body2">{data.graduationName}</Typography>
                       </Grid>
-                      <Grid item xs={6} sm={6}>
+                      <Grid size={{xs: 12, sm: 6}}>
                           <Typography variant="body1" fontWeight="bold">Zone</Typography>
                           <Typography variant="body2">{data.zone}</Typography>
                       </Grid>
-                      <Grid item xs={6} sm={6}>
+                      <Grid size={{xs: 12, sm: 6}}>
                           <Typography variant="body1" fontWeight="bold">Gender</Typography>
                           <Typography variant="body2">{data.gender}</Typography>
                       </Grid>
-                      <Grid item xs={6} sm={6}>
+                      <Grid size={{xs: 12, sm: 6}}>
                           <Typography variant="body1" fontWeight="bold">Phone</Typography>
                           <Typography variant="body2">{data.phone}</Typography>
                       </Grid>
-                      <Grid item xs={6} sm={6}>
+                      <Grid size={{xs: 12, sm: 6}}>
                           <Typography variant="body1" fontWeight="bold">Duty</Typography>
                           <Typography
                                 variant="body2">{dutyOptions.find(option => option.id === data.dutyId)?.name || ''}</Typography>
                       </Grid>
-                      <Grid item xs={6} sm={6}>
+                      <Grid size={{xs: 12, sm: 6}}>
                           <Typography variant="body1" fontWeight="bold">Center</Typography>
                           <Typography
                                 variant="body2">{centerOptions.find(option => option.id === data.centerId)?.name || ''}</Typography>
                       </Grid>
-                      <Grid item xs={6} sm={6}>
+                      <Grid size={{xs: 12, sm: 6}}>
                           <Typography variant="body1" fontWeight="bold">Bank Name</Typography>
                           <Typography variant="body2">{data.bankName}</Typography>
                       </Grid>
-                      <Grid item xs={6} sm={6}>
+                      <Grid size={{xs: 12, sm: 6}}>
                           <Typography variant="body1" fontWeight="bold">Bank User Name</Typography>
                           <Typography variant="body2">{data.bankUserName}</Typography>
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid size={12}>
                           <Typography variant="body1" fontWeight="bold">IBAN</Typography>
                           <Typography variant="body2">{data.ibanBank}</Typography>
                       </Grid>

@@ -7,6 +7,10 @@ import colors from "@/app/helpers/colors";
 
 
 const theme = createTheme({
+    zIndex: {
+        modal: 1300,      // Modal z-index
+        snackbar: 1500,   // Snackbar z-index above Modal
+    },
     direction: "rtl",
     palette: {
         primary: {

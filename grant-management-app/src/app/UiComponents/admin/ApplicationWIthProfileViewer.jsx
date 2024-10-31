@@ -7,8 +7,10 @@ import {
     Card,
     CardContent,
     Divider, TextField, MenuItem, Snackbar, IconButton, Alert,
+    Avatar, List,
+    ListItem,
+    ListItemText, Portal,
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
 import {MdOutlineExpandMore as ExpandMoreIcon} from "react-icons/md";
 import {MdOutlineExpandLess as ExpandLessIcon} from "react-icons/md";
 import {AiOutlineEdit as EditIcon} from "react-icons/ai";
@@ -16,20 +18,14 @@ import {FaDeleteLeft as DeleteIcon} from "react-icons/fa6";
 import CircularProgress from "@mui/material/CircularProgress";
 import {getData} from "@/app/helpers/functions/getData";
 import FullScreenLoader from "@/app/UiComponents/feedback/loaders/FullscreenLoader";
-import {MdDateRange as DateIcon} from "react-icons/md";
 
 import {
     ApplicationStatus,
-    FieldStatus, FieldType,
     GenderType,
-    GpaType,
-    ParentStatus,
-    ResidenceType, StatusColor,
-    StudySource,
-    StudyType,
-    SupportType
+
+    StatusColor,
+
 } from "@/app/helpers/constants";
-import {renderFileLink} from "@/app/helpers/functions/utility";
 import dayjs from "dayjs";
 import MuiAlert from "@mui/material/Alert";
 import ConfirmWithActionModel from "@/app/UiComponents/models/ConfirmsWithActionModel";
@@ -37,7 +33,150 @@ import SearchComponent from "@/app/UiComponents/formComponents/SearchComponent";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import DrawerWithContent from "@/app/UiComponents/DataViewer/DrawerWithContent";
-import {Form} from "@/app/UiComponents/formComponents/forms/Form";
+import ApplicationDataView from "@/app/UiComponents/admin/ApplicationDataView";
+import {RenderImprovementsAndAskedFields} from "@/app/UiComponents/admin/RenderImprovementsAndAskedFields";
+import UserGrantsView from "@/app/UiComponents/DataViewer/UserGrantsView";
+
+
+function UserProfilePreview({personalInfo, userImage}) {
+    const [openSections, setOpenSections] = React.useState({
+        basicInfo: true,
+        contactInfo: true,
+        studyInfo: true,
+    });
+
+    const handleToggle = (section) => {
+        setOpenSections((prev) => ({
+            ...prev,
+            [section]: !prev[section],
+        }));
+    };
+
+    const {basicInfo, contactInfo, studyInfo} = personalInfo;
+
+    return (
+          <>
+              <Box sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  flexDirection: "column",
+                  gap: 2,
+                  py: 2
+              }}>
+                  <Avatar
+                        sx={{
+                            width: 80,
+                            height: 80,
+                            border: '3px solid white',
+                        }}
+                        src={userImage || '/default-avatar.png'} // Replace with actual avatar URL
+                        alt={`${basicInfo?.name} ${basicInfo?.familyName}`}
+                  />
+                  <Box sx={{mt: 0, textAlign: 'center'}}>
+                      <Typography variant="h6" fontWeight="bold">
+                          {`${basicInfo?.name || ''} ${basicInfo?.fatherName || ''} ${basicInfo?.familyName || ''}`}
+                      </Typography>
+                      <Typography variant="subtitle1" color="textSecondary">
+                          {basicInfo?.nationality || 'لا يوجد'}
+                      </Typography>
+                  </Box>
+              </Box>
+
+              <CardContent>
+                  <Section
+                        title="المعلومات الأساسية"
+                        open={openSections.basicInfo}
+                        onToggle={() => handleToggle('basicInfo')}
+                  >
+                      <InfoList items={[
+                          {label: 'الجواز', value: basicInfo?.passport || 'لا يوجد'},
+                          {label: 'الجنس', value: basicInfo?.gender ? GenderType[basicInfo.gender] : 'غير متوفر'},
+                          {
+                              label: 'تاريخ الميلاد',
+                              value: basicInfo?.birthDate ? dayjs(basicInfo.birthDate).format('DD/MM/YYYY') : 'غير متوفر'
+                          },
+                          {label: 'البلد', value: basicInfo?.residenceCountry || 'لا يوجد'},
+                          {label: 'هل لديك إعاقة', value: basicInfo?.hasDisability ? 'نعم' : 'لا'},
+                          basicInfo?.hasDisability && {
+                              label: 'نوع الإعاقة',
+                              value: basicInfo?.disability || 'غير متوفر'
+                          },
+                      ]}/>
+                  </Section>
+
+                  {/* Contact Information */}
+                  <Section
+                        title="معلومات الاتصال"
+                        open={openSections.contactInfo}
+                        onToggle={() => handleToggle('contactInfo')}
+                  >
+                      <InfoList items={[
+                          {label: 'الهاتف', value: contactInfo?.phone || 'لا يوجد'},
+                          {label: 'واتساب', value: contactInfo?.whatsapp || 'لا يوجد'},
+                          {label: 'فيسبوك', value: contactInfo?.facebook || 'لا يوجد'},
+                          {label: 'انستغرام', value: contactInfo?.instagram || 'لا يوجد'},
+                          {label: 'تويتر', value: contactInfo?.twitter || 'لا يوجد'},
+                      ]}/>
+                  </Section>
+
+                  {/* Study Information */}
+                  <Section
+                        title="المعلومات الدراسية"
+                        open={openSections.studyInfo}
+                        onToggle={() => handleToggle('studyInfo')}
+                  >
+                      <InfoList items={[
+                          {label: 'الجامعة', value: studyInfo?.university || 'لا يوجد'},
+                          {label: 'الكلية', value: studyInfo?.college || 'لا يوجد'},
+                          {label: 'القسم', value: studyInfo?.department || 'لا يوجد'},
+                          {label: 'السنة الدراسية', value: studyInfo?.year || 'لا يوجد'},
+                          {label: 'رقم الطالب', value: studyInfo?.studentIdNo || 'لا يوجد'},
+                      ]}/>
+                  </Section>
+              </CardContent>
+          </>
+    );
+}
+
+function Section({title, children, open, onToggle}) {
+    return (
+          <>
+              <Box sx={{display: 'flex', alignItems: 'center', mt: 2}}>
+                  <IconButton onClick={onToggle}>
+                      {open ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
+                  </IconButton>
+                  <Typography variant="subtitle1" fontWeight="bold">
+                      {title}
+                  </Typography>
+              </Box>
+              <Divider sx={{my: 1}}/>
+              <Collapse in={open} timeout="auto" unmountOnExit>
+                  {children}
+              </Collapse>
+          </>
+    );
+}
+
+function InfoList({items}) {
+    return (
+          <List disablePadding>
+              {items
+                    .filter(Boolean)
+                    .map((item, index) => (
+                          <ListItem key={index} sx={{py: 0.5}}>
+                              <ListItemText
+                                    primary={
+                                        <Typography variant="body1">
+                                            <strong>{item.label}:</strong> {item.value}
+                                        </Typography>
+                                    }
+                              />
+                          </ListItem>
+                    ))}
+          </List>
+    );
+}
 
 export default function ApplicationWithProfileViewer({
                                                          item,
@@ -47,7 +186,9 @@ export default function ApplicationWithProfileViewer({
                                                          view = false,
                                                          isAdmin = true,
                                                          isStudent = false,
-                                                         rerender
+                                                         rerender, withUserGrant
+                                                         , userGrantRoute,
+                                                         userGrantItem
                                                      }) {
     route = isStudent ? "student" : `${route}/student`
 
@@ -82,286 +223,7 @@ export default function ApplicationWithProfileViewer({
     }, [item]);
 
     // Personal Info Rendering
-    const renderPersonalInfo = () => {
-        const {basicInfo, contactInfo, studyInfo} = personalInfo;
 
-        return (
-              <Card variant="outlined" sx={{mb: 2, p: 2, backgroundColor: "#f7f9fc", borderRadius: "12px"}}>
-                  <CardContent>
-                      <Typography variant="h6" fontWeight="bold" sx={{mb: 2}}>
-                          المعلومات الشخصية
-                      </Typography>
-                      <Divider sx={{my: 2}}/>
-                      <Grid container spacing={3}>
-                          {/* Basic Information */}
-                          <Grid size={{xs: 12}}>
-                              <Typography variant="subtitle1" fontWeight="bold" sx={{mb: 1}}>
-                                  المعلومات الأساسية
-                              </Typography>
-                          </Grid>
-                          <Grid size={{xs: 12, sm: 6}}>
-                              <Typography>الاسم: {basicInfo?.name || "لا يوجد"}</Typography>
-                              <Typography>اسم الأب: {basicInfo?.fatherName || "لا يوجد"}</Typography>
-                              <Typography>اسم العائلة: {basicInfo?.familyName || "لا يوجد"}</Typography>
-                              <Typography>الجنسية: {basicInfo?.nationality || "لا يوجد"}</Typography>
-                          </Grid>
-                          <Grid size={{xs: 12, sm: 6}}>
-                              <Typography>الجواز: {basicInfo?.passport || "لا يوجد"}</Typography>
-                              <Typography>الجنس: {GenderType[basicInfo?.gender] || "غير متوفر"}</Typography>
-                              <Typography>
-                                  تاريخ
-                                  الميلاد: {basicInfo?.birthDate ? dayjs(basicInfo.birthDate).format("DD/ MM/ YYYY") : "غير متوفر"}
-                              </Typography>
-                              <Typography>البلد: {basicInfo?.residenceCountry || "لا يوجد"}</Typography>
-                          </Grid>
-                          <Grid size={{xs: 12}}>
-                              <Typography>هل لديك إعاقة: {basicInfo?.hasDisability ? "نعم" : "لا"}</Typography>
-                              {basicInfo?.hasDisability && (
-                                    <Typography>نوع الإعاقة: {basicInfo?.disability || "غير متوفر"}</Typography>
-                              )}
-                          </Grid>
-
-                          {/* Contact Information */}
-                          <Grid size={{xs: 12}} sx={{mt: 2}}>
-                              <Typography variant="subtitle1" fontWeight="bold" sx={{mb: 1}}>
-                                  معلومات الاتصال
-                              </Typography>
-                          </Grid>
-                          <Grid size={{xs: 12, sm: 6}}>
-                              <Typography>الهاتف: {contactInfo?.phone || "لا يوجد"}</Typography>
-                              <Typography>واتساب: {contactInfo?.whatsapp || "لا يوجد"}</Typography>
-                              <Typography>فيسبوك: {contactInfo?.facebook || "لا يوجد"}</Typography>
-                          </Grid>
-                          <Grid size={{xs: 12, sm: 6}}>
-                              <Typography>انستغرام: {contactInfo?.instagram || "لا يوجد"}</Typography>
-                              <Typography>تويتر: {contactInfo?.twitter || "لا يوجد"}</Typography>
-                          </Grid>
-
-                          {/* Study Information */}
-                          <Grid size={{xs: 12}} sx={{mt: 2}}>
-                              <Typography variant="subtitle1" fontWeight="bold" sx={{mb: 1}}>
-                                  المعلومات الدراسية
-                              </Typography>
-                          </Grid>
-                          <Grid size={{xs: 12, sm: 6}}>
-                              <Typography>الجامعة: {studyInfo?.university || "لا يوجد"}</Typography>
-                              <Typography>الكلية: {studyInfo?.college || "لا يوجد"}</Typography>
-                          </Grid>
-                          <Grid size={{xs: 12, sm: 6}}>
-                              <Typography>القسم: {studyInfo?.department || "لا يوجد"}</Typography>
-                              <Typography>السنة الدراسية: {studyInfo?.year || "لا يوجد"}</Typography>
-                              <Typography>رقم الطالب: {studyInfo?.studentIdNo || "لا يوجد"}</Typography>
-                          </Grid>
-                      </Grid>
-                  </CardContent>
-              </Card>
-        );
-    };
-
-    const renderApplicationData = () => {
-        const {
-            scholarshipInfo,
-            academicPerformance,
-            residenceInfo,
-            supportingFiles,
-            siblings,
-            commitment,
-            scholarshipTerms,
-        } = application;
-
-        return (
-              <Card variant="outlined" sx={{p: 4, backgroundColor: "#f9f9f9", borderRadius: "12px"}}>
-                  <CardContent>
-                      <Typography variant="h5" fontWeight="bold" sx={{mb: 2}}>
-                          بيانات الطلب
-                      </Typography>
-                      <Divider sx={{mb: 3}}/>
-
-                      {/* Scholarship Info */}
-                      <Box mb={4}>
-                          <Typography variant="h6" fontWeight="bold" sx={{mb: 1}}>
-                              معلومات المنحة
-                          </Typography>
-                          <Grid container spacing={2}>
-                              <Grid size={{xs: 12, sm: 6}}>
-                                  <Typography>نوع الدعم
-                                      المطلوب: {SupportType[scholarshipInfo?.supportType] || "لا يوجد"}</Typography>
-                              </Grid>
-                              <Grid size={{xs: 12, sm: 6}}>
-                                  <Typography>الرسوم
-                                      السنوية: {scholarshipInfo?.annualTuitionFee || "لا يوجد"}</Typography>
-                              </Grid>
-                              <Grid size={{xs: 12}}>
-                                  <Typography>المبلغ الممكن
-                                      توفيره: {scholarshipInfo?.providedAmount || "لا يوجد"}</Typography>
-                              </Grid>
-                              <Grid size={{xs: 12}}>
-                                  <Typography>المبلغ
-                                      المطلوب: {scholarshipInfo?.requestedAmount || "لا يوجد"}</Typography>
-                              </Grid>
-                          </Grid>
-                      </Box>
-
-                      {/* Academic Performance */}
-                      <Box mb={4}>
-                          <Typography variant="h6" fontWeight="bold" sx={{mb: 1}}>
-                              الأداء الأكاديمي
-                          </Typography>
-                          <Grid container spacing={2}>
-                              <Grid size={{xs: 12, sm: 6}}>
-                                  <Typography>نوع
-                                      الدراسة: {StudyType[academicPerformance?.typeOfStudy] || "لا يوجد"}</Typography>
-                              </Grid>
-                              <Grid size={{xs: 12, sm: 6}}>
-                                  <Typography>نوع
-                                      المعدل: {GpaType[academicPerformance?.gpaType] || "لا يوجد"}</Typography>
-                              </Grid>
-                              <Grid size={{xs: 12, sm: 6}}>
-                                  <Typography>قيمة المعدل: {academicPerformance?.gpaValue || "لا يوجد"}</Typography>
-                              </Grid>
-                              <Grid size={{xs: 12}}>
-                                  {renderFileLink(academicPerformance?.transcript, "كشف الدرجات")}
-                              </Grid>
-                          </Grid>
-                      </Box>
-
-                      {/* Residence Info */}
-                      <Box mb={4}>
-                          <Typography variant="h6" fontWeight="bold" sx={{mb: 1}}>
-                              معلومات السكن
-                          </Typography>
-                          <Grid container spacing={2}>
-                              <Grid size={{xs: 12, sm: 6}}>
-                                  <Typography>نوع
-                                      السكن: {ResidenceType[residenceInfo?.residenceType] || "لا يوجد"}</Typography>
-                              </Grid>
-                              <Grid size={{xs: 12, sm: 6}}>
-                                  <Typography>الدولة: {residenceInfo?.country || "لا يوجد"}</Typography>
-                              </Grid>
-                              <Grid size={{xs: 12, sm: 6}}>
-                                  <Typography>المدينة: {residenceInfo?.city || "لا يوجد"}</Typography>
-                              </Grid>
-                              <Grid size={{xs: 12, sm: 6}}>
-                                  <Typography>العنوان: {residenceInfo?.address || "لا يوجد"}</Typography>
-                              </Grid>
-                              <Grid size={{xs: 12, sm: 6}}>
-                                  <Typography>حالة
-                                      الأب: {ParentStatus[residenceInfo?.fatherStatus] || "غير متوفر"}</Typography>
-                              </Grid>
-                              <Grid size={{xs: 12, sm: 6}}>
-                                  <Typography>دخل
-                                      الأب: {residenceInfo?.fatherIncome ? `${residenceInfo.fatherIncome} USD` : "غير متوفر"}</Typography>
-                              </Grid>
-                              <Grid size={{xs: 12, sm: 6}}>
-                                  <Typography>حالة
-                                      الأم: {ParentStatus[residenceInfo?.motherStatus] || "غير متوفر"}</Typography>
-                              </Grid>
-                              <Grid size={{xs: 12, sm: 6}}>
-                                  <Typography>دخل
-                                      الأم: {residenceInfo?.motherIncome ? `${residenceInfo.motherIncome} USD` : "غير متوفر"}</Typography>
-                              </Grid>
-                              <Grid size={{xs: 12}}>
-                                  <Typography>إجمالي دخل
-                                      الأسرة: {residenceInfo?.familyIncome ? `${residenceInfo.familyIncome} USD` : "غير متوفر"}</Typography>
-                              </Grid>
-                          </Grid>
-                      </Box>
-                      <Box mb={4}>
-                          <Typography variant="h6" fontWeight="bold" sx={{mb: 1}}>
-                              الملفات الداعمة
-                          </Typography>
-                          <Grid container spacing={2}>
-                              <Grid size={{xs: 12, sm: 6}}>
-                                  {renderFileLink(supportingFiles?.personalId, "الهوية الشخصية")}
-                              </Grid>
-                              <Grid size={{xs: 12, sm: 6}}>
-                                  {renderFileLink(supportingFiles?.studentDoc, "وثيقة الطالب")}
-                              </Grid>
-                              <Grid size={{xs: 12, sm: 6}}>
-                                  {renderFileLink(supportingFiles?.medicalReport, "التقرير الطبي")}
-                              </Grid>
-                              <Grid size={{xs: 12, sm: 6}}>
-                                  {renderFileLink(supportingFiles?.personalPhoto, "الصورة الشخصية")}
-                              </Grid>
-                              <Grid size={{xs: 12, sm: 6}}>
-                                  {renderFileLink(supportingFiles?.proofOfAddress, "إثبات العنوان")}
-                              </Grid>
-                          </Grid>
-                      </Box>
-
-                      {/* Siblings */}
-                      <Box mb={4}>
-                          <Typography variant="h6" fontWeight="bold" sx={{mb: 2}}>
-                              الأشقاء
-                          </Typography>
-
-                          {siblings?.length > 0 ? (
-                                <Grid container spacing={3}>
-                                    {siblings.map((sibling, index) => (
-                                          <Grid size={{xs: 12}} key={index}>
-                                              <Box sx={{
-                                                  p: 3,
-                                                  backgroundColor: "#f0f4f8",
-                                                  borderRadius: "8px",
-                                                  boxShadow: 2,
-                                                  mb: 2
-                                              }}>
-                                                  <Typography fontWeight="bold" sx={{mb: 2}}>
-                                                      {`الأخ ${index + 1}`}
-                                                  </Typography>
-                                                  <Grid container spacing={2}>
-                                                      <Grid size={{xs: 12, sm: 6}}>
-                                                          <Typography>الاسم: {sibling.name}</Typography>
-                                                      </Grid>
-                                                      <Grid size={{xs: 12, sm: 6}}>
-                                                          <Typography>العلاقة: {sibling.relation}</Typography>
-                                                      </Grid>
-                                                      <Grid size={{xs: 12, sm: 6}}>
-                                                          <Typography>الجامعة: {sibling.university}</Typography>
-                                                      </Grid>
-                                                      <Grid size={{xs: 12, sm: 6}}>
-                                                          <Typography>الكلية: {sibling.college}</Typography>
-                                                      </Grid>
-                                                      <Grid size={{xs: 12, sm: 6}}>
-                                                          <Typography>القسم: {sibling.department}</Typography>
-                                                      </Grid>
-                                                      <Grid size={{xs: 12, sm: 6}}>
-                                                          <Typography>سنة
-                                                              الدراسة: {sibling.studyYear}</Typography>
-                                                      </Grid>
-                                                      <Grid size={{xs: 12, sm: 6}}>
-                                                          <Typography>مصدر تغطية
-                                                              الدراسة: {StudySource[sibling.sourceOfStudy]}</Typography>
-                                                      </Grid>
-                                                      <Grid size={{xs: 12, sm: 6}}>
-                                                          <Typography>مصدر
-                                                              المنحة: {sibling.grantSource || "غير متوفر"}</Typography>
-                                                      </Grid>
-                                                      <Grid size={{xs: 12, sm: 6}}>
-                                                          <Typography>قيمة
-                                                              المنحة: {sibling.grantAmount || "غير متوفر"}</Typography>
-                                                      </Grid>
-                                                      <Grid size={{xs: 12}}>
-                                                          {renderFileLink(sibling.document, "الوثيقة")}
-                                                      </Grid>
-                                                  </Grid>
-                                              </Box>
-                                          </Grid>
-                                    ))}
-                                </Grid>
-                          ) : (
-                                <Typography>لا يوجد معلومات عن الأخوة</Typography>
-                          )}
-                      </Box>
-
-                      <Box mb={4}>
-                          <Typography>{commitment ? "تم الموافقة على التعهد" : "لم يتم الموافقة على التعهد"}</Typography>
-                          <Typography>{scholarshipTerms ? "تم الموافقة على شروط المنحة" : "لم يتم الموافقة على شروط المنحة"}</Typography>
-                      </Box>
-                  </CardContent>
-              </Card>
-        );
-    };
     const status = application?.status;
     const alertColor = StatusColor[status] || "info"; // Fallback to info if undefined
 
@@ -372,33 +234,74 @@ export default function ApplicationWithProfileViewer({
                       حالة الطلب: {ApplicationStatus[status]}
                   </Typography>
               </Alert>
+              {withUserGrant && (
+                    <>
+                        <UserGrantsView route={userGrantRoute}
+                                        item={userGrantItem}
+                                        isStudent={isStudent}
+                                        isApplication={true}
+                        />
+
+                    </>
+              )}
               {loadingPersonalInfo ? (
                     <CircularProgress/>
               ) : (
                     <>
-                        <Button
-                              variant="contained"
-                              onClick={() => setOpenPersonalInfo(!openPersonalInfo)}
-                              sx={{mb: 2}}
-                        >
-                            {openPersonalInfo ? "إخفاء المعلومات الشخصية" : "عرض المعلومات الشخصية"}
-                            {openPersonalInfo ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
-                        </Button>
-                        <Collapse in={openPersonalInfo}>{renderPersonalInfo()}</Collapse>
+                        <Card variant="outlined" sx={{
+                            mb: 4,
+                            p: 3,
+                            backgroundColor: "#ffffff",
+                            borderRadius: "16px",
+                            boxShadow: 2
+                        }}>
+                            <Box
+                                  onClick={() => setOpenPersonalInfo(!openPersonalInfo)}
+                                  display="flex" justifyContent="space-between" alignItems="center"
+                            >
+                                <Typography variant="h6" fontWeight="bold" color="text.primary">
+
+                                    {openPersonalInfo ? "إخفاء المعلومات الشخصية" : "عرض المعلومات الشخصية"}
+                                </Typography>
+                                <IconButton
+                                      aria-label="Expand/Collapse">
+                                    {openPersonalInfo ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
+                                </IconButton>
+                            </Box>
+
+                            <Collapse in={openPersonalInfo}>
+
+                                <UserProfilePreview personalInfo={personalInfo}
+                                                    userImage={!loadingApplication && application.supportingFiles?.personalPhoto}/>
+                            </Collapse>
+                        </Card>
                     </>
               )}
 
               {loadingApplication ? <FullScreenLoader/> :
                     <>
-                        <Button
-                              variant="contained"
-                              onClick={() => setOpenAppDetails(!openAppDetails)}
-                              sx={{mb: 2}}
-                        >
-                            {openAppDetails ? "إخفاء معلومات طلب المنحة" : "عرض معلومات طلب المنحة"}
-                            {openAppDetails ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
-                        </Button>
-                        <Collapse in={openAppDetails}>{renderApplicationData()}</Collapse>
+                        <Card variant="outlined" sx={{
+                            mb: 4,
+                            p: 3,
+                            backgroundColor: "#ffffff",
+                            borderRadius: "16px",
+                            boxShadow: 2
+                        }}>
+                            <Box
+                                  onClick={() => setOpenAppDetails(!openAppDetails)}
+                                  display="flex" justifyContent="space-between" alignItems="center"
+                            >
+                                <Typography variant="h6" fontWeight="bold" color="text.primary">
+
+                                    {openAppDetails ? "إخفاء معلومات طلب المنحة" : "عرض معلومات طلب المنحة"}
+                                </Typography>
+                                <IconButton
+                                      aria-label="Expand/Collapse">
+                                    {openAppDetails ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
+                                </IconButton>
+                            </Box>
+                            <Collapse in={openAppDetails}>{<ApplicationDataView application={application}/>}</Collapse>
+                        </Card>
                     </>
               }
               <RenderImprovementsAndAskedFields item={item} route={route} view={view} isStudent={isStudent}/>
@@ -417,285 +320,6 @@ export default function ApplicationWithProfileViewer({
     );
 };
 
-const RenderImprovementsAndAskedFields = ({item, route, view, isStudent}) => {
-    const [openImprovements, setOpenImprovements] = useState(false);
-    const [openAskedFields, setOpenAskedFields] = useState(false);
-    const [openUpdates, setOpenUpdates] = useState(false); // State for updates
-
-    const [improvementRequests, setImprovementRequest] = useState(null)
-    const [loadingRequest, setLoadingRequests] = useState(true)
-    const [askedFields, setAskedFields] = useState(null)
-    const [loadingAsked, setLoadingAsked] = useState(true)
-    const [updates, setUpdates] = useState(null);
-    const [loadingUpdates, setLoadingUpdates] = useState(true);
-    const fetchImprovements = async (key, setLoading, setData) => {
-        setLoading(true);
-        route = !isStudent ? route : 'student/applications'
-        const response = await getData({url: `${route}/${item.id}/${key}`, setLoading: setLoading})
-        if (response.data) {
-            key = key === "asked" ? "askedFields" : key === "updates" ? "updates" : "improvementRequests"
-            setData(response.data[key]);
-        }
-    };
-    useEffect(() => {
-        if (openImprovements && !improvementRequests) {
-            fetchImprovements("improvements", setLoadingRequests, setImprovementRequest)
-        }
-    }, [openImprovements])
-    useEffect(() => {
-        if (openAskedFields && !askedFields) {
-            fetchImprovements("asked", setLoadingAsked, setAskedFields)
-        }
-    }, [openAskedFields])
-    useEffect(() => {
-        if (openUpdates && !updates) {
-            fetchImprovements("updates", setLoadingUpdates, setUpdates)
-        }
-    }, [openUpdates]);
-    const renderImprovementRequests = () => {
-        if (loadingRequest) return <CircularProgress/>
-        return improvementRequests?.length > 0 ? (
-              improvementRequests.map((request, index) => (
-                    <Card key={index} variant="outlined" sx={{my: 2, p: 2}}>
-                        <Typography fontWeight="bold">العنوان: {request.title}</Typography>
-                        <Typography>الرسالة: {request.message}</Typography>
-                        <Typography>الحالة: {FieldStatus[request.status]}</Typography>
-                    </Card>
-              ))
-        ) : (
-              <Typography>لا يوجد طلبات تحسين حقول </Typography>
-        );
-    };
-    const renderAskedFields = () => {
-        if (loadingAsked) return <CircularProgress/>
-        return askedFields?.length > 0 ? (
-              askedFields.map((field, index) => (
-                    <Card key={index} variant="outlined" sx={{my: 2, p: 2}}>
-                        <Typography fontWeight="bold">العنوان: {field.title}</Typography>
-                        <Typography>الرسالة: {field.message}</Typography>
-                        <Typography>الحالة: {FieldStatus[field.status]}</Typography>
-                        <Typography>نوع الطلب: {FieldType[field.type]}</Typography>
-                        {field.type === "FILE" ?
-                              <>
-                                  {renderFileLink(field.value, "الملف")}
-                              </>
-                              : <Typography>الرد: {field.value || "لم يتم الرد بعد"}</Typography>
-                        }
-                    </Card>
-              ))
-        ) : (
-              <Typography>لا يوجد طلبات اضافه تحسينات جديده</Typography>
-        );
-    };
-
-    const renderUpdates = () => {
-        if (loadingUpdates) return <CircularProgress/>;
-        return <>
-            {isStudent &&
-                  <CreateNewUpdate setData={setUpdates} appId={item.id}/>
-            }
-            {updates?.length > 0 ? (
-                  updates.map((update, index) => (
-                        <Grid spacing={2} container key={index} variant="outlined" sx={{
-                            my: 3,
-                            p: 3,
-                            backgroundColor: "#f9fafc", // Light background for distinction
-                            borderRadius: "12px",
-                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)", // Subtle shadow for elevation
-                        }}
-                        >
-                            <Grid size={{xs: 12, md: 6}}>
-                                <Typography fontWeight="bold">العنوان: {update.title || "بدون عنوان"}</Typography>
-                            </Grid>
-                            <Grid size={{xs: 12, md: 6}}>
-
-                                <Typography>الوصف: {update.description || "لا يوجد وصف"}</Typography>
-                            </Grid>
-                            <Grid size={{xs: 12, md: 6}}>
-                                {renderFileLink(update.url, "الملف المرفق")}
-                            </Grid>
-                            <Grid size={{xs: 12, md: 6}}>
-                                <Typography
-                                      color="textSecondary"
-                                      sx={{
-                                          display: "flex",
-                                          alignItems: "center",
-                                      }}
-                                >
-                                    <DateIcon sx={{mr: 1}}/>
-                                    {dayjs(update.createdAt).format("DD/MM/YYYY")}
-                                </Typography>
-                            </Grid>
-
-                        </Grid>
-                  ))
-            ) : (
-                  <Typography>لا يوجد تحديثات</Typography>
-            )
-            }
-        </>
-    };
-    return (
-          <Box>
-              {(view || isStudent) &&
-                    <Box my={2}>
-                        <Button
-                              variant="contained"
-                              onClick={() => setOpenUpdates(!openUpdates)}
-                              endIcon={openUpdates ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
-                              sx={{mb: 2}}
-                        >
-                            {openUpdates ? "إخفاء التحديثات" : "عرض  تحديثات الطالب"}
-                        </Button>
-                        <Collapse in={openUpdates}>
-                            <Card variant="outlined" sx={{p: 3}}>
-                                <Typography variant="h5" fontWeight="bold" sx={{mb: 2}}>
-                                    تحديثات تم اضافتها من قبل الطالب ( بعد قبول منحته )
-                                </Typography>
-                                <Divider sx={{mb: 2}}/>
-                                {renderUpdates()}
-                            </Card>
-                        </Collapse>
-                    </Box>
-              }
-              {!isStudent &&
-                    <Alert severity="info" my={2}>ملحوظه التعديلات التي بالاسفل انت او الادمن ارسل طلب الي الطالب
-                        لتعديلها
-                        سواء علي
-                        حقل معين او اضافه
-                        جديده تمام</Alert>
-              }
-              <Box my={2}>
-                  <Button
-                        variant="contained"
-                        onClick={() => setOpenImprovements(!openImprovements)}
-                        endIcon={openImprovements ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
-                        sx={{mb: 2}}
-
-                  >
-                      {openImprovements ? "إخفاء طلبات تحسين حقول موجوده من قبل" : "عرض طلبات تحسين حقول موجوده من قبل"}
-                  </Button>
-                  <Collapse in={openImprovements}>
-                      <Card variant="outlined" sx={{p: 3}}>
-                          <Typography variant="h5" fontWeight="bold" sx={{mb: 2}}>
-                              طلبات تحسين حقول موجود من قبل
-                          </Typography>
-                          <Divider sx={{mb: 2}}/>
-                          {renderImprovementRequests()}
-                      </Card>
-                  </Collapse>
-              </Box>
-              <Box my={2}>
-                  <Button
-                        variant="contained"
-                        onClick={() => setOpenAskedFields(!openAskedFields)}
-                        endIcon={openAskedFields ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
-                        sx={{mb: 2}}
-
-                  >
-                      {openAskedFields ? "إخفاء طلبات اضافه تحسينات جديده" : "عرض طلبات اضافه تحسينات جديده"}
-                  </Button>
-                  <Collapse in={openAskedFields}>
-                      <Card variant="outlined" sx={{p: 3}}>
-                          <Typography variant="h5" fontWeight="bold" sx={{mb: 2}}>
-                              طلبات اضافه تحسينات جديده
-                          </Typography>
-                          <Divider sx={{mb: 2}}/>
-                          {renderAskedFields()}
-                      </Card>
-                  </Collapse>
-              </Box>
-          </Box>
-    );
-};
-
-function CreateNewUpdate({appId, setData}) {
-    const [error, setError] = useState(null)
-
-    const {setLoading} = useToastContext()
-    const [rerender, setRerender] = useState(false)
-
-    async function handleBeforeUpdate(url) {
-        const formData = new FormData()
-        formData.append("url", url[0]);
-
-        const request = await handleRequestSubmit(formData, setLoading, "upload", true, "جاري رفع  ملفك")
-        if (request.status === 200)
-            return request.data
-    }
-
-    async function submit(data) {
-        const {url, description, title} = data
-        if (!title || !description && !url) {
-            setError("يجب عليك ملئ جميع الحقول")
-            return
-        }
-        const newUrl = await handleBeforeUpdate(url)
-        const request = await handleRequestSubmit({
-            title, description, url: newUrl.url
-        }, setLoading, `student/applications/${appId}/updates`, false, "جاري اضافة التحديث")
-        if (request.status === 200) {
-            setData((oldData) => ([...oldData, request.data]))
-            setRerender(true)
-        }
-    }
-
-    const inputs = [
-        {
-            data: {id: "title", type: "text", label: "عنوان التحديث"},
-            pattern: {
-                required: {value: true, message: "يجب عليك ادخال عنوان للتحديث"}
-            }
-        },
-        {
-            data: {id: "description", type: "textarea", label: "تفاصيل التحديث"}
-            ,
-            pattern: {
-                required: {value: true, message: "يجب عليك ادخال عنوان تفاصيل"}
-            }
-        },
-        {
-            data: {id: "url", type: "file", label: "مرفق"},
-            pattern: {
-                required: {value: true, message: "يجب عليك ادخال مرفق"}
-            }
-        },
-    ]
-    return (
-          <>
-              <DrawerWithContent
-                    extraData={{
-                        label: "اضافة تحديث علي الطلب",
-                        onSubmit: submit,
-                        inputs: inputs,
-                        formTitle: "اضافة تحديث جديد",
-                        btnText: "اضافة",
-                        variant: "outlined"
-                    }}
-                    rerender={rerender}
-                    component={Form}
-              >
-              </DrawerWithContent>
-              {error &&
-                    <Snackbar
-                          open={!!error}
-                          autoHideDuration={6000}
-                          sx={{zIndex: 500000000}}
-                          onClose={() => setError(null)}
-                    >
-                        <MuiAlert
-                              onClose={() => setError(null)}
-                              severity="error"
-                              elevation={6}
-                              variant="filled"
-                        >
-                            {error}
-                        </MuiAlert>
-                    </Snackbar>
-              }
-          </>
-    )
-}
 
 function RenderActionsButtons({isAdmin, route, appId, onClose, setData, item, view, application, rerender}) {
     return (
@@ -802,21 +426,23 @@ function ApproveByAdmin({route, appId, onClose, setData, application, rerender})
                   }
               </ConfirmWithActionModel>
               {error &&
-                    <Snackbar
-                          open={!!error}
-                          autoHideDuration={6000}
-                          sx={{zIndex: 500000000}}
-                          onClose={() => setError(null)}
-                    >
-                        <MuiAlert
+                    <Portal>
+
+                        <Snackbar
+                              open={!!error}
+                              autoHideDuration={6000}
                               onClose={() => setError(null)}
-                              severity="error"
-                              elevation={6}
-                              variant="filled"
                         >
-                            {error}
-                        </MuiAlert>
-                    </Snackbar>
+                            <MuiAlert
+                                  onClose={() => setError(null)}
+                                  severity="error"
+                                  elevation={6}
+                                  variant="filled"
+                            >
+                                {error}
+                            </MuiAlert>
+                        </Snackbar>
+                    </Portal>
               }
           </>
     )
@@ -905,22 +531,25 @@ function RejectApplication({route, appId, onClose, setData, rerender}) {
                   />
               </ConfirmWithActionModel>
               {error &&
-                    <Snackbar
-                          open={!!error}
-                          autoHideDuration={6000}
-                          sx={{zIndex: 500000000}}
+                    <Portal>
 
-                          onClose={() => setError(null)}
-                    >
-                        <MuiAlert
+                        <Snackbar
+                              open={!!error}
+                              autoHideDuration={6000}
+                              sx={{zIndex: 500000000}}
+
                               onClose={() => setError(null)}
-                              severity="error"
-                              elevation={6}
-                              variant="filled"
                         >
-                            {error}
-                        </MuiAlert>
-                    </Snackbar>
+                            <MuiAlert
+                                  onClose={() => setError(null)}
+                                  severity="error"
+                                  elevation={6}
+                                  variant="filled"
+                            >
+                                {error}
+                            </MuiAlert>
+                        </Snackbar>
+                    </Portal>
               }
           </>
     )
@@ -1060,20 +689,25 @@ function MarkAsUnCompleteAndAskForImprovement({
                     </TextField>
               }
               {error && (
-                    <Snackbar
-                          open={!!error}
-                          autoHideDuration={6000}
-                          onClose={() => setError(null)}
-                    >
-                        <MuiAlert
+                    <Portal>
+
+                        <Snackbar
+                              open={!!error}
+                              autoHideDuration={6000}
                               onClose={() => setError(null)}
-                              severity="error"
-                              elevation={6}
-                              variant="filled"
+                              sx={{zIndex: 500000000}}
+
                         >
-                            {error}
-                        </MuiAlert>
-                    </Snackbar>
+                            <MuiAlert
+                                  onClose={() => setError(null)}
+                                  severity="error"
+                                  elevation={6}
+                                  variant="filled"
+                            >
+                                {error}
+                            </MuiAlert>
+                        </Snackbar>
+                    </Portal>
               )}
 
               <Button variant="contained" color="primary" fullWidth type="submit">
@@ -1138,8 +772,9 @@ function MarkUnderReview({route, appId, onClose, setData, rerender}) {
     const {setLoading} = useToastContext()
 
     async function review() {
-        if (!user) {
+        if (!user || !user.query) {
             setError("يجب ان تختار مشرف حتي تتم تعين مشرف لمراجعة الطلب")
+            return
         }
         const request = await handleRequestSubmit({
             supervisorId: user.query.id,
@@ -1179,22 +814,26 @@ function MarkUnderReview({route, appId, onClose, setData, rerender}) {
                   />
               </ConfirmWithActionModel>
               {error &&
-                    <Snackbar
-                          open={!!error}
-                          autoHideDuration={6000}
-                          onClose={() => setError(null)}
-                          sx={{zIndex: 500000000}}
+                    <Portal>
 
-                    >
-                        <MuiAlert
+                        <Snackbar
+                              open={!!error}
+                              autoHideDuration={6000}
                               onClose={() => setError(null)}
-                              severity="error"
-                              elevation={6}
-                              variant="filled"
+                              sx={{zIndex: 500000000}}
+
                         >
-                            {error}
-                        </MuiAlert>
-                    </Snackbar>
+                            <MuiAlert
+                                  onClose={() => setError(null)}
+                                  severity="error"
+                                  elevation={6}
+                                  variant="filled"
+
+                            >
+                                {error}
+                            </MuiAlert>
+                        </Snackbar>
+                    </Portal>
               }
           </>
     )

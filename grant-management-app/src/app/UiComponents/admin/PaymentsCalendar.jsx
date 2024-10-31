@@ -18,7 +18,7 @@ const inputs = [
         , pattern: {required: {value: true, message: "يجب ادخال مبلغ"}}
     },
     {
-        data: {id: "paidAt", label: "ميعاد الدفع", type: "date", defaultValue: new Date()}
+        data: {id: "paidAt", label: "تاريخ الدفع", type: "date", defaultValue: new Date()}
         ,
         useDefault: true
         , pattern: {required: {value: true, message: "يجب ادخال ميعاد"}}
@@ -98,6 +98,16 @@ const PaymentCalendar = () => {
 
     const extraParams = user.role === "ADMIN" ? `?isAdmin=true&` : "";
 
+    function handleAfterEdit(data) {
+        const newPayments = filteredPayments.map((payment) => {
+            if (payment.id === data.id) {
+                payment.amountPaid = data.amountPaid
+            }
+            return payment
+        })
+        setFilteredPayments(newPayments)
+    }
+
     return (
           <Container maxWidth="xxl" px={{xs: 2, md: 4}}>
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
@@ -134,6 +144,7 @@ const PaymentCalendar = () => {
                     loading={loading}
                     noPagination={true}
                     withEdit={true}
+                    handleAfterEdit={(data) => handleAfterEdit(data)}
                     editHref={"shared/payments/pay"}
                     editButtonText={"دفع"}
                     renderFormTitle={(item) => `الدفعة رقم # ${item.id}`}

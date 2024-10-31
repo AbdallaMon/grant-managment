@@ -5,7 +5,7 @@ const nextConfig = {
             {
                 protocol: process.env.NEXT_PUBLIC_PROTOCOL,
                 hostname: process.env.NEXT_PUBLIC_HOST,
-                port: process.env.NEXT_PUBLIC_PORT,
+                pathname: '/**',
             },
         ],
     },

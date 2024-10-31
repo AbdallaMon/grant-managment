@@ -6,9 +6,8 @@ import {
     CardMedia, Collapse,
     Typography,
     useMediaQuery,
-    useTheme
+    useTheme, Grid2 as Grid
 } from "@mui/material";
-import Grid from "@mui/material/Grid2"
 import Link from "next/link";
 import {grantLinks} from "@/app/helpers/constants";
 import {usePathname} from "next/navigation";

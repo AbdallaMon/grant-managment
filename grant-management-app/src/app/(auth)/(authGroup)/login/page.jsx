@@ -7,7 +7,7 @@ import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import AuthForm from "@/app/UiComponents/formComponents/forms/AuthForm";
 import {Button, Typography} from "@mui/material";
 
-export default function LoginPage() {
+export default function Page() {
     const {setLoading} = useToastContext();
     const {setIsLoggedIn, setUser} = useAuth()
 

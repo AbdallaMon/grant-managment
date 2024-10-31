@@ -2,13 +2,13 @@ import {FormControl, FormHelperText, InputLabel, Select} from "@mui/material";
 import {useState} from "react";
 import MenuItem from "@mui/material/MenuItem";
 
-export default function SelectField({
-                                        select,
-                                        variant = "filled",
-                                        register,
-                                        errors,
-                                        set_value
-                                    }) {
+export default function SimpleSelect({
+                                         select,
+                                         variant = "filled",
+                                         register,
+                                         errors,
+                                         set_value
+                                     }) {
     const selectData = select.data;
     const options = selectData.options;
     const [value, setValue] = useState(selectData.defaultValue || "");

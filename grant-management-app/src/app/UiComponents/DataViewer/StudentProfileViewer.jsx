@@ -1,8 +1,7 @@
 import {studentInputs} from "@/app/helpers/constantInputs";
 import React, {Fragment, useEffect, useState} from "react";
 import {getData} from "@/app/helpers/functions/getData";
-import {Box, CircularProgress, Divider, Typography} from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import {Box, CircularProgress, Divider, Typography, Grid2 as Grid} from "@mui/material";
 import dayjs from "dayjs";
 
 const inputs = studentInputs

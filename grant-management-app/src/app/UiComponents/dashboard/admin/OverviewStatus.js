@@ -6,13 +6,7 @@ import {
     Card,
     CardContent,
     Typography,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
+    Grid2 as Grid,
     Divider,
     List,
     ListItem,
@@ -25,7 +19,6 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 import {Chart} from 'chart.js';
 import LoadingOverlay from '@/app/UiComponents/feedback/loaders/LoadingOverlay';
 import {getData} from "@/app/helpers/functions/getData";
-import Grid from "@mui/material/Grid2";
 
 import CustomTable from "@/app/UiComponents/dashboard/CustomTable";
 

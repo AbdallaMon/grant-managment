@@ -7,14 +7,13 @@ import {
     ListItemText,
     IconButton,
     Snackbar,
-    Typography, ListItemAvatar, Avatar, Divider,
+    Typography, ListItemAvatar, Avatar, Divider, Grid2 as Grid
 } from "@mui/material";
 import {MdDelete as DeleteIcon} from "react-icons/md";
 import MuiAlert from "@mui/material/Alert";
 import {getData} from "@/app/helpers/functions/getData";
 import SearchComponent from "@/app/UiComponents/formComponents/SearchComponent";
 import {getPropertyValue} from "@/app/helpers/functions/utility";
-import Grid from "@mui/material/Grid2"
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import FullScreenLoader from "@/app/UiComponents/feedback/loaders/FullscreenLoader";

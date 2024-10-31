@@ -5,14 +5,13 @@ import {
     Card,
     CardContent,
     Typography,
-
+    Grid2 as Grid,
     Divider,
     CardActionArea,
     Avatar,
     Badge,
     Tooltip,
 } from "@mui/material";
-import {Grid2 as Grid} from "@mui/material";
 import {
     IoIosNotifications as NotificationsIcon,
     IoMdChatbubbles as MessageIcon,

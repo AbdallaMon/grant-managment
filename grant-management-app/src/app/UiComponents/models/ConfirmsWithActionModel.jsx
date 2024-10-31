@@ -50,6 +50,7 @@ export default function ConfirmWithActionModel({
                           </Button>
                       </Box>
                   </Box>
+
               </Fade>
           </Modal>
     )

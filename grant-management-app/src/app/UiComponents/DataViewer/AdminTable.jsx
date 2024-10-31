@@ -51,12 +51,19 @@ export default function AdminTable({
                                        deleteHref,
                                        withArchive,
                                        archiveHref,
-                                       extraComponent, extraEditParams,
+                                       extraComponent,
+                                       extraEditParams,
                                        extraComponentProps,
-                                       setTotal, noPagination = false,
+                                       setTotal,
+                                       noPagination = false,
                                        checkChanges,
                                        editButtonText = "تعديل" // Default value is "Edit"
-                                       , checkDates, totalPages, handleBeforeSubmit, renderFormTitle, editFormButton
+                                       ,
+                                       handleAfterEdit,
+                                       totalPages,
+                                       handleBeforeSubmit,
+                                       renderFormTitle,
+                                       editFormButton
                                    }) {
     const ExtraComponent = extraComponent;
     const theme = useTheme()
@@ -132,6 +139,7 @@ export default function AdminTable({
                                                         extraEditParams={extraEditParams}
                                                         renderFormTitle={renderFormTitle}
                                                         editFormButton={editFormButton}
+                                                        handleAfterEdit={handleAfterEdit}
                                                   /> </TableCell>
                                         )}
                                         {withDelete && (

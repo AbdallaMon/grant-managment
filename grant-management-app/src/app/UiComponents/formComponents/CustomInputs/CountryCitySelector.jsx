@@ -1,10 +1,8 @@
 "use client"
 import React, {useState, useEffect} from 'react';
-import {CircularProgress, TextField, Typography} from '@mui/material';
+import {CircularProgress, TextField, Grid2 as Grid} from '@mui/material';
 import {Controller} from "react-hook-form";
 import Autocomplete from '@mui/material/Autocomplete';
-import {useMediaQuery} from '@mui/material';
-import Grid from '@mui/material/Grid2';
 
 export default function CountryCitySelector({control, errors, input, setValue}) {
     const [countries, setCountries] = useState([]);

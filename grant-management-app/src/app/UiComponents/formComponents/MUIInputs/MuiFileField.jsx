@@ -2,7 +2,6 @@ import {Controller} from "react-hook-form";
 import {Alert, Box, Snackbar, TextField} from "@mui/material";
 import {useState} from "react";
 import Image from "next/image";
-import MuiAlert from "@mui/material/Alert";
 
 export default function MuiFileField({
                                          control,
@@ -24,35 +23,43 @@ export default function MuiFileField({
 
         if (file) {
             if (input.acceptOnly === "pdf" && file.type !== "application/pdf") {
-                setError("الملف يجب أن يكون بصيغة PDF فقط"); // Set error message in Arabic
-                setValue(id, null)
-                setPreview(null)
+                setError("الملف يجب أن يكون بصيغة PDF فقط");
+                setValue(id, null);
+                setPreview(null);
                 return;
             } else if (input.acceptOnly === "image" && !file.type.startsWith("image/")) {
-                setError("الملف يجب أن يكون صورة فقط"); // Set error message in Arabic
-                setValue(id, null)
-                setPreview(null)
+                setError("الملف يجب أن يكون صورة فقط");
+                setValue(id, null);
+                setPreview(null);
                 return;
             }
             if (!file.type.startsWith("image/") && file.type !== "application/pdf") {
-                setError("نوع الملف غير مدعوم (يجب ان يكون الملف صورة او pdf");
-                setValue(id, null)
-                setPreview(null)
+                setError("نوع الملف غير مدعوم (يجب ان يكون الملف صورة او pdf)");
+                setValue(id, null);
+                setPreview(null);
                 return;
             }
 
             setFileName(file.name); // Store file name
+
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreview(reader.result);
-            };
-            reader.readAsDataURL(file);
+            if (file.type === "application/pdf") {
+                // Use blob URL for PDFs
+                const pdfBlob = URL.createObjectURL(file);
+                setPreview(pdfBlob);
+            } else if (file.type.startsWith("image/")) {
+                // Use base64 for images
+                reader.onloadend = () => {
+                    setPreview(reader.result);
+                };
+                reader.readAsDataURL(file);
+            }
         } else {
             setPreview(null);
-
         }
     };
-    const isPdf = preview && preview.startsWith("data:application/pdf");
+
+    const isPdf = preview && (preview.startsWith("blob:") || preview.endsWith(".pdf"));
     const renderPreview = () => {
         if (!preview) return null;
 

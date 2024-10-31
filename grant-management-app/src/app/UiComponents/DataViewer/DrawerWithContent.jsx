@@ -1,34 +1,51 @@
-import {useEffect, useState} from "react";
+import {useState, useEffect} from "react";
 import {Button, Container, Drawer, IconButton} from "@mui/material";
 import {FaTimes} from "react-icons/fa";
 
-export default function DrawerWithContent({component, item, extraData, rerender}) {
-    const [open, setOpen] = useState(false)
-    const Component = component
+function DrawerWithContent({component: Component, item, extraData, rerender}) {
+    const [open, setOpen] = useState(false);
 
-    function onClose() {
-        setOpen(false)
-    }
+    const handleToggle = () => setOpen(!open);
 
     useEffect(() => {
         if (rerender) {
-            onClose()
+            setOpen(false);
         }
     }, [rerender]);
-    if (!open) {
-        return (<Button onClick={() => setOpen(true)} variant="outlined">
-            {extraData.label}
-        </Button>)
-    }
+
     return (
-          <Drawer anchor="bottom" open={open} onClose={onClose}>
-              <Container maxWidth="xl"
-                         sx={{p: 2, height: '100vh', overflow: 'auto', position: 'relative', zIndex: 1}}>
-                  <IconButton onClick={onClose} sx={{position: 'absolute', right: 16, top: 16}}>
-                      <FaTimes/>
-                  </IconButton>
-                  <Component item={item} onClose={onClose} {...extraData} />
-              </Container>
-          </Drawer>
-    )
+          <>
+              <Button onClick={handleToggle} variant="outlined">
+                  {extraData.label}
+              </Button>
+              <Drawer anchor="bottom" open={open} onClose={handleToggle}>
+                  <Container
+                        maxWidth="md"
+                        sx={{
+                            p: 2,
+                            height: "100vh",
+                            overflowY: "auto",
+                            position: "relative",
+                        }}
+                  >
+                      <IconButton
+                            onClick={handleToggle}
+                            sx={{
+                                position: "absolute",
+                                top: 8,
+                                right: 8,
+                            }}
+                      >
+                          <FaTimes/>
+                      </IconButton>
+                      <div>
+
+                          <Component item={item} onClose={handleToggle} {...extraData} />
+                      </div>
+                  </Container>
+              </Drawer>
+          </>
+    );
 }
+
+export default DrawerWithContent;

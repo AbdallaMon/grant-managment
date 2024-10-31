@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=19.9.0"
   },
   "dependencies": {
     "@emotion/cache": "^11.13.1",

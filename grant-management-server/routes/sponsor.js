@@ -2,6 +2,7 @@ import {Router} from "express";
 import {getPagination, verifyTokenAndHandleAuthorization} from "../services/utility.js";
 import {getUser} from "../services/adminServices.js";
 import {getPersonalInfo} from "../services/studentsServices.js";
+import prisma from '../prisma/prisma.js';
 
 const router = Router();
 

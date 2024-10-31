@@ -1,14 +1,14 @@
-import { Controller } from "react-hook-form";
-import { FormControlLabel, Switch } from "@mui/material";
+import {Controller} from "react-hook-form";
+import {FormControlLabel, Switch} from "@mui/material";
 
-export default function MuiSwitchField({ control, input }) {
+export default function MuiSwitch({control, input}) {
     const inputData = input.data;
-    const { label, id } = inputData;
+    const {label, id} = inputData;
     return (
           <Controller
                 name={id}
                 control={control}
-                render={({ field:{value=inputData.defaultValue,onChange} }) => (
+                render={({field: {value = inputData.defaultValue, onChange}}) => (
                       <FormControlLabel
                             control={
                                 <Switch

@@ -1,8 +1,7 @@
 "use client"
 import React, {useEffect, useState} from 'react';
 import {useForm, Controller} from 'react-hook-form';
-import {Button, TextField, Select, MenuItem, InputLabel, FormControl, Typography} from '@mui/material';
-import Grid from "@mui/material/Grid2";
+import {Button, TextField, Select, MenuItem, InputLabel, FormControl, Typography, Grid2 as Grid} from '@mui/material';
 
 import {getData} from "@/app/helpers/functions/getData";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";

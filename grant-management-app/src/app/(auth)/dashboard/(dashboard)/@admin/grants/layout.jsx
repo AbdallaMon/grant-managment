@@ -1,15 +1,16 @@
 import {BasicTabs} from "@/app/UiComponents/DataViewer/BasicTabs";
 
 export const metadata = {
-    title: "منح الطلاب"
-}
+    title: "منح الطلاب",
+};
+
 export default function Layout({children}) {
     return (
           <>
               <GrantTabs/>
               {children}
           </>
-    )
+    );
 }
 
 function GrantTabs() {
@@ -17,29 +18,29 @@ function GrantTabs() {
         {label: "مشاريع المنح", href: "/dashboard/grants"},
         {label: "طلبات المنح", href: "/dashboard/grants/applications"},
         {
-            label: "طلبات منح تحت المراجعه",
+            label: "الطلبات قيد المراجعة",
             href: "/dashboard/grants/under-review",
-            hoverText: "منح قمت بتعين مشرف لمراجعتها"
+            hoverText: "طلبات المنح التي يقوم المشرفون بمراجعتها حاليًا",
         },
         {
-            label: "منح مطلوب لها تحديثات",
+            label: "منح تحتاج إلى تحديثات",
             href: "/dashboard/grants/uncompleted",
-            hoverText: "منح طلب الادمن او المشرف تحديثات من الطالب ولكنه لم يوفرها بعد"
+            hoverText: "منح طلب المشرفون تحديثات من الطلاب ولم يتم توفيرها بعد من قبله",
         },
         {
-            label: "المنح المحدثة من قبل الطالب", href: "/dashboard/grants/updated",
-            hoverText: "منح طلب الادمن او المشرف تحديثات من الطالب وفد عدل الطالب التحديثات بالفعل"
+            label: "منح محدثة من قبل الطلاب",
+            href: "/dashboard/grants/updated",
+            hoverText: "منح قام الطلاب بتحديثها بعد طلب المشرفين",
         },
         {
-            label: "منح مقبولة بدون مشروع",
+            label: "منح مقبولة بدون تخصيص مشروع",
             href: "/dashboard/grants/no-grant",
-            hoverText: "منح قمت بقبولها ولكن لم تقم بتخصيص مبلغ مالي او تضمها لمشروع حتي الان"
+            hoverText: "منح مقبولة لكن لم يتم تخصيص مشروع أو مبلغ مالي لها",
         },
         {label: "المنح المقبولة", href: "/dashboard/grants/approved"},
-        {label: "المنح منتهية", href: "/dashboard/grants/end-grant"},
-
+        {label: "المنح المنتهية", href: "/dashboard/grants/end-grant"},
         {label: "المنح المرفوضة", href: "/dashboard/grants/rejected"},
-    ]
+    ];
 
-    return <BasicTabs tabs={tabs}/>
+    return <BasicTabs tabs={tabs}/>;
 }

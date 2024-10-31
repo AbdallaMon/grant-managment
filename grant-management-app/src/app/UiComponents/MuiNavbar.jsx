@@ -14,10 +14,10 @@ import {
     useMediaQuery,
     useTheme,
 } from "@mui/material";
-import {FaBars, FaEnvelope, FaThLarge} from "react-icons/fa"; // FaThLarge as the 'More' button
+import {FaBars} from "react-icons/fa";
 import Link from "next/link";
 import {useAuth} from "@/app/providers/AuthProvider";
-import LogoutButton from "@/app/UiComponents/Buttons/LogoutBtn";
+import SignOutBtn from "@/app/UiComponents/buttons/SignOutBtn";
 import NotificationsIcon from "@/app/UiComponents/DataViewer/NotificationMenu";
 import MessagesIcon from "@/app/UiComponents/DataViewer/MessagesMenu";
 
@@ -113,6 +113,9 @@ export default function Navbar() {
                     button
                     key={index}
                     component={Link}
+                    sx={{
+                        color: "primary.main"
+                    }}
                     href={`/dashboard/${link.route === "dashboard" ? "" : link.route}`}
               >
                   <ListItemText primary={link.name}/>
@@ -199,7 +202,7 @@ export default function Navbar() {
 
                       <Box sx={{ml: "auto"}}>
                           {isLoggedIn ? (
-                                <LogoutButton/>
+                                <SignOutBtn/>
                           ) : (
                                 <Button
                                       component={Link}

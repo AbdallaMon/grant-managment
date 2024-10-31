@@ -1,5 +1,6 @@
 import {Router} from "express";
 import {verifyTokenAndHandleAuthorization} from "../services/utility.js";
+import prisma from '../prisma/prisma.js';
 
 const router = Router();
 router.use((req, res, next) => {

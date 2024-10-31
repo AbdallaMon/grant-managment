@@ -3,7 +3,7 @@ import {Box, Button, Fade, Modal} from '@mui/material';
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import {simpleModalStyle} from "@/app/helpers/constants";
-import {Form} from "@/app/UiComponents/formComponents/forms/Form";
+import {MainForm} from "@/app/UiComponents/formComponents/forms/MainForm";
 import {getPropertyValue} from "@/app/helpers/functions/utility";
 
 const EditModal = ({
@@ -13,7 +13,7 @@ const EditModal = ({
                        inputs,
                        setData,
                        href,
-                       checkChanges = false,
+                       checkChanges = false, handleAfterEdit,
                        handleBeforeSubmit, extraEditParams, renderFormTitle, editFormButton = "حفظ التغيرات"
                    }) => {
     const {setLoading} = useToastContext()
@@ -38,6 +38,9 @@ const EditModal = ({
         if (result.status === 200) {
             if (setData) {
                 setData((prevData) => prevData.map((dataItem) => dataItem.id === result.data.id ? result.data : dataItem));
+            }
+            if (handleAfterEdit) {
+                handleAfterEdit(result.data)
             }
             if (handleClose) {
                 handleClose();
@@ -72,7 +75,7 @@ const EditModal = ({
               >
                   <Fade in={open}>
                       <Box sx={{...simpleModalStyle}}>
-                          <Form
+                          <MainForm
                                 onSubmit={onSubmit}
                                 inputs={prefilledInputs.map(input => {
                                           const defaultValue = getPropertyValue(item, input.data.key ? input.data.key : input.data.id, input.data.enum, input.data.type, input.useDefault && input.data.defaultValue)
@@ -88,7 +91,7 @@ const EditModal = ({
                                 formTitle={renderFormTitle ? renderFormTitle(item) : `تعديل ${item.title || item.name || item.id}`}
                                 btnText={editFormButton}
                           >
-                          </Form>
+                          </MainForm>
 
                       </Box>
                   </Fade>

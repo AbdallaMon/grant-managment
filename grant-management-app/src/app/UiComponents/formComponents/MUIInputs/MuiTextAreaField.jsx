@@ -1,14 +1,14 @@
 import {Controller} from "react-hook-form";
 import {TextField} from "@mui/material";
 
-export default function TextAreaField({
-                                          control,
-                                          input,
-                                          register,
-                                          variant,
-                                          errors,
+export default function MuiTextAreaField({
+                                             control,
+                                             input,
+                                             register,
+                                             variant,
+                                             errors,
 
-                                      }) {
+                                         }) {
     const inputData = input.data;
     const fullWidth = input.fullWidth
     const {label, id} = inputData;

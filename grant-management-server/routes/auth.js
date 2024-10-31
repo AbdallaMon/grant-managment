@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import {Router} from 'express';
 import {
     confirmEmail,
     createUser,
@@ -8,14 +8,15 @@ import {
     resetPassword
 } from '../services/authServices.js';
 import {handlePrismaError, verifyToken} from "../services/utility.js";
+import prisma from '../prisma/prisma.js';
 
 const router = Router();
 
 // Login Route
 router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+    const {email, password} = req.body;
     try {
-        const { user, token } = await loginUser(email, password);
+        const {user, token} = await loginUser(email, password);
         res.cookie('token', token, {
             httpOnly: true,
             secure: true,
@@ -28,7 +29,7 @@ router.post('/login', async (req, res) => {
             user
         });
     } catch (error) {
-        res.status(500).json({ status: 500, message: `خطأ: ${error.message}` });
+        res.status(500).json({status: 500, message: `خطأ: ${error.message}`});
     }
 });
 router.post('/register', async (req, res) => {
@@ -42,20 +43,20 @@ router.post('/register', async (req, res) => {
         });
     } catch (error) {
         if (error.code === 'P2002' && error.meta?.target?.includes('email')) {
-            res.status(400).json({ status: 400, message: "هذا البريد الإلكتروني مسجل بالفعل" });
+            res.status(400).json({status: 400, message: "هذا البريد الإلكتروني مسجل بالفعل"});
         } else {
-                handlePrismaError(res, error);
+            handlePrismaError(res, error);
         }
     }
 });
 // Logout Route
 router.post('/logout', (req, res) => {
     try {
-        const { token, options } = logoutUser();
+        const {token, options} = logoutUser();
         res.cookie('token', token, options);
-        res.status(200).json({ status: 200, message: "تم تسجيل الخروج بنجاح" });
+        res.status(200).json({status: 200, message: "تم تسجيل الخروج بنجاح"});
     } catch (error) {
-        res.status(500).json({ status: 500, message: `خطأ: ${error.message}` });
+        res.status(500).json({status: 500, message: `خطأ: ${error.message}`});
     }
 });
 
@@ -63,7 +64,7 @@ router.post('/logout', (req, res) => {
 router.get('/status', (req, res) => {
     const token = req.cookies.token;
     if (!token) {
-        return res.status(401).json({ auth: false, message: "أنت لست مسجلاً للدخول" });
+        return res.status(401).json({auth: false, message: "أنت لست مسجلاً للدخول"});
     }
     try {
         const decoded = verifyToken(token);
@@ -73,7 +74,7 @@ router.get('/status', (req, res) => {
                 id: decoded.id,
                 role: decoded.role,
                 emailConfirmed: decoded.emailConfirmed,
-                accountStatus:decoded.accountStatus
+                accountStatus: decoded.accountStatus
             },
             auth: true,
         });
@@ -87,28 +88,28 @@ router.get('/status', (req, res) => {
 });
 
 router.post('/reset', async (req, res) => {
-    const { email } = req.body;
+    const {email} = req.body;
     try {
         const message = await requestPasswordReset(email);
-        res.status(200).json({ status: 200, message });
+        res.status(200).json({status: 200, message});
     } catch (error) {
-        res.status(500).json({ status: 500, message: `خطأ: ${error.message}` });
+        res.status(500).json({status: 500, message: `خطأ: ${error.message}`});
     }
 });
 
 // Reset password route
 router.post('/reset/:token', async (req, res) => {
-    const { token } = req.params;
-    const { password } = req.body;
+    const {token} = req.params;
+    const {password} = req.body;
     try {
         const message = await resetPassword(token, password);
-        res.status(200).json({ status: 200, message });
+        res.status(200).json({status: 200, message});
     } catch (error) {
-        res.status(500).json({ status: 500, message: `خطأ: ${error.message}` });
+        res.status(500).json({status: 500, message: `خطأ: ${error.message}`});
     }
 });
 router.post('/confirm/:token', async (req, res) => {
-    const { token } = req.params;
+    const {token} = req.params;
     try {
         const confirm = await confirmEmail(token);
         res.cookie('token', confirm.loginToken, {
@@ -116,7 +117,7 @@ router.post('/confirm/:token', async (req, res) => {
             secure: true,
             path: '/',
         });
-        res.status(200).json({ status: 200, message:confirm.message,user:confirm.loginUser });
+        res.status(200).json({status: 200, message: confirm.message, user: confirm.loginUser});
     } catch (error) {
         handlePrismaError(res, error);
     }

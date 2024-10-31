@@ -1,8 +1,8 @@
-import ProfileComponent from "@/app/UiComponents/DataViewer/ProfileComponent";
+import UserProfile from "@/app/UiComponents/DataViewer/UserProfile";
 
 export const metadata = {
     title: "البيانات الشخصية"
 }
 export default function Page({params: {id}}) {
-    return (<ProfileComponent isApplication={true} id={id}/>)
+    return (<UserProfile isApplication={true} id={id}/>)
 }

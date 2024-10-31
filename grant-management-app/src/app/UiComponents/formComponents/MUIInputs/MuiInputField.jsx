@@ -4,14 +4,14 @@ import {useEffect, useRef, useState} from "react";
 import {FaRegEye} from "react-icons/fa";
 import {FaRegEyeSlash} from "react-icons/fa6";
 
-export default function InputField({
-                                       input,
-                                       variant = "filled",
-                                       register,
-                                       errors,
-                                       watch,
-                                       trigger, setValue
-                                   }) {
+export default function MuiInputField({
+                                          input,
+                                          variant = "filled",
+                                          register,
+                                          errors,
+                                          watch,
+                                          trigger, setValue
+                                      }) {
     const [inputData, setInputData] = useState(input.data);
     const [showPassword, setShowPassword] = useState(false);
     const inputRef = useRef(null);

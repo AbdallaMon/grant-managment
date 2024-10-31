@@ -138,7 +138,6 @@ export const uploadFiles = async (req, res) => {
                 const nextcloudUrlBase = process.env.NEXTCLOUD_URL;
                 const nextcloudUsername = process.env.NEXTCLOUD_USERNAME;
                 const nextcloudPassword = process.env.NEXTCLOUD_PASSWORD;
-
                 for (const file of req.files) {
                     const uniqueName = uuidv4() + '-' + file.originalname;
                     const nextcloudUrl = `${nextcloudUrlBase}/${uniqueName}`;
@@ -171,7 +170,6 @@ export const uploadFiles = async (req, res) => {
 
                     results[file.fieldname] = publicUrl.startsWith('http://') ? publicUrl.replace('http://', 'https://') : publicUrl;
                 }
-                console.log("did we finish");
                 resolve(results);  // <-- Resolving with the results
             } catch (error) {
                 reject(new Error("حدث خطاء اثناء رفع الملفات"));

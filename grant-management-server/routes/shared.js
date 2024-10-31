@@ -5,6 +5,8 @@ import {
     handlePrismaError,
     verifyTokenAndHandleAuthorization
 } from "../services/utility.js";
+import prisma from '../prisma/prisma.js';
+
 import {
     approveApplication,
     getApplicationById,
@@ -167,7 +169,7 @@ router.get('/grants/applications/student/:appId', async (req, res) => {
         res.status(500).json({message: 'حدث خطأ أثناء جلب  طلب منحة '});
     }
 });
-router.get('/grants/applications/student/:appId/improvements', async (req, res) => {
+router.get('/grants/applications/student/:appId/improvementRequests', async (req, res) => {
     const {appId} = req.params
     try {
         const application = await getSpecificApplicationField(appId, "improvementRequests");
@@ -180,7 +182,7 @@ router.get('/grants/applications/student/:appId/improvements', async (req, res) 
         res.status(500).json({message: 'حدث خطأ أثناء جلب  طلب منحة '});
     }
 });
-router.get('/grants/applications/student/:appId/asked', async (req, res) => {
+router.get('/grants/applications/student/:appId/askedFields', async (req, res) => {
     const {appId} = req.params
     try {
         const application = await getSpecificApplicationField(appId, "askedFields");

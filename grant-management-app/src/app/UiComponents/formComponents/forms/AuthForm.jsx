@@ -1,6 +1,6 @@
 import {useForm} from "react-hook-form";
 import {Button, Typography, Box, Paper, Grid2 as Grid} from "@mui/material";
-import InputField from "@/app/UiComponents/FormComponents/MUIInputs/InputField";
+import MuiInputField from "@/app/UiComponents/formComponents/MUIInputs/MuiInputField";
 
 export default function AuthForm({
                                      inputs,
@@ -43,7 +43,7 @@ export default function AuthForm({
                   <Grid container spacing={2}>
                       {inputs.map((input) => (
                             <Grid size={12} key={input.data.id}>
-                                <InputField
+                                <MuiInputField
                                       input={input}
                                       register={register}
                                       errors={errors}

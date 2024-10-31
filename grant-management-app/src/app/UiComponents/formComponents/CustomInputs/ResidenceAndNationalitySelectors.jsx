@@ -1,7 +1,6 @@
-import Grid from "@mui/material/Grid2";
 import {Controller} from "react-hook-form";
 import Autocomplete from "@mui/material/Autocomplete";
-import {CircularProgress, TextField, useMediaQuery} from "@mui/material";
+import {CircularProgress, TextField, Grid2 as Grid} from "@mui/material";
 import React, {useEffect, useState} from "react";
 
 export default function ResidenceAndNationalitySelectors({control, setValue, errors}) {

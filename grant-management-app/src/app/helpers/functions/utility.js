@@ -1,6 +1,11 @@
 import dayjs from "dayjs";
-import {Box, Link, Paper, Typography} from "@mui/material";
+import {Box, Button, Link, Paper, Typography} from "@mui/material";
 import React from "react";
+import {
+    MdAttachFile as AttachFile,
+    MdPictureAsPdf as PictureAsPdf,
+    MdImage as Image
+} from 'react-icons/md';
 
 export const handleSearchParamsChange = (event, key, searchParams, router, onChange) => {
     if (onChange) return onChange(event)
@@ -47,26 +52,46 @@ export function convertEnumToOptions(enums, propertyKey = "id", valueKey = "name
     return Object.entries(enums).map(([property, value]) => ({[propertyKey]: property, [valueKey]: value}))
 }
 
+
 export const renderFileLink = (url, label, style) => {
     if (!url) return <Typography>لا يوجد {label}</Typography>;
+
     const isImage = /\.(jpeg|jpg|png|gif)$/i.test(url);
     const isPdf = /\.pdf$/i.test(url);
-    return (
-          <Paper>
-              <Box display="flex" gap={3} alignItems="center" height="auto" my="auto" justifyContent="space-between"
-                   p={1}>
 
-                  {label}:
+    return (
+          <Paper variant="outlined" sx={{p: 2, mb: 2}}>
+              <Box display="flex" alignItems="center" gap={2}>
+                  <Typography variant="body1" fontWeight="bold">
+                      {label && label?.length > 0 && `${label}:`}
+                  </Typography>
                   {isImage ? (
-                        <img src={url} alt={label} width="100" style={style}/>
+                        <Box display="flex" alignItems="center" gap={1}>
+
+                            <img src={url} alt={label} width="100" style={style}/>
+                        </Box>
                   ) : isPdf ? (
-                        <Link href={url} target="_blank" rel="noopener noreferrer">
+                        <Button
+                              variant="outlined"
+                              color="primary"
+                              startIcon={<PictureAsPdf/>}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                        >
                             تحميل ملف PDF
-                        </Link>
+                        </Button>
                   ) : (
-                        <Link href={url} target="_blank" rel="noopener noreferrer">
+                        <Button
+                              variant="outlined"
+                              color="primary"
+                              startIcon={<AttachFile/>}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                        >
                             تحميل الملف
-                        </Link>
+                        </Button>
                   )}
               </Box>
           </Paper>

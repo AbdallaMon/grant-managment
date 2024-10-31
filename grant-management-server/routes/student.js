@@ -19,6 +19,8 @@ import {
     updateAskedFieldsAndImprovementRequests,
     updatePersonalInfo
 } from "../services/studentsServices.js";
+import prisma from '../prisma/prisma.js';
+
 import {getApplicationById, getSpecificApplicationField} from "../services/adminServices.js";
 import {createNotification} from "../services/utility.js";
 import {getUserGrants} from "../services/shared.js";
@@ -244,6 +246,7 @@ router.post('/applications/:appId/submit/uncomplete', async (req, res) => {
         const studentId = await getStudentIdByAppId(appId)
 
         await createNotification(supervisorId, `تم تحديث طلب منحة من قبل الطالب (معرف الطلب:#${appId})`, `/dashboard/apps/view/${appId}/${studentId}`, "APPLICATION_RESPONSE")
+        await createNotification(null, `تم تحديث طلب منحة من قبل الطالب (معرف الطلب:#${appId})`, `/dashboard/apps/view/${appId}/${studentId}`, "APPLICATION_RESPONSE", true)
 
         res.status(200).json({
             message: "تم تقديم الطلب بنجاح",
@@ -289,7 +292,7 @@ router.get('/applications/:appId/check', async (req, res) => {
         res.status(500).json({error: 'حدث خطأ أثناء جلب الطلب'});
     }
 });
-router.get('/applications/:appId/improvements', async (req, res) => {
+router.get('/applications/:appId/improvementRequests', async (req, res) => {
     const {appId} = req.params
     try {
         const application = await getSpecificApplicationField(appId, "improvementRequests");
@@ -302,7 +305,7 @@ router.get('/applications/:appId/improvements', async (req, res) => {
         res.status(500).json({message: 'حدث خطأ أثناء جلب  طلب منحة '});
     }
 });
-router.get('/applications/:appId/asked', async (req, res) => {
+router.get('/applications/:appId/askedFields', async (req, res) => {
     const {appId} = req.params
     try {
         const application = await getSpecificApplicationField(appId, "askedFields");

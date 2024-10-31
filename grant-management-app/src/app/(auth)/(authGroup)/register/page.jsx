@@ -11,14 +11,13 @@ import {
     TextField,
     InputLabel,
     FormControl,
-    Select, MenuItem, Divider, Container, Alert
+    Select, MenuItem, Divider, Container, Alert, Grid2 as Grid
 } from "@mui/material";
-import Grid from '@mui/material/Grid2';
 
-import {MuiDatePicker} from "@/app/UiComponents/FormComponents/MUIInputs/MuiDatePicker";
+import {MDatePicker} from "@/app/UiComponents/formComponents/MUIInputs/MDatePicker";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider";
-import InputField from "@/app/UiComponents/formComponents/MUIInputs/InputField";
+import MuiInputField from "@/app/UiComponents/formComponents/MUIInputs/MuiInputField";
 import PhoneInput from "@/app/UiComponents/formComponents/CustomInputs/PhoneInput";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
@@ -240,10 +239,9 @@ export default function RegisterForm() {
 
     return (
           <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={locales}>
-              <Box sx={{width: "100%", minHeight: "100vh", py: 4, mt: 3}}>
+              <Box sx={{minHeight: "100vh", py: 4, mt: 3}}>
                   <Container maxWidth="md" sx={{p: 0}}>
                       <Box sx={{
-                          width: "100%",
                           my: 3,
                           p: {xs: 2, md: 4},
                           bgcolor: "background.default",
@@ -319,7 +317,7 @@ export default function RegisterForm() {
                                                         }}
                                                               key={input.data.id}
                                                         >
-                                                            <MuiDatePicker
+                                                            <MDatePicker
                                                                   key={input.data.id}
                                                                   input={input}
                                                                   control={control}
@@ -368,7 +366,7 @@ export default function RegisterForm() {
                                                                                   }
                                                                               }}
                                                                               render={({field}) => (
-                                                                                    <InputField
+                                                                                    <MuiInputField
                                                                                           input={input}
                                                                                           register={register}
                                                                                           errors={errors}
