@@ -1,10 +1,10 @@
-'use client';
+"use client"
 import React, {useState} from 'react';
 import {
     Card,
     CardContent,
     Typography,
-    Grid,
+    Grid2 as Grid,
     Box,
     Button,
     Dialog,
@@ -14,13 +14,13 @@ import {
     TextField,
     Container,
     Paper,
-    Stack,
-    IconButton,
     Divider,
     List,
     ListItem,
     ListItemText,
     styled,
+    useMediaQuery,
+    useTheme, Select, MenuItem,
 } from '@mui/material';
 import LoadingOverlay from '@/app/UiComponents/feedback/loaders/LoadingOverlay';
 import {useRouter} from 'next/navigation';
@@ -46,6 +46,8 @@ const TicketCard = styled(Paper)(({theme}) => ({
 }));
 
 const StudentTicketsList = () => {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // Check if screen size is small
     const [openDialog, setOpenDialog] = useState(false);
     const [newTicketTitle, setNewTicketTitle] = useState('');
     const [newTicketContent, setNewTicketContent] = useState('');
@@ -59,14 +61,20 @@ const StudentTicketsList = () => {
         totalPages,
         limit,
         setPage,
-        setLimit, page, setData
+        setLimit, page, setData, setFilters
     } = useDataFetcher(`student/tickets`);
+    const [status, setStatus] = useState("all");
+
 
     const handleOpenDialog = () => {
         setNewTicketTitle('');
         setNewTicketContent('');
         setErrorMessage('');
         setOpenDialog(true);
+    };
+    const handleStatusChange = (event) => {
+        setStatus(event.target.value);
+        setFilters({status: event.target.value});
     };
 
     const handleCloseDialog = () => setOpenDialog(false);
@@ -90,40 +98,58 @@ const StudentTicketsList = () => {
     };
 
     return (
-          <Container maxWidth="lg" sx={{display: 'flex', mt: 4}}>
-              {/* Sidebar for Ticket Filters */}
-              <Sidebar>
-                  <Typography variant="h6" gutterBottom>تصفية التذاكر</Typography>
-                  <Divider/>
-                  <List>
-                      <ListItem button>
-                          <ListItemText primary="جميع التذاكر"/>
-                      </ListItem>
-                      {Object.entries(TicketStatus).map(([status, label]) => (
-                            <ListItem button key={status}>
-                                <ListItemText primary={label}/>
+          <Box sx={{display: 'flex', flexDirection: isMobile ? 'column' : 'row', mt: 4}}>
+              {!isMobile && (
+                    <Sidebar>
+                        <Typography variant="h6" gutterBottom>تصفية التذاكر</Typography>
+                        <Divider/>
+                        <List>
+                            <ListItem button onClick={() => handleStatusChange({target: {value: "all"}})}>
+                                <ListItemText primary="الكل"/>
                             </ListItem>
-                      ))}
-                  </List>
-              </Sidebar>
+                            <ListItem button onClick={() => handleStatusChange({target: {value: "OPEN"}})}>
+                                <ListItemText primary="مفتوحة"/>
+                            </ListItem>
+                            <ListItem button onClick={() => handleStatusChange({target: {value: "CLOSED"}})}>
+                                <ListItemText primary="مغلقة"/>
+                            </ListItem>
+                        </List>
+                    </Sidebar>
+              )}
 
-              {/* Main Content */}
-              <Box sx={{flexGrow: 1}}>
+              <Box sx={{flexGrow: 1, width: '100%'}}>
                   <Card sx={{mb: 2}}>
-                      <CardContent sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                      <CardContent sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          flexWrap: "wrap", gap: 2
+                      }}>
                           <Typography variant="h5">{'تذاكر الشكاوي والمقترحات'}</Typography>
+                          {isMobile &&
+                                <Select
+                                      value={status}
+                                      onChange={handleStatusChange}
+                                      variant="outlined"
+                                      size="small"
+                                      sx={{minWidth: 150}}
+                                >
+                                    <MenuItem value="all">الكل</MenuItem>
+                                    <MenuItem value="OPEN">مفتوحة</MenuItem>
+                                    <MenuItem value="CLOSED">مغلقة</MenuItem>
+                                </Select>
+                          }
                           <Button variant="contained" color="primary" onClick={handleOpenDialog}>
                               {'إنشاء تذكرة جديدة'}
                           </Button>
                       </CardContent>
                   </Card>
-
                   {loading ? (
                         <LoadingOverlay/>
                   ) : tickets.length > 0 ? (
                         <Grid container spacing={3}>
                             {tickets.map((ticket) => (
-                                  <Grid item xs={12} sm={6} md={4} key={ticket.id}>
+                                  <Grid xs={12} sm={6} md={4} size={{xs: 12, sm: 6, md: 4}} key={ticket.id}>
                                       <TicketCard elevation={2}>
                                           <Typography variant="h6" gutterBottom>{ticket.title}</Typography>
                                           <Typography variant="body2" color="textSecondary">
@@ -152,7 +178,6 @@ const StudentTicketsList = () => {
 
                   <PaginationWithLimit limit={limit} totalPages={totalPages} setPage={setPage} setLimit={setLimit}
                                        page={page} total={total}/>
-
               </Box>
 
               {/* New Ticket Dialog */}
@@ -190,7 +215,7 @@ const StudentTicketsList = () => {
                       </Button>
                   </DialogActions>
               </Dialog>
-          </Container>
+          </Box>
     );
 };
 

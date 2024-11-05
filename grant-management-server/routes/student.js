@@ -511,7 +511,7 @@ router.get('/tickets', async (req, res) => {
     try {
         const userId = req.user.id;
         const {limit, skip} = getPagination(req);
-        const [tickets, total] = await getTicketsByUser(userId, +skip, +limit);
+        const [tickets, total] = await getTicketsByUser(userId, +skip, +limit, req.query);
         const totalPages = Math.ceil(+total / +limit);
         res.json({data: tickets, total, totalPages});
     } catch (error) {

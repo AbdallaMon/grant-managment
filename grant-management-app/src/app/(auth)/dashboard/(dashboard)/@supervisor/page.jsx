@@ -8,9 +8,8 @@ import SupervisorStudentsList from "@/app/UiComponents/dashboard/supervisor/Supe
 
 export default function SupervisorPage() {
     return <>
-        <>
-            <Box sx={{my: 4}}>
-                
+        <Container maxWidth="xl">
+            <Box sx={{my: 4, display: "block"}}>
                 <Masonry columns={{xs: 1, md: 2}} spacing={2}>
                     <SupervisorStudentsList/>
                     <SupervisorPaymentsOverview/>
@@ -18,6 +17,6 @@ export default function SupervisorPage() {
                     <SupervisorPaymentsStats/>
                 </Masonry>
             </Box>
-        </>
+        </Container>
     </>
 }

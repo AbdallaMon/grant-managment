@@ -73,7 +73,11 @@ export const getApplicationModel = async (appId, model, status = "DRAFT") => {
         select: {
             scholarshipInfo: model === 'scholarshipInfo',
             supportingFiles: model === 'supportingFiles',
-            academicPerformance: model === 'academicPerformance',
+            academicPerformance: model === 'academicPerformance' ? {
+                include: {
+                    gradeRecords: true // Include gradeRecords only if the model is academicPerformance
+                }
+            } : false,
             residenceInfo: model === 'residenceInfo',
             siblings: model === 'siblings',
             commitment: model === "commitment"
@@ -128,7 +132,13 @@ export const createDraftApplicationModel = async (appId, model, inputData) => {
                             gpaType: inputData.gpaType,
                             gpaValue: +inputData.gpaValue,
                             typeOfStudy: inputData.typeOfStudy,
-                            transcript: inputData.transcript
+                            transcript: inputData.transcript,
+                            gradeRecords: {
+                                create: inputData.gradeRecords.map(record => ({
+                                    description: record.description,
+                                    url: record.url
+                                }))
+                            }
                         }
                     }
                 }
@@ -230,15 +240,29 @@ export const updateApplicationModel = async (appId, model, inputData) => {
             });
         case 'academicPerformance':
             let oldFileUrl = null;
-
-            if (inputData.transcript && typeof inputData.transcript === 'string' && inputData.transcript.trim() !== '') {
-                const currentAcademicPerformance = await prisma.academicPerformance.findUnique({
-                    where: {applicationId: Number(appId)},
-                    select: {transcript: true}, // Only select the transcript field
+            let urlsToBeDeleted = [];
+            const currentAcademicPerformance = await prisma.academicPerformance.findUnique({
+                where: {applicationId: Number(appId)},
+                select: {transcript: true, gradeRecords: true},
+            });
+            if (currentAcademicPerformance && currentAcademicPerformance.gradeRecords.length > 0) {
+                currentAcademicPerformance.gradeRecords.forEach((rec) => {
+                    const found = inputData.gradeRecords.some((newRec) => newRec.url === rec.url && newRec.updated);
+                    if (!found) {
+                        urlsToBeDeleted.push(rec.url);
+                    }
                 });
-
-                if (currentAcademicPerformance && currentAcademicPerformance.transcript) {
-                    oldFileUrl = currentAcademicPerformance.transcript;
+            }
+            await prisma.file.deleteMany({
+                where: {
+                    academicPerformanceId: currentAcademicPerformance.id
+                }
+            });
+            if (inputData.transcript && typeof inputData.transcript === 'string' && inputData.transcript.trim() !== '') {
+                if (currentAcademicPerformance) {
+                    if (currentAcademicPerformance.transcript) {
+                        oldFileUrl = currentAcademicPerformance.transcript;
+                    }
                 }
             }
             if (inputData.gpaType === "GPA_4" && (inputData.gpaValue > 4 || inputData.gpaValue < 0)) {
@@ -258,13 +282,19 @@ export const updateApplicationModel = async (appId, model, inputData) => {
                             gpaType: inputData.gpaType,
                             gpaValue: inputData.gpaValue && +inputData.gpaValue,
                             typeOfStudy: inputData.typeOfStudy,
-                            transcript: typeof inputData.transcript === 'string' && inputData.transcript.trim() !== '' ? inputData.transcript : undefined
+                            transcript: typeof inputData.transcript === 'string' && inputData.transcript.trim() !== '' ? inputData.transcript : undefined,
+                            gradeRecords: {
+                                create: inputData.gradeRecords.map(record => ({
+                                    description: record.description,
+                                    url: record.url
+                                }))
+                            }
                         }
                     }
                 }
             });
             if (oldFileUrl) {
-                await deleteListOfFiles([oldFileUrl])
+                await deleteListOfFiles([...urlsToBeDeleted, oldFileUrl])
             }
 
             return updatedApplication;
@@ -505,9 +535,14 @@ export async function createNewUpdate(appId, data) {
 
 
 //tickets
-export const getTicketsByUser = async (userId, skip, take) => {
+export const getTicketsByUser = async (userId, skip, take, searchParams) => {
+    const filters = JSON.parse(searchParams.filters);
+    let filter = {userId}
+    if (filters && filters.status !== "all") {
+        filter.status = filters.status
+    }
     const tickets = await prisma.ticket.findMany({
-        where: {userId},
+        where: filter,
         select: {
             id: true,
             title: true,

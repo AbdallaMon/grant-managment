@@ -294,24 +294,27 @@ function Section({title, children}) {
 function InfoList({items}) {
     return (
           <List>
-              {items.map(
-                    (item, index) =>
-                          item && (
-                                <ListItem key={index} sx={{px: 0}}>
-                                    <ListItemText
-                                          primary={
-                                              <Typography variant="body1">
-                                                  <strong>{item.label}:</strong> {item.value}
-                                              </Typography>
-                                          }
-                                    />
-                                </ListItem>
-                          )
-              )}
+              <Grid container spacing={2}>
+                  {items.map(
+                        (item, index) =>
+                              item && (
+                                    <Grid size={{xs: 12, md: 6}} key={index}>
+                                        <ListItem sx={{px: 0}}>
+                                            <ListItemText
+                                                  primary={
+                                                      <Typography variant="body1">
+                                                          <strong>{item.label}:</strong> {item.value}
+                                                      </Typography>
+                                                  }
+                                            />
+                                        </ListItem>
+                                    </Grid>
+                              )
+                  )}
+              </Grid>
           </List>
     );
 }
-
 
 function SiblingsInfo({siblings}) {
     return (

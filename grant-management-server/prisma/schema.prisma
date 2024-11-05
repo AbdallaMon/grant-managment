@@ -241,6 +241,7 @@ model AcademicPerformance {
   gpaType          GpaType
   gpaValue         Float?
   transcript       String?
+  gradeRecords             File[]
   applicationId    Int                @unique
   application      Application        @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 }
@@ -450,10 +451,12 @@ model File {
   id               Int                @id @default(autoincrement())
   title            String?
   description      String?
-  url              String
+  url              String @unique
   createdAt        DateTime           @default(now())
 
   applicationId    Int?
   application      Application?       @relation(fields: [applicationId], references: [id])
 
+  academicPerformanceId Int?               // Foreign key to AcademicPerformance
+  academicPerformance   AcademicPerformance? @relation(fields: [academicPerformanceId], references: [id])
 }

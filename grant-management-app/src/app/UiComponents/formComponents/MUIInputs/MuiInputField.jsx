@@ -54,7 +54,6 @@ export default function MuiInputField({
                     width: "100%",
                     ...(input.sx && input.sx),
                 })}
-
                 onInput={() => setType(true)}
                 variant={variant}
                 error={Boolean(errors[inputData.id])}

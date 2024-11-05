@@ -8,7 +8,6 @@ import {
     resetPassword
 } from '../services/authServices.js';
 import {handlePrismaError, verifyToken} from "../services/utility.js";
-import prisma from '../prisma/prisma.js';
 
 const router = Router();
 

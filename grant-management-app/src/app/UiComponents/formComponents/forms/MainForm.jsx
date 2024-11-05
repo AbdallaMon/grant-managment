@@ -27,7 +27,7 @@ export function MainForm({
                              disabled,
                              reFetch,
                              gridGap = 2,
-                             removeButton = false,
+                             removeButton = false, data
                          }) {
     const {
         formState,
@@ -37,6 +37,8 @@ export function MainForm({
         watch,
         trigger,
         control,
+        getValues,
+        unregister
     } = useForm();
     const {errors} = formState;
     const formRef = useRef();
@@ -77,7 +79,11 @@ export function MainForm({
                                     <RenderInputs input={input} watch={watch} setValue={setValue} trigger={trigger}
                                                   errors={errors} register={register} control={control}
                                                   disabled={disabled} extraData={extraData} reFetch={reFetch}
-                                                  variant={variant}/>
+                                                  variant={variant}
+                                                  getValues={getValues}
+                                                  data={data}
+                                                  unregister={unregister}
+                                    />
                                 </Grid>
                           ))}
                           {children}
@@ -118,7 +124,8 @@ function RenderInputs({
                           disabled,
                           extraData,
                           reFetch,
-                          setValue
+                          setValue, getValues, data
+                          , unregister
                       }) {
     switch (input.data.type) {
         case "SelectField":
@@ -199,7 +206,9 @@ function RenderInputs({
                   <Component input={input} setValue={setValue} register={register} watch={watch} trigger={trigger}
                              errors={errors} variant={variant}
                              control={control}
-
+                             getValues={getValues}
+                             data={data}
+                             unregister={unregister}
                   />
             )
         case "file":

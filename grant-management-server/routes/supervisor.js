@@ -47,14 +47,12 @@ router.get('/dashboard/payments-overview', async (req, res) => {
 router.get('/dashboard/students', async (req, res) => {
     try {
         const supervisorId = req.user.id;
-        // Count all students associated with the supervisor through user grants
         const totalStudents = await prisma.user.count({
             where: {
                 role: "STUDENT",
-                applications: {
+                userGrants: {
                     some: {
-                        supervisorId: supervisorId,
-                        status: "APPROVED"
+                        supervisorId: +supervisorId,
                     },
                 },
             },

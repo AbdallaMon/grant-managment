@@ -22,7 +22,7 @@ import {
     ListItem,
     ListItemText,
     ListItemSecondaryAction,
-    Divider,
+    Divider, Container,
 } from "@mui/material";
 import {CiEdit as Edit} from "react-icons/ci";
 import {getData} from "@/app/helpers/functions/getData";
@@ -139,138 +139,140 @@ export default function UserProfile({isApplication, id}) {
     }
 
     return (
-          <Box sx={{p: {xs: 0.5, md: 3}}}>
-              {isApplication &&
-                    <div>
-                        <Typography variant="h4" gutterBottom>
-                            البيانات الشخصية
-                        </Typography>
-                        <Typography variant="h6" gutterBottom>
-                            هذه البيانات مسجلة من وقت التسجيل ان كنت لا تريد تعديلها اذهب الي قسم اخر
-                        </Typography>
-                        <Button href={`/dashboard/applications/drafts/${id}/scholarship-info`} component={Link}>
-                            اضغط هنا للذهاب لملئ بيانات نوع المنحة المطلوبه
-                        </Button>
-                    </div>}
-              {!isApplication &&
-                    <Box sx={{position: "relative", mb: 3}}>
+          <Container maxWidth="lg" sx={{p: 0}}>
+              <Box sx={{p: {xs: 0.5, md: 3}}}>
+                  {isApplication &&
+                        <div>
+                            <Typography variant="h4" gutterBottom>
+                                البيانات الشخصية
+                            </Typography>
+                            <Typography variant="h6" gutterBottom>
+                                هذه البيانات مسجلة من وقت التسجيل ان كنت لا تريد تعديلها اذهب الي قسم اخر
+                            </Typography>
+                            <Button href={`/dashboard/applications/drafts/${id}/scholarship-info`} component={Link}>
+                                اضغط هنا للذهاب لملئ بيانات نوع المنحة المطلوبه
+                            </Button>
+                        </div>}
+                  {!isApplication &&
+                        <Box sx={{position: "relative", mb: 3}}>
 
-                        <Box
-                              sx={{
-                                  height: 200,
-                                  backgroundImage: 'url("/images/cover-photo.jpg")', // Replace with your cover photo URL
-                                  backgroundSize: "cover",
-                                  backgroundPosition: "center",
-                              }}
-                        />
-                        <Avatar
-                              sx={{
-                                  width: 120,
-                                  height: 120,
-                                  position: "absolute",
-                                  bottom: -60,
-                                  left: "50%",
-                                  transform: "translateX(-50%)",
-                                  border: "4px solid white",
-                              }}
-                              src="/images/avatar.jpg" // Replace with your avatar URL
-                        />
-                    </Box>
-              }
-              <Typography variant="h5" align="center" sx={{mt: 8}}>
-                  {user.name}
-              </Typography>
+                            <Box
+                                  sx={{
+                                      height: 200,
+                                      backgroundImage: 'url("/images/cover-photo.jpg")', // Replace with your cover photo URL
+                                      backgroundSize: "cover",
+                                      backgroundPosition: "center",
+                                  }}
+                            />
+                            <Avatar
+                                  sx={{
+                                      width: 120,
+                                      height: 120,
+                                      position: "absolute",
+                                      bottom: -60,
+                                      left: "50%",
+                                      transform: "translateX(-50%)",
+                                      border: "4px solid white",
+                                  }}
+                                  src="/images/avatar.jpg" // Replace with your avatar URL
+                            />
+                        </Box>
+                  }
+                  <Typography variant="h5" align="center" sx={{mt: 8}}>
+                      {user.name}
+                  </Typography>
 
-              <Box sx={{textAlign: "center", mt: 2}}>
-                  <Button variant="outlined" onClick={toggleEditMode}>
-                      {editMode ? "وضع العرض" : "وضع التعديل"}
-                  </Button>
+                  <Box sx={{textAlign: "center", mt: 2}}>
+                      <Button variant="outlined" onClick={toggleEditMode}>
+                          {editMode ? "وضع العرض" : "وضع التعديل"}
+                      </Button>
+                  </Box>
+
+                  {/* Tabs */}
+                  <Box sx={{width: "100%", mt: 3}}>
+                      <Tabs
+                            value={activeTab}
+                            onChange={handleTabChange}
+                            centered
+                            indicatorColor="primary"
+                            textColor="primary"
+                            variant="fullWidth"
+                      >
+                          <Tab label="المعلومات الاساسية"/>
+                          <Tab label="معلومات الدراسة"/>
+                          <Tab label="معلومات الاتصال"/>
+                      </Tabs>
+
+                      {activeTab === 0 && (
+                            <TabPanel>
+                                <Section>
+                                    {inputs[0].map((sectionInput, index) => (
+                                          <RenderField
+                                                key={index}
+                                                item={sectionInput}
+                                                editMode={editMode}
+                                                setItem={setSelectedField}
+                                                setOpenModal={setOpenModal}
+                                                data={personalInfo.basicInfo}
+                                                setCurrentData={setCurrentData}
+                                          />
+                                    ))}
+                                </Section>
+                            </TabPanel>
+                      )}
+                      {activeTab === 1 && (
+                            <TabPanel>
+                                <Section>
+                                    {inputs[1].map((sectionInput, index) => (
+                                          <RenderField
+                                                key={index}
+                                                item={sectionInput}
+                                                editMode={editMode}
+                                                setItem={setSelectedField}
+                                                setOpenModal={setOpenModal}
+                                                data={personalInfo.studyInfo}
+                                                setCurrentData={setCurrentData}
+                                          />
+                                    ))}
+                                </Section>
+                            </TabPanel>
+                      )}
+                      {activeTab === 2 && (
+                            <TabPanel>
+                                <Section>
+                                    {inputs[2].map((sectionInput, index) => (
+                                          <RenderField
+                                                key={index}
+                                                item={sectionInput}
+                                                editMode={editMode}
+                                                setItem={setSelectedField}
+                                                setOpenModal={setOpenModal}
+                                                data={personalInfo.contactInfo}
+                                                setCurrentData={setCurrentData}
+                                          />
+                                    ))}
+                                </Section>
+                            </TabPanel>
+                      )}
+                  </Box>
+
+                  {/* Edit Modal */}
+                  <Dialog open={openModal} onClose={handleModalClose} fullWidth maxWidth="sm">
+                      {selectedField && (
+                            <>
+                                <DialogTitle>تعديل {selectedField.data.label}</DialogTitle>
+                                <DialogContent>
+                                    <RenderForm
+                                          data={currentData}
+                                          handleSave={handleSave}
+                                          selectedField={selectedField}
+                                    />
+                                </DialogContent>
+                            </>
+                      )}
+                  </Dialog>
               </Box>
-
-              {/* Tabs */}
-              <Box sx={{width: "100%", mt: 3}}>
-                  <Tabs
-                        value={activeTab}
-                        onChange={handleTabChange}
-                        centered
-                        indicatorColor="primary"
-                        textColor="primary"
-                        variant="fullWidth"
-                  >
-                      <Tab label="المعلومات الاساسية"/>
-                      <Tab label="معلومات الدراسة"/>
-                      <Tab label="معلومات الاتصال"/>
-                  </Tabs>
-
-                  {activeTab === 0 && (
-                        <TabPanel>
-                            <Section>
-                                {inputs[0].map((sectionInput, index) => (
-                                      <RenderField
-                                            key={index}
-                                            item={sectionInput}
-                                            editMode={editMode}
-                                            setItem={setSelectedField}
-                                            setOpenModal={setOpenModal}
-                                            data={personalInfo.basicInfo}
-                                            setCurrentData={setCurrentData}
-                                      />
-                                ))}
-                            </Section>
-                        </TabPanel>
-                  )}
-                  {activeTab === 1 && (
-                        <TabPanel>
-                            <Section>
-                                {inputs[1].map((sectionInput, index) => (
-                                      <RenderField
-                                            key={index}
-                                            item={sectionInput}
-                                            editMode={editMode}
-                                            setItem={setSelectedField}
-                                            setOpenModal={setOpenModal}
-                                            data={personalInfo.studyInfo}
-                                            setCurrentData={setCurrentData}
-                                      />
-                                ))}
-                            </Section>
-                        </TabPanel>
-                  )}
-                  {activeTab === 2 && (
-                        <TabPanel>
-                            <Section>
-                                {inputs[2].map((sectionInput, index) => (
-                                      <RenderField
-                                            key={index}
-                                            item={sectionInput}
-                                            editMode={editMode}
-                                            setItem={setSelectedField}
-                                            setOpenModal={setOpenModal}
-                                            data={personalInfo.contactInfo}
-                                            setCurrentData={setCurrentData}
-                                      />
-                                ))}
-                            </Section>
-                        </TabPanel>
-                  )}
-              </Box>
-
-              {/* Edit Modal */}
-              <Dialog open={openModal} onClose={handleModalClose} fullWidth maxWidth="sm">
-                  {selectedField && (
-                        <>
-                            <DialogTitle>تعديل {selectedField.data.label}</DialogTitle>
-                            <DialogContent>
-                                <RenderForm
-                                      data={currentData}
-                                      handleSave={handleSave}
-                                      selectedField={selectedField}
-                                />
-                            </DialogContent>
-                        </>
-                  )}
-              </Dialog>
-          </Box>
+          </Container>
     );
 }
 

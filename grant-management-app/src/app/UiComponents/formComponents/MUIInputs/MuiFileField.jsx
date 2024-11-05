@@ -9,10 +9,10 @@ export default function MuiFileField({
                                          register,
                                          errors,
                                          variant = "filled",
-                                         setValue
+                                         setValue, noValue = false
                                      }) {
     const {id, label} = input.data;
-    const [preview, setPreview] = useState(input.value || input.data.defaultValue || null);
+    const [preview, setPreview] = useState(input.value || input.data.defaultValue || input.preview);
 
     const [fileName, setFileName] = useState(""); // Track file name
     const [error, setError] = useState(null); // Track file error
@@ -88,29 +88,31 @@ export default function MuiFileField({
                   <Controller
                         name={input.data.id}
                         control={control}
-                        render={({field: {onChange, value = input.value}}) => (
-                              <TextField
-                                    label={label}
-                                    id={id}
-                                    sx={(theme) => ({
-                                        backgroundColor: variant === "outlined" ? theme.palette.background.default : "inherit",
-                                        ...(input.sx && input.sx),
-                                    })}
-                                    type="file"
-                                    InputLabelProps={{shrink: true}}
-                                    {...register(id, input.pattern)}
-                                    error={Boolean(errors[id])}
-                                    helperText={errors[id]?.message}
-                                    variant={variant}
-                                    fullWidth
-                                    value={value}
-                                    accept={input.data.accept}
-                                    onChange={(e) => {
-                                        onChange(e); // default handler
-                                        handleFileChange(e); // our handler
-                                    }}
-                              />
-                        )}
+                        render={({field: {onChange, value = input.value}}) => {
+                            return (
+                                  <TextField
+                                        label={label}
+                                        id={id}
+                                        sx={(theme) => ({
+                                            backgroundColor: variant === "outlined" ? theme.palette.background.default : "inherit",
+                                            ...(input.sx && input.sx),
+                                        })}
+                                        type="file"
+                                        InputLabelProps={{shrink: true}}
+                                        {...register(id, !preview && input.pattern)}
+                                        error={Boolean(errors[id])}
+                                        helperText={errors[id]?.message}
+                                        variant={variant}
+                                        fullWidth
+                                        {...!noValue && {value}}
+                                        accept={input.data.accept}
+                                        onChange={(e) => {
+                                            onChange(e); // default handler
+                                            handleFileChange(e); // our handler
+                                        }}
+                                  />
+                            )
+                        }}
                   />
                   {renderPreview()}
               </Box>

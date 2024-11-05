@@ -79,7 +79,7 @@ export const renderFileLink = (url, label, style) => {
                               target="_blank"
                               rel="noopener noreferrer"
                         >
-                            تحميل ملف PDF
+                            عرض ملف PDF
                         </Button>
                   ) : (
                         <Button

@@ -34,7 +34,7 @@ const StudentNextPayments = () => {
     }, [user]);
 
     const columns = [
-        {name: "id", label: "رقم الدفع"},
+        {name: "id", label: "معرف الدفعة"},
         {name: "amount", label: "المبلغ"},
         {name: "dueDate", label: "تاريخ الاستحقاق"},
     ];
@@ -45,7 +45,7 @@ const StudentNextPayments = () => {
               backgroundColor: theme.palette.background.default,
               boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
               borderRadius: '12px',
-              padding: {xs: 2, md: 4},
+              padding: {xs: 1, md: 3}, width: "100%"
           }}> <CardContent>
               <Typography variant="h6" gutterBottom>
                   {'الدفعات القادمة'}

@@ -49,14 +49,12 @@ const UserGrantsView = ({item, route, isStudent, isApplication = false}) => {
     if (error) {
         return <Alert severity="error" color="error">{error}</Alert>;
     }
-
     return (
           <Box>
               {/* User Information */}
               {userGrants?.length > 0 && !isStudent && (
                     <>
                         {!isApplication &&
-
                               <Card sx={{
                                   mb: 4,
                                   p: 3,
@@ -79,14 +77,29 @@ const UserGrantsView = ({item, route, isStudent, isApplication = false}) => {
               )}
 
               {/* Available Grants Section */}
-              {application?.status === "APPROVED" && (
+              {(application?.status === "APPROVED" || application?.status === "UPDATED") && (
                     <Box mb={4}>
                         <Typography variant="h4" mb={2} color="primary.main">المنح المتاحه</Typography>
                         {userGrants.length === 0 ? (
-                              <Typography>لا يوجد منح لهذا المستخدم.</Typography>
+                              <>
+                                  <Typography>لا يوجد منح لهذا المستخدم.</Typography>
+                                  {(!isStudent && (item.studentId || item.userId)) && (
+                                        <Box my={2}>
+                                            <DrawerWithContent
+                                                  item={item}
+                                                  component={AddAGrant}
+                                                  extraData={{
+                                                      userId: item.studentId || item.userId,
+                                                      label: "اضافة منحة جديدة",
+                                                      setUserGrants: setUserGrants
+                                                  }}
+                                            />
+                                        </Box>
+                                  )}
+                              </>
                         ) : (
                               <>
-                                  {/* Add Grant Button for Non-Students */}
+
                                   {(!isStudent && (item.studentId || item.userId)) && (
                                         <Box my={2}>
                                             <DrawerWithContent
@@ -101,7 +114,6 @@ const UserGrantsView = ({item, route, isStudent, isApplication = false}) => {
                                         </Box>
                                   )}
 
-                                  {/* Grant Details */}
                                   {userGrants.map((userGrant, index) => (
                                         <Card key={index} sx={{
                                             mb: 4,

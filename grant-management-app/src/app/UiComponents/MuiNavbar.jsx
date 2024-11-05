@@ -27,8 +27,7 @@ const roleBasedLinks = {
         {name: "لوحة التحكم", route: "dashboard"},
         {name: "المستخدمين", route: "users"},
         {name: "المنح", route: "grants"},
-        {name: "الشكاوي", route: "tickets"},
-        {name: "مهام المشرفين", route: "tasks"},
+        {name: "الطلبات", route: "tickets"},
         {name: "الدفعات", route: "payments"},
         {name: "الفواتير", route: "invoices"},
     ],
@@ -37,7 +36,6 @@ const roleBasedLinks = {
         {name: "الطلاب", route: "students"},
         {name: "طلبات المراجعة", route: "grants/applications"},
         {name: "المنح", route: "grants"},
-        {name: "المهام", route: "tasks"},
         {name: "الدفعات", route: "payments"},
         {name: "الفواتير", route: "invoices"},
     ],
@@ -45,7 +43,7 @@ const roleBasedLinks = {
         {name: "لوحة التحكم", route: "dashboard"},
         {name: "المنح الدراسية", route: "grants"},
         {name: "الملف الشخصي", route: "profile"},
-        {name: "الشكاوي", route: "tickets"},
+        {name: "الطلبات", route: "tickets"},
     ],
     SPONSOR: [
         {name: "لوحة التحكم", route: "dashboard"},
@@ -116,6 +114,7 @@ export default function Navbar() {
                     sx={{
                         color: "primary.main"
                     }}
+                    onClick={() => setIsDrawerOpen(false)}
                     href={`/dashboard/${link.route === "dashboard" ? "" : link.route}`}
               >
                   <ListItemText primary={link.name}/>

@@ -20,7 +20,7 @@ function DrawerWithContent({component: Component, item, extraData, rerender}) {
               </Button>
               <Drawer anchor="bottom" open={open} onClose={handleToggle}>
                   <Container
-                        maxWidth="md"
+                        maxWidth="xl"
                         sx={{
                             p: 2,
                             height: "100vh",

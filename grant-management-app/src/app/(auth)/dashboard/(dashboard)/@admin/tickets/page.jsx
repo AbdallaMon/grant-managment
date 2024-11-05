@@ -1,5 +1,4 @@
-'use client';
-
+"use client"
 import React, {useState} from 'react';
 import {
     Card,
@@ -18,6 +17,8 @@ import {
     ListItem,
     ListItemText,
     styled,
+    useMediaQuery,
+    useTheme,
 } from '@mui/material';
 import {useRouter} from 'next/navigation';
 import dayjs from "dayjs";
@@ -40,7 +41,9 @@ const TicketCard = styled(Paper)(({theme}) => ({
 }));
 
 const AdminTicketsList = () => {
+    const theme = useTheme();
     const router = useRouter();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // Check if screen size is small
     const [status, setStatus] = useState("all");
     const {
         data: tickets,
@@ -60,40 +63,44 @@ const AdminTicketsList = () => {
     };
 
     return (
-          <Container maxWidth="lg" sx={{display: 'flex', mt: 4}}>
+          <Container maxWidth="lg" sx={{display: 'flex', flexDirection: isMobile ? 'column' : 'row', mt: 4}}>
               {/* Sidebar for Quick Filters */}
-              <Sidebar>
-                  <Typography variant="h6" gutterBottom>تصفية التذاكر</Typography>
-                  <Divider/>
-                  <List>
-                      <ListItem button onClick={() => handleStatusChange({target: {value: "all"}})}>
-                          <ListItemText primary="الكل"/>
-                      </ListItem>
-                      <ListItem button onClick={() => handleStatusChange({target: {value: "OPEN"}})}>
-                          <ListItemText primary="مفتوحة"/>
-                      </ListItem>
-                      <ListItem button onClick={() => handleStatusChange({target: {value: "CLOSED"}})}>
-                          <ListItemText primary="مغلقة"/>
-                      </ListItem>
-                  </List>
-              </Sidebar>
+              {!isMobile && (
+                    <Sidebar>
+                        <Typography variant="h6" gutterBottom>تصفية التذاكر</Typography>
+                        <Divider/>
+                        <List>
+                            <ListItem button onClick={() => handleStatusChange({target: {value: "all"}})}>
+                                <ListItemText primary="الكل"/>
+                            </ListItem>
+                            <ListItem button onClick={() => handleStatusChange({target: {value: "OPEN"}})}>
+                                <ListItemText primary="مفتوحة"/>
+                            </ListItem>
+                            <ListItem button onClick={() => handleStatusChange({target: {value: "CLOSED"}})}>
+                                <ListItemText primary="مغلقة"/>
+                            </ListItem>
+                        </List>
+                    </Sidebar>
+              )}
 
               {/* Main Content */}
-              <Box sx={{flexGrow: 1}}>
+              <Box sx={{flexGrow: 1, width: '100%'}}>
                   <Card sx={{mb: 2}}>
                       <CardContent sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                           <Typography variant="h5">إدارة التذاكر</Typography>
-                          <Select
-                                value={status}
-                                onChange={handleStatusChange}
-                                variant="outlined"
-                                size="small"
-                                sx={{minWidth: 150}}
-                          >
-                              <MenuItem value="all">الكل</MenuItem>
-                              <MenuItem value="OPEN">مفتوحة</MenuItem>
-                              <MenuItem value="CLOSED">مغلقة</MenuItem>
-                          </Select>
+                          {isMobile &&
+                                <Select
+                                      value={status}
+                                      onChange={handleStatusChange}
+                                      variant="outlined"
+                                      size="small"
+                                      sx={{minWidth: 150}}
+                                >
+                                    <MenuItem value="all">الكل</MenuItem>
+                                    <MenuItem value="OPEN">مفتوحة</MenuItem>
+                                    <MenuItem value="CLOSED">مغلقة</MenuItem>
+                                </Select>
+                          }
                       </CardContent>
                   </Card>
 

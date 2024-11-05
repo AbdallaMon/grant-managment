@@ -1,7 +1,7 @@
 "use client";
 import useDataFetcher from "@/app/helpers/hooks/useDataFetcher";
 import AdminTable from "@/app/UiComponents/DataViewer/AdminTable";
-import {Box, Snackbar} from "@mui/material";
+import {Box, Button, Snackbar} from "@mui/material";
 import DrawerWithContent from "@/app/UiComponents/DataViewer/DrawerWithContent";
 import ApplicationWithProfileViewer from "@/app/UiComponents/admin/ApplicationWIthProfileViewer";
 import SearchComponent from "@/app/UiComponents/formComponents/SearchComponent";
@@ -13,6 +13,7 @@ import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import ConfirmWithActionModel from "@/app/UiComponents/models/ConfirmsWithActionModel";
 import MuiAlert from "@mui/material/Alert";
 import AddAGrant from "@/app/UiComponents/admin/AddAGrant";
+import Link from "next/link";
 
 const columns = [
     {name: "student.personalInfo.basicInfo.name", label: "الاسم"},
@@ -78,14 +79,9 @@ export default function Applications() {
                                                      userId: item.student.id,
                                                      label: "تعين منحة"
                                                  }}/>
-                              <DrawerWithContent item={item} component={ApplicationWithProfileViewer}
-                                                 extraData={{
-                                                     view: true,
-                                                     route: "shared/grants/applications",
-                                                     label: "عرض الطلب",
-                                                     setData: setData,
-                                                     isAdmin: false
-                                                 }}/>
+                              <Button component={Link} href={`/dashboard/apps/view/${item.id}/${item.studentId}`}>
+                                  اتخاذ اجراء
+                              </Button>
                           </Box>
                     )}
               />

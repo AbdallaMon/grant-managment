@@ -9,7 +9,7 @@ import {
     Divider, TextField, MenuItem, Snackbar, IconButton, Alert,
     Avatar, List,
     ListItem,
-    ListItemText, Portal,
+    ListItemText, Portal, Grid2 as Grid,
 } from "@mui/material";
 import {MdOutlineExpandMore as ExpandMoreIcon} from "react-icons/md";
 import {MdOutlineExpandLess as ExpandLessIcon} from "react-icons/md";
@@ -84,56 +84,60 @@ function UserProfilePreview({personalInfo, userImage}) {
               </Box>
 
               <CardContent>
-                  <Section
-                        title="المعلومات الأساسية"
-                        open={openSections.basicInfo}
-                        onToggle={() => handleToggle('basicInfo')}
-                  >
-                      <InfoList items={[
-                          {label: 'الجواز', value: basicInfo?.passport || 'لا يوجد'},
-                          {label: 'الجنس', value: basicInfo?.gender ? GenderType[basicInfo.gender] : 'غير متوفر'},
-                          {
-                              label: 'تاريخ الميلاد',
-                              value: basicInfo?.birthDate ? dayjs(basicInfo.birthDate).format('DD/MM/YYYY') : 'غير متوفر'
-                          },
-                          {label: 'البلد', value: basicInfo?.residenceCountry || 'لا يوجد'},
-                          {label: 'هل لديك إعاقة', value: basicInfo?.hasDisability ? 'نعم' : 'لا'},
-                          basicInfo?.hasDisability && {
-                              label: 'نوع الإعاقة',
-                              value: basicInfo?.disability || 'غير متوفر'
-                          },
-                      ]}/>
-                  </Section>
+                  <Grid container spacing={2}>
 
-                  {/* Contact Information */}
-                  <Section
-                        title="معلومات الاتصال"
-                        open={openSections.contactInfo}
-                        onToggle={() => handleToggle('contactInfo')}
-                  >
-                      <InfoList items={[
-                          {label: 'الهاتف', value: contactInfo?.phone || 'لا يوجد'},
-                          {label: 'واتساب', value: contactInfo?.whatsapp || 'لا يوجد'},
-                          {label: 'فيسبوك', value: contactInfo?.facebook || 'لا يوجد'},
-                          {label: 'انستغرام', value: contactInfo?.instagram || 'لا يوجد'},
-                          {label: 'تويتر', value: contactInfo?.twitter || 'لا يوجد'},
-                      ]}/>
-                  </Section>
+                      <Section
+                            title="المعلومات الأساسية"
+                            open={openSections.basicInfo}
+                            onToggle={() => handleToggle('basicInfo')}
+                      >
+                          <InfoList items={[
+                              {label: 'الجواز', value: basicInfo?.passport || 'لا يوجد'},
+                              {label: 'الجنس', value: basicInfo?.gender ? GenderType[basicInfo.gender] : 'غير متوفر'},
+                              {
+                                  label: 'تاريخ الميلاد',
+                                  value: basicInfo?.birthDate ? dayjs(basicInfo.birthDate).format('DD/MM/YYYY') : 'غير متوفر'
+                              },
+                              {label: 'البلد', value: basicInfo?.residenceCountry || 'لا يوجد'},
+                              {label: 'هل لديك إعاقة', value: basicInfo?.hasDisability ? 'نعم' : 'لا'},
+                              basicInfo?.hasDisability && {
+                                  label: 'نوع الإعاقة',
+                                  value: basicInfo?.disability || 'غير متوفر'
+                              },
+                          ]}/>
+                      </Section>
 
-                  {/* Study Information */}
-                  <Section
-                        title="المعلومات الدراسية"
-                        open={openSections.studyInfo}
-                        onToggle={() => handleToggle('studyInfo')}
-                  >
-                      <InfoList items={[
-                          {label: 'الجامعة', value: studyInfo?.university || 'لا يوجد'},
-                          {label: 'الكلية', value: studyInfo?.college || 'لا يوجد'},
-                          {label: 'القسم', value: studyInfo?.department || 'لا يوجد'},
-                          {label: 'السنة الدراسية', value: studyInfo?.year || 'لا يوجد'},
-                          {label: 'رقم الطالب', value: studyInfo?.studentIdNo || 'لا يوجد'},
-                      ]}/>
-                  </Section>
+                      {/* Contact Information */}
+                      <Section
+                            title="معلومات الاتصال"
+                            open={openSections.contactInfo}
+                            onToggle={() => handleToggle('contactInfo')}
+                      >
+                          <InfoList items={[
+                              {label: 'الهاتف', value: contactInfo?.phone || 'لا يوجد'},
+                              {label: 'واتساب', value: contactInfo?.whatsapp || 'لا يوجد'},
+                              {label: 'فيسبوك', value: contactInfo?.facebook || 'لا يوجد'},
+                              {label: 'انستغرام', value: contactInfo?.instagram || 'لا يوجد'},
+                              {label: 'تويتر', value: contactInfo?.twitter || 'لا يوجد'},
+                          ]}/>
+                      </Section>
+
+                      {/* Study Information */}
+                      <Section
+                            title="المعلومات الدراسية"
+                            open={openSections.studyInfo}
+                            onToggle={() => handleToggle('studyInfo')}
+                      >
+                          <InfoList items={[
+                              {label: 'الجامعة', value: studyInfo?.university || 'لا يوجد'},
+                              {label: 'الكلية', value: studyInfo?.college || 'لا يوجد'},
+                              {label: 'القسم', value: studyInfo?.department || 'لا يوجد'},
+                              {label: 'السنة الدراسية', value: studyInfo?.year || 'لا يوجد'},
+                              {label: 'رقم الطالب', value: studyInfo?.studentIdNo || 'لا يوجد'},
+                          ]}/>
+                      </Section>
+                  </Grid>
+
               </CardContent>
           </>
     );
@@ -141,11 +145,11 @@ function UserProfilePreview({personalInfo, userImage}) {
 
 function Section({title, children, open, onToggle}) {
     return (
-          <>
+          <Grid size={{xs: 12, md: 6}}>
               <Box sx={{display: 'flex', alignItems: 'center', mt: 2}}>
-                  <IconButton onClick={onToggle}>
-                      {open ? <ExpandLessIcon/> : <ExpandMoreIcon/>}
-                  </IconButton>
+                  {/*<IconButton onClick={onToggle}>*/}
+                  {/*    {open ? <ExpandLessIcon/> : <ExpandMoreIcon/>}*/}
+                  {/*</IconButton>*/}
                   <Typography variant="subtitle1" fontWeight="bold">
                       {title}
                   </Typography>
@@ -154,7 +158,7 @@ function Section({title, children, open, onToggle}) {
               <Collapse in={open} timeout="auto" unmountOnExit>
                   {children}
               </Collapse>
-          </>
+          </Grid>
     );
 }
 

@@ -3,6 +3,8 @@ import {GrantDraftFrom} from "@/app/UiComponents/formComponents/forms/GrantDraft
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 
+import {GradeRecords} from "@/app/UiComponents/formComponents/CustomInputs/GradeRecords";
+
 
 const inputs = [
     {
@@ -33,7 +35,6 @@ const inputs = [
         },
         pattern: {
             required: {value: true, message: "هذه الخانة  مطلوبة"},
-            min: {value: 0, message: "المبلغ الممكن توفيره يجب أن يكون رقمًا إيجابيًا"},
         },
     },
     {
@@ -66,21 +67,76 @@ const inputs = [
             required: {value: true, message: "هذه الخانة  مطلوبة"},
         },
     },
+    {
+        data: {
+            type: "outComponent",
+            component: GradeRecords
+        }
+    }
 ];
 export default function AcademicPerformance({params: {id}}) {
-
     const {setLoading} = useToastContext()
 
-    async function handleBeforeUpdate(data, PUT) {
+    function extractNumber(key) {
+        const match = key.match(/^(\d+)_file$/);
+        if (match) {
+            return parseInt(match[1], 10);
+        }
+        return null;
+    }
 
-        if (PUT && !data.transcript[0]) return data;
+    async function handleBeforeUpdate(data, PUT) {
+        let hasFiles = false;
         const formData = new FormData()
-        formData.append('transcript', data.transcript[0]);
-        console.log(data, "data")
-        const transcriptFile = await handleRequestSubmit(formData, setLoading, "upload", true, "جاري رفع ملف الشهادة")
-        if (transcriptFile.status === 200)
-            return {...data, transcript: transcriptFile.data.transcript}
-        throw new Error("حدثت مشكلة اثناء رفع الملفات")
+        const gradeRecords = [];
+        if (!PUT && data.transcript && data.transcript[0]) {
+            formData.append('transcript', data.transcript[0]);
+            hasFiles = true
+        }
+        for (const key in data) {
+            if (key.endsWith("_file") && data[key]) {
+                if (data[key] instanceof FileList && data[key].length > 0) {
+                    const file = data[key][0];
+                    formData.append(key, file);
+                    hasFiles = true
+                }
+                const match = extractNumber(key)
+                let url = data[key] instanceof File ? "" : data[key];
+                if (data[key].length === 0 && data[match + "_url"]) {
+                    url = data[match + "_url"];
+                }
+                gradeRecords.push({
+                    url: url,
+                    description: data[match + "_text"],
+                    updated: data[key] instanceof FileList
+                })
+            }
+        }
+        let uploadedUrls = {};
+        if (hasFiles) {
+            const fileUploadResponse = await handleRequestSubmit(formData, setLoading, "upload", true, "جاري رفع الملفات");
+            if (fileUploadResponse.status !== 200) {
+                throw new Error("حدثت مشكلة اثناء رفع الملفات");
+            }
+            uploadedUrls = fileUploadResponse.data;
+        }
+        for (const key in uploadedUrls) {
+            if (key === "transcript") {
+                data.transcript = uploadedUrls[key]
+            } else {
+                const index = extractNumber(key);
+                gradeRecords[index].url = uploadedUrls[key];
+            }
+        }
+
+        const newData = {
+            gpaType: data.gpaType,
+            gpaValue: data.gpaValue,
+            gradeRecords: gradeRecords,
+            transcript: data.transcript,
+            typeOfStudy: data.typeOfStudy
+        }
+        return newData
     }
 
     return (
@@ -92,7 +148,9 @@ export default function AcademicPerformance({params: {id}}) {
                                     "الاداء الاكاديمي",
                               btnText: "حفظ",
                               variant: "outlined"
-                          }}/>
+                          }}
+          />
 
     )
 }
+

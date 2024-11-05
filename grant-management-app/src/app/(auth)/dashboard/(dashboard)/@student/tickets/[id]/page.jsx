@@ -41,7 +41,6 @@ const StudentTicketDetails = ({params: {id: ticketId}}) => {
 
         if (res?.data) {
             const {status, title, content, messages: fetchedMessages, totalMessages} = res.data;
-            console.log(fetchedMessages, "fetchedMessages")
             setTicketStatus(status);
             setTicketTitle(title);      // Set title
             setTicketContent(content);  // Set content
@@ -110,8 +109,8 @@ const StudentTicketDetails = ({params: {id: ticketId}}) => {
         }
     };
     return (
-          <Container maxWidth="lg">
-              <Box px={{xs: 2, md: 4}}>
+          <Container maxWidth="md" p={0}>
+              <Box>
                   <Card
                         sx={{
                             position: "relative",
@@ -130,7 +129,7 @@ const StudentTicketDetails = ({params: {id: ticketId}}) => {
                                         color={ticketStatus === 'OPEN' ? 'success' : 'error'}
                                         sx={{mt: 1}}/>
                               </Box>
-              
+
                           </Box>
                           <Typography variant="body1" color="textSecondary">{ticketContent}</Typography>
                           <Divider sx={{my: 2}}/>

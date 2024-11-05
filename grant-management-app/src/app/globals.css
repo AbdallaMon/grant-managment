@@ -12,3 +12,9 @@ body {
     overflow-x: hidden;
 }
 
+.MuiMasonry-root > div {
+    @media (max-width: 899px) {
+        width: 100%;
+
+    }
+}

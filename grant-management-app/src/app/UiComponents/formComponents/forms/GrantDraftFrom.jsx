@@ -5,10 +5,9 @@ import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import {useEffect, useState} from "react";
 import {Alert, Box, Button, Typography, CircularProgress} from "@mui/material";
 import Link from "next/link";
-import {usePathname, useRouter} from "next/navigation";
+import {useRouter} from "next/navigation";
 import {getData} from "@/app/helpers/functions/getData";
 import {useGrantLinks} from "@/app/providers/GrantLinksProvider";
-import {grantLinks} from "@/app/helpers/constants";
 
 // Loading Component
 export const LoadingState = () => (
@@ -179,7 +178,7 @@ export function GrantDraftFrom({
             default:
                 return (
                       <Box mt={4}>
-                          <MainForm inputs={prefilledInputs} onSubmit={onSubmit} {...formProps} />
+                          <MainForm inputs={prefilledInputs} onSubmit={onSubmit} {...formProps} data={currentData}/>
                       </Box>
                 );
         }

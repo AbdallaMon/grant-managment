@@ -1,7 +1,7 @@
 "use client";
 import useDataFetcher from "@/app/helpers/hooks/useDataFetcher";
 import AdminTable from "@/app/UiComponents/DataViewer/AdminTable";
-import {Box} from "@mui/material";
+import {Box, Button} from "@mui/material";
 import DrawerWithContent from "@/app/UiComponents/DataViewer/DrawerWithContent";
 import ApplicationWithProfileViewer from "@/app/UiComponents/admin/ApplicationWIthProfileViewer";
 import SearchComponent from "@/app/UiComponents/formComponents/SearchComponent";
@@ -9,6 +9,7 @@ import React from "react";
 import FilterSelect from "@/app/UiComponents/formComponents/FilterSelect";
 import UserGrantsView from "@/app/UiComponents/DataViewer/UserGrantsView";
 import AddAGrant from "@/app/UiComponents/admin/AddAGrant";
+import Link from "next/link";
 
 const columns = [
     {name: "student.personalInfo.basicInfo.name", label: "الاسم"},
@@ -77,14 +78,9 @@ export default function Applications() {
                                                      userId: item.student.id,
                                                      label: "تعين منحة اخري"
                                                  }}/>
-                              <DrawerWithContent item={item} component={ApplicationWithProfileViewer}
-                                                 extraData={{
-                                                     view: true,
-                                                     route: "shared/grants/applications",
-                                                     label: "اتخاذ اجراء",
-                                                     setData: setData,
-                                                     isAdmin: true
-                                                 }}/>
+                              <Button component={Link} href={`/dashboard/apps/view/${item.id}/${item.studentId}`}>
+                                  اتخاذ اجراء
+                              </Button>
                           </Box>
                     )}
               />

@@ -42,11 +42,11 @@ const StudentRecentInvoices = () => {
               backgroundColor: theme.palette.background.default,
               boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
               borderRadius: '12px',
-              padding: '16px',
+              padding: '16px', width: "100%"
           }}> <CardContent>
               <Typography variant="h6" gutterBottom align="center"
                           sx={{fontWeight: 'bold', color: theme.palette.primary.main}}>
-                  
+
                   {'الدفعات المدفوعة حديثاً'}
               </Typography>
               {loading ? (

@@ -165,7 +165,8 @@ const OverviewStats = () => {
                   backgroundColor: theme.palette.background.default,
                   boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
                   borderRadius: '12px',
-                  padding: {xs: 2, md: 4},
+                  padding: {xs: 2, md: 4}
+                  , width: "100%",
               }}> <CardContent>
                   <Typography variant="h6" gutterBottom align="right">
                       {'المستخدمين'}
@@ -240,7 +241,7 @@ const OverviewStats = () => {
                   backgroundColor: theme.palette.background.default,
                   boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
                   borderRadius: '12px',
-                  padding: {xs: 2, md: 4},
+                  padding: {xs: 2, md: 4}, width: "100%"
               }}> <CardContent>
                   <Typography variant="h6" gutterBottom>
                       {'الدفعات المستحقة لهذا الشهر'}
@@ -256,7 +257,7 @@ const OverviewStats = () => {
                   backgroundColor: theme.palette.background.default,
                   boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
                   borderRadius: '12px',
-                  padding: {xs: 2, md: 4},
+                  padding: {xs: 2, md: 4}, width: "100%"
               }}> <CardContent>
                   <Typography variant="h6" gutterBottom>
                       {'إجمالي الطلبات'}
@@ -318,7 +319,7 @@ const OverviewStats = () => {
                   backgroundColor: theme.palette.background.default,
                   boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
                   borderRadius: '12px',
-                  padding: {xs: 2, md: 4},
+                  padding: {xs: 2, md: 4}, width: "100%"
               }}> <CardContent>
                   <Typography variant="h6" gutterBottom>
                       {'إجمالي الإنفاق والمنح'}

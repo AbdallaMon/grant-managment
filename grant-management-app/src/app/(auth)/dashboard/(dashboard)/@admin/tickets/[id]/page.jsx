@@ -128,7 +128,6 @@ const AdminTicketDetails = ({params: {id: ticketId}}) => {
     };
 
     // Open/Close the confirm close modal
-    const handleOpenCloseModal = () => setConfirmCloseOpen(true);
     const handleCloseModal = () => setConfirmCloseOpen(false);
 
     useEffect(() => {
@@ -136,8 +135,8 @@ const AdminTicketDetails = ({params: {id: ticketId}}) => {
     }, [ticketId]);
 
     return (
-          <Container maxWidth="lg">
-              <Box px={{xs: 2, md: 4}}>
+          <Container maxWidth="md" p={0}>
+              <Box>
                   <Card
                         sx={{
                             position: "relative",
