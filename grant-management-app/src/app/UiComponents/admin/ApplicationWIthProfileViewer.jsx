@@ -9,7 +9,7 @@ import {
     Divider, TextField, MenuItem, Snackbar, IconButton, Alert,
     Avatar, List,
     ListItem,
-    ListItemText, Portal, Grid2 as Grid,
+    ListItemText, Portal, Grid2 as Grid, FormControl, InputLabel, Select, Checkbox, FormHelperText, Paper,
 } from "@mui/material";
 import {MdOutlineExpandMore as ExpandMoreIcon} from "react-icons/md";
 import {MdOutlineExpandLess as ExpandLessIcon} from "react-icons/md";
@@ -20,8 +20,8 @@ import {getData} from "@/app/helpers/functions/getData";
 import FullScreenLoader from "@/app/UiComponents/feedback/loaders/FullscreenLoader";
 
 import {
-    ApplicationStatus,
-    GenderType,
+    ApplicationStatus, ArFieldEnum, ArModelEnum, FieldEnum,
+    GenderType, ModelEnum,
 
     StatusColor,
 
@@ -254,7 +254,7 @@ export default function ApplicationWithProfileViewer({
                     <>
                         <Card variant="outlined" sx={{
                             mb: 4,
-                            p: 3,
+                            p: {xs: 1, md: 3},
                             backgroundColor: "#ffffff",
                             borderRadius: "16px",
                             boxShadow: 2
@@ -286,7 +286,7 @@ export default function ApplicationWithProfileViewer({
                     <>
                         <Card variant="outlined" sx={{
                             mb: 4,
-                            p: 3,
+                            p: {xs: 2, md: 3},
                             backgroundColor: "#ffffff",
                             borderRadius: "16px",
                             boxShadow: 2
@@ -353,7 +353,7 @@ function RenderActionsButtons({isAdmin, route, appId, onClose, setData, item, vi
                             }
                         </>
                   }
-                  <DrawerWithContent item={item} component={MarkAsUnCompleteAndAskForImprovement}
+                  <DrawerWithContent item={item} component={ImprovementRequestForm}
                                      extraData={{
                                          route: route,
                                          label: "طلب تعديل حقول نموذج معين",
@@ -769,6 +769,183 @@ function MarkAsUnCompleteAndAskForImprovement({
     );
 }
 
+
+const ImprovementRequestForm = ({appId, route}) => {
+    const [modelName, setModelName] = useState('');
+    const [fieldName, setFieldName] = useState(''); // Single field for each improvement request
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState({model: '', field: '', message: ''});
+    const [requests, setRequests] = useState([]); // Store multiple improvement requests
+    const {setLoading} = useToastContext()
+    const handleModelChange = (event) => {
+        setModelName(event.target.value);
+        setFieldName(''); // Clear field selection when model changes
+        setError((prev) => ({...prev, model: ''}));
+    };
+
+    const handleFieldChange = (event) => {
+        setFieldName(event.target.value);
+        setError((prev) => ({...prev, field: ''}));
+    };
+
+    const handleMessageChange = (event) => {
+        setMessage(event.target.value);
+        setError((prev) => ({...prev, message: ''}));
+    };
+
+    const validateRequest = () => {
+        let valid = true;
+        let newError = {model: '', field: '', message: ''};
+
+        if (!modelName) {
+            newError.model = 'يرجى اختيار النموذج';
+            valid = false;
+        }
+        if (!fieldName) {
+            newError.field = 'يرجى اختيار الحقل';
+            valid = false;
+        }
+        if (!message) {
+            newError.message = 'يرجى إدخال رسالة التحسين';
+            valid = false;
+        }
+
+        // Check for duplicate Model-Field pairs
+        const duplicate = requests.some(
+              (request) => request.modelName === modelName && request.fieldName === fieldName
+        );
+        if (duplicate) {
+            newError.field = `الحقل "${ArFieldEnum[modelName][fieldName]}" تم طلب تحسينه مسبقًا`;
+            valid = false;
+        }
+
+        setError(newError);
+        return valid;
+    };
+
+    const addRequest = () => {
+        if (!validateRequest()) return;
+
+        const newRequest = {
+            modelName,
+            arModelName: ArModelEnum[modelName],
+            fieldName,
+            arFieldName: ArFieldEnum[modelName][fieldName],
+            message,
+        };
+
+        setRequests((prev) => [...prev, newRequest]);
+        setModelName('');
+        setFieldName('');
+        setMessage('');
+    };
+
+    const removeRequest = (index) => {
+        setRequests((prev) => prev.filter((_, i) => i !== index));
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+
+        if (requests.length === 0) {
+            setError((prev) => ({...prev, message: 'يرجى إضافة طلبات تحسين قبل الإرسال'}));
+            return;
+        }
+
+        const request = await handleRequestSubmit(
+              {
+                  askFields: requests,
+                  action: 'uncomplete_with_edit',
+              },
+              setLoading,
+              `${route}/${appId}`,
+              false,
+              'جاري تعيين هذا الطلب كغير مكتمل'
+        );
+        if (request.status === 200) {
+            setRequests([]);
+        } else {
+            console.error('فشل في إرسال طلب التحسين');
+            setError((prev) => ({...prev, message: 'حدث خطأ أثناء الإرسال، يرجى المحاولة لاحقًا'}));
+        }
+    };
+
+    return (
+          <Box
+                component="form"
+                onSubmit={handleSubmit}
+                sx={{
+                    maxWidth: 800,
+                    margin: '0 auto',
+                    padding: 3,
+                    bgcolor: '#f5f5f5',
+                    borderRadius: 2,
+                    boxShadow: 3,
+                }}
+          >
+              <FormControl fullWidth variant="outlined" margin="normal" error={Boolean(error.model)}>
+                  <InputLabel>اختر النموذج</InputLabel>
+                  <Select value={modelName} onChange={handleModelChange} sx={{bgcolor: 'white'}}>
+                      {Object.keys(ModelEnum).map((key) => (
+                            <MenuItem key={key} value={ModelEnum[key]}>
+                                {ArModelEnum[ModelEnum[key]]}
+                            </MenuItem>
+                      ))}
+                  </Select>
+                  {error.model && <FormHelperText>{error.model}</FormHelperText>}
+              </FormControl>
+
+              {modelName && (
+                    <FormControl fullWidth variant="outlined" margin="normal" error={Boolean(error.field)}>
+                        <InputLabel>اختر الحقل</InputLabel>
+                        <Select value={fieldName} onChange={handleFieldChange} sx={{bgcolor: 'white'}}>
+                            {Object.keys(FieldEnum[modelName]).map((key) => (
+                                  <MenuItem key={key} value={FieldEnum[modelName][key]}>
+                                      {ArFieldEnum[modelName][key]}
+                                  </MenuItem>
+                            ))}
+                        </Select>
+                        {error.field && <FormHelperText>{error.field}</FormHelperText>}
+                    </FormControl>
+              )}
+
+              <TextField
+                    label="رسالة التحسين"
+                    variant="outlined"
+                    fullWidth
+                    margin="normal"
+                    multiline
+                    rows={4}
+                    value={message}
+                    onChange={handleMessageChange}
+                    error={Boolean(error.message)}
+                    helperText={error.message}
+                    sx={{bgcolor: 'white'}}
+              />
+
+              <Button type="button" variant="outlined" color="primary" onClick={addRequest} sx={{mt: 2, mb: 3}}>
+                  إضافة الطلب
+              </Button>
+
+              <List>
+                  {requests.map((request, index) => (
+                        <Paper key={index} elevation={2} sx={{mb: 2, p: 2, display: 'flex', alignItems: 'center'}}>
+                            <Typography variant="body1" sx={{flexGrow: 1}}>
+                                <strong>{request.arModelName}</strong> - <strong>{request.arFieldName}</strong>: {request.message}
+                            </Typography>
+                            <IconButton edge="end" aria-label="delete" onClick={() => removeRequest(index)}>
+                                <DeleteIcon/>
+                            </IconButton>
+                        </Paper>
+                  ))}
+              </List>
+
+              <Button type="submit" variant="contained" color="primary" sx={{mt: 2, display: 'block', width: '100%'}}>
+                  إرسال جميع طلبات التحسين
+              </Button>
+          </Box>
+    );
+};
 
 function MarkUnderReview({route, appId, onClose, setData, rerender}) {
     const [user, setUser] = useState(null)

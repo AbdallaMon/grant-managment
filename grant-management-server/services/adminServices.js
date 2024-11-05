@@ -528,7 +528,11 @@ export async function getApplicationById(appId) {
         where: {id: Number(appId)},
         include: {
             scholarshipInfo: true,
-            academicPerformance: true,
+            academicPerformance: {
+                include: {
+                    gradeRecords: true
+                }
+            },
             residenceInfo: true,
             supportingFiles: true,
             siblings: true,
@@ -580,13 +584,24 @@ export async function markApplicationUnComplete(appId, fieldsData, unComplete) {
     if (!fieldsData || fieldsData.length === 0) {
         throw new Error('يجب ادخال الحقول التي تريد تحسينها من الطالب');
     }
+    let fields;
+    if (unComplete) {
+        fields = fieldsData.map(request => ({
+            modelName: request.modelName,
+            arModelName: request.arModelName,
+            fieldName: request.fieldName,
+            arFieldName: request.arFieldName,
+            message: request.message,
+        }));
+    } else {
 
-    const fields = fieldsData.map(field => ({
-        title: field.title,
-        message: field.message,
-        type: unComplete ? undefined : field.type,
-    }));
+        fields = fieldsData.map(field => ({
+            title: field.title,
+            message: field.message,
+            type: unComplete ? undefined : field.type,
+        }));
 
+    }
     const updateData = unComplete
           ? {
               improvementRequests: {

@@ -587,4 +587,4 @@ export async function createNotification(userId, content, href, type, isAdmin) {
         io.to(userId.toString()).emit('notification', notification);
     }
     return notification;
-}
+}// Model names (both English and Arabic)

@@ -202,7 +202,7 @@ export default function SiblingsPage({id, extraParams, route}) {
                     handleBeforeSubmit={handleBeforeSubmit}
                     editHref={"student/applications/draft"}
                     withDelete={true}
-                    deleteHref={"student/applications/draft"}
+                    deleteHref={"student/applications/draft/apps/siblings"}
                     extraEditParams="?model=siblings"
               />
               {data && data.length > 0 &&

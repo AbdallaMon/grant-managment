@@ -1,4 +1,6 @@
 import {GrantDraftFrom} from "@/app/UiComponents/formComponents/forms/GrantDraftFrom";
+import ImprovementRequestsByModel
+    from "@/app/(auth)/dashboard/(dashboard)/@student/applications/uncomplete/ImprovementRequest";
 
 const inputs = [
     {
@@ -63,14 +65,18 @@ export default function ScholarshipInfo({params: {id}}) {
 
 
     return (
-          <GrantDraftFrom inputs={inputs} appId={id} current={"scholarshipInfo"}
-                          next={{url: "academic-performance", text: "مليء بيانات الاداء الاكاديمي"}}
-                          uncomplete={true}
-                          formProps={{
-                              formTitle:
-                                    "نوع المنحة المطلوبة",
-                              btnText: "حفظ",
-                              variant: "outlined"
-                          }}/>
+          <>
+              <ImprovementRequestsByModel appId={id}/>
+
+              <GrantDraftFrom inputs={inputs} appId={id} current={"scholarshipInfo"}
+                              next={{url: "academic-performance", text: "مليء بيانات الاداء الاكاديمي"}}
+                              uncomplete={true}
+                              formProps={{
+                                  formTitle:
+                                        "نوع المنحة المطلوبة",
+                                  btnText: "حفظ",
+                                  variant: "outlined"
+                              }}/>
+          </>
     )
 }

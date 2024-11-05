@@ -353,14 +353,18 @@ model Invoice {
 // Admin Requests
 
 model ImprovementRequest {
-  id               Int                @id @default(autoincrement())
-  title            String
-  message          String
-  status           FieldStatus        @default(PENDING)
-  applicationId    Int
+  id            Int         @id @default(autoincrement())
 
-  application      Application        @relation(fields: [applicationId], references: [id])
+  message       String
+  status        FieldStatus @default(PENDING)
+  applicationId Int
+  modelName     String
+  fieldName     String
+  arModelName   String
+  arFieldName   String
+  application   Application @relation(fields: [applicationId], references: [id])
 }
+
 model AskedField {
   id               Int                @id @default(autoincrement())
   title            String

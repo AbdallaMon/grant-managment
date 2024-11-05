@@ -1,22 +1,12 @@
 "use client";
 import React, {useEffect, useState} from "react";
-import {
-    Box,
-    Typography,
-    CircularProgress,
-    Button,
-    Alert,
-    TextField,
-    Checkbox,
-    FormControlLabel,
-    Snackbar,
-    Card,
-    CardContent,
-    Grid
-} from "@mui/material";
+import {Box, Typography, CircularProgress, Button, Alert, TextField, Snackbar, Card, CardContent} from "@mui/material";
+import Link from "next/link";
+import {usePathname} from "next/navigation";
 import {getData} from "@/app/helpers/functions/getData";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
+import {grantLinks} from "@/app/helpers/constants";
 
 export default function ReviewSubmissionPage({params: {id}}) {
     const [loading, setLoading] = useState(true);
@@ -26,13 +16,18 @@ export default function ReviewSubmissionPage({params: {id}}) {
     const [error, setError] = useState(null);
     const [askedFields, setAskedFields] = useState([]);
     const [improvementRequests, setImprovementRequests] = useState([]);
-    const [snackbarError, setSnackbarError] = useState(null); // For snackbar alerts
-    // Fetch data on component load
+    const [groupedRequests, setGroupedRequests] = useState({});
+    const [snackbarError, setSnackbarError] = useState(null);
+    const [isFormValid, setIsFormValid] = useState(false);
+
     useEffect(() => {
         async function fetchData() {
-            const response = await getData({url: `student/applications/${id}/submit/uncomplete`, setLoading});
+            const response = await getData({
+                url: `student/applications/${id}/submit/uncomplete`,
+                setLoading,
+            });
             if (response.error) {
-                setError(response.error)
+                setError(response.error);
                 setLoading(false);
                 return;
             }
@@ -41,68 +36,84 @@ export default function ReviewSubmissionPage({params: {id}}) {
             setMessage(response.message);
             setError(response.error);
             setLoading(false);
+            groupRequestsByModel(response.data.improvementRequests || []);
+            validateForm();
         }
 
         fetchData();
     }, []);
 
+    const getLinkForRequest = (arModelName) => {
+        const link = grantLinks.find((link) => link.meta.title === arModelName);
+        return link ? link.href : "#";
+    };
+
     const handleAskedFieldChange = (index, value) => {
         const updatedFields = [...askedFields];
         updatedFields[index].value = value;
         setAskedFields(updatedFields);
+        validateForm();
     };
 
-    const handleImprovementRequestCheck = (index) => {
-        const updatedRequests = [...improvementRequests];
-        updatedRequests[index].checked = !updatedRequests[index].checked;
-        setImprovementRequests(updatedRequests);
+    const validateForm = () => {
+        const allFieldsFilled = askedFields.every((field) => field.value);
+        const allRequestsChecked = improvementRequests.every((request) => request.checked);
+        setIsFormValid(allFieldsFilled && allRequestsChecked);
     };
-    const validateSubmission = () => {
-        const unfilledAskedFields = askedFields.some((field) => !field.value);
-        if (unfilledAskedFields) {
-            setSnackbarError("يرجى تعبئة جميع الحقول المطلوبة.");
-            return false;
-        }
 
-        const uncheckedImprovementRequests = improvementRequests.some((request) => !request.checked);
-        if (uncheckedImprovementRequests) {
-            setSnackbarError("يرجى تأكيد جميع طلبات التحسين.");
-            return false;
-        }
-
-        return true;
+    const groupRequestsByModel = (requests) => {
+        const grouped = requests.reduce((acc, request) => {
+            if (!acc[request.arModelName]) {
+                acc[request.arModelName] = [];
+            }
+            acc[request.arModelName].push(request);
+            return acc;
+        }, {});
+        setGroupedRequests(grouped);
     };
 
     async function handleBeforeUpdate(askedField, fileFields) {
-        const formData = new FormData()
-        fileFields.forEach((item, index) => {
+        const formData = new FormData();
+        fileFields.forEach((item) => {
             formData.append(item.id, item.value[0]);
-        })
-        const request = await handleRequestSubmit(formData, setLoading, "upload", true, "جاري رفع  ملفاتك")
+        });
+        const request = await handleRequestSubmit(
+              formData,
+              setLoading,
+              "upload",
+              true,
+              "جاري رفع ملفاتك"
+        );
         if (request.status === 200) {
             const newFields = fileFields.map((item) => {
-                item.value = request.data[item.id]
-                return item
-            })
+                item.value = request.data[item.id];
+                return item;
+            });
 
-            return [...askedField, ...newFields]
+            return [...askedField, ...newFields];
         }
     }
 
-    // Handle submission
     const handleSaveAndSubmit = async () => {
-        if (!validateSubmission()) {
+        if (!isFormValid) {
+            setSnackbarError("يرجى تعبئة جميع الحقول المطلوبة وتأكيد جميع طلبات التحسين.");
             return;
         }
+
         const fileFields = askedFields.filter((field) => field.type === "FILE");
-        let submittedAskedFields = askedFields.filter((field) => field.type !== "FILE")
+        let submittedAskedFields = askedFields.filter((field) => field.type !== "FILE");
         if (fileFields.length > 0) {
-            submittedAskedFields = await handleBeforeUpdate(submittedAskedFields, fileFields)
+            submittedAskedFields = await handleBeforeUpdate(submittedAskedFields, fileFields);
         }
-        const request = await handleRequestSubmit({
-            improvementRequests,
-            askedFields: submittedAskedFields,
-        }, setSubmitLoading, `student/applications/${id}/submit/uncomplete`, false, "جاري الحفظ");
+        const request = await handleRequestSubmit(
+              {
+                  askedFields: submittedAskedFields,
+              },
+              setSubmitLoading,
+              `student/applications/${id}/submit/uncomplete`,
+              false,
+              "جاري الحفظ"
+        );
         if (request.status === 200) {
             setSubmitted(true);
         }
@@ -118,16 +129,7 @@ export default function ReviewSubmissionPage({params: {id}}) {
               </Box>
         );
     }
-    if (error) {
-        return (
-              <Box sx={{p: 4}}>
-                  <Alert severity="error">
-                      <Typography variant="h6">هناك مشكلة ما</Typography>
-                      <Typography>${error} </Typography>
-                  </Alert>
-              </Box>
-        );
-    }
+
     return (
           <Box sx={{p: 4}}>
               {loading ? (
@@ -146,6 +148,7 @@ export default function ReviewSubmissionPage({params: {id}}) {
                             من فضلك قم بملء البيانات التالية
                         </Typography>
 
+                        {/* Asked Fields Section */}
                         <Box mb={4}>
                             <Card elevation={3}>
                                 <CardContent>
@@ -156,7 +159,6 @@ export default function ReviewSubmissionPage({params: {id}}) {
                                                           fontWeight="bold">{field.title}</Typography>
                                               <Typography variant="body2"
                                                           color="textSecondary">{field.message}</Typography>
-
                                               {field.type === "TEXT" && (
                                                     <TextField
                                                           label="أدخل القيمة"
@@ -166,7 +168,6 @@ export default function ReviewSubmissionPage({params: {id}}) {
                                                           sx={{my: 2}}
                                                     />
                                               )}
-
                                               {field.type === "FILE" && (
                                                     <TextField
                                                           type="file"
@@ -181,44 +182,47 @@ export default function ReviewSubmissionPage({params: {id}}) {
                             </Card>
                         </Box>
 
+                        {/* Grouped Improvement Requests Section */}
                         <Box mb={4}>
                             <Card elevation={3}>
                                 <CardContent>
                                     <Typography variant="h6" mb={2}>طلبات تحسين الحقول</Typography>
-                                    {improvementRequests.map((request, index) => (
-                                          <Box key={index} sx={{mb: 3}}>
-                                              <Typography variant="subtitle1"
-                                                          fontWeight="bold">{request.title}</Typography>
-                                              <Typography variant="body2"
-                                                          color="textSecondary">{request.message}</Typography>
-                                              <FormControlLabel
-                                                    control={
-                                                        <Checkbox
-                                                              checked={request.checked || false}
-                                                              onChange={() => handleImprovementRequestCheck(index)}
-                                                        />
-                                                    }
-                                                    label="تأكيد"
-                                              />
+                                    {Object.keys(groupedRequests).map((modelName) => (
+                                          <Box key={modelName} sx={{mb: 3}}>
+                                              <Typography variant="subtitle1" fontWeight="bold">{modelName}</Typography>
+                                              {groupedRequests[modelName].map((request, index) => (
+                                                    <Typography variant="body2" color="textSecondary" key={index}
+                                                                sx={{pl: 2, mb: 1}}>
+                                                        - {request.arFieldName}: {request.message}
+                                                    </Typography>
+                                              ))}
+                                              <Button
+                                                    variant="outlined"
+                                                    color="primary"
+                                                    component={Link}
+                                                    href={getLinkForRequest(modelName)}
+                                                    sx={{mt: 1}}
+                                              >
+                                                  الذهاب إلى الصفحة المطلوبة
+                                              </Button>
                                           </Box>
                                     ))}
                                 </CardContent>
                             </Card>
                         </Box>
-                        {!error &&
-                              <Button
-                                    variant="contained"
-                                    color="primary"
-                                    fullWidth
-                                    onClick={handleSaveAndSubmit}
-                                    sx={{mt: 2}}
-                              >
-                                  حفظ البيانات وارسالها للمراجعة
-                              </Button>
-                        }
+
+                        <Button
+                              variant="contained"
+                              color="primary"
+                              fullWidth
+                              onClick={handleSaveAndSubmit}
+                              sx={{mt: 2}}
+                              disabled={!isFormValid}
+                        >
+                            حفظ البيانات وارسالها للمراجعة
+                        </Button>
                     </Box>
-              )
-              }
+              )}
 
               {/* Snackbar for Errors */}
               <Snackbar

@@ -189,6 +189,8 @@ export const createDraftApplicationModel = async (appId, model, inputData) => {
             throw new Error("نموذج غير صالح");
     }
 };
+
+
 export const updateApplicationModel = async (appId, model, inputData) => {
 
     switch (model) {
@@ -361,6 +363,28 @@ export const updateApplicationModel = async (appId, model, inputData) => {
             throw new Error("نموذج غير صالح");
     }
 };
+
+export async function handleUpdateUnCompletedFields(appId, model) {
+    const modelMap = {
+        "scholarshipInfo": "ScholarshipInfo",
+        "academicPerformance": "AcademicPerformance",
+        "residenceInfo": "ResidenceInformation",
+        "siblings": "Sibling",
+        "supportingFiles": "SupportingFiles",
+    };
+
+    return await prisma.improvementRequest.updateMany({
+        where: {
+            applicationId: Number(appId),
+            modelName: modelMap[model],
+            status: {not: 'COMPLETED'}  // Only update if not already completed
+        },
+        data: {
+            status: 'COMPLETED'
+        }
+    });
+}
+
 export const deleteSibling = async (siblingId,) => {
     const sibling = await prisma.sibling.delete({
         where: {id: Number(siblingId)},
@@ -499,18 +523,20 @@ export async function updateAskedFieldsAndImprovementRequests(appId, askedFields
             });
         }
     }
-
-    if (improvementRequestsData && improvementRequestsData.length > 0) {
-        for (const request of improvementRequestsData) {
-            await prisma.improvementRequest.update({
-                where: {id: Number(request.id)},
-                data: {
-                    status: 'COMPLETED'
-                }
-            });
+    const incompleteRequests = await prisma.improvementRequest.findMany({
+        where: {
+            applicationId: Number(appId),
+            status: {
+                not: 'COMPLETED'
+            }
         }
-    }
+    });
 
+    if (incompleteRequests.length > 0) {
+        // Throw an error if there are any incomplete improvement requests
+        throw new Error('هناك طلبات تحسين تحتاج إلى إتمامها قبل تحديث الطلب.'
+        );
+    }
     const updatedApplication = await prisma.application.update({
         where: {id: Number(appId)},
         data: {
@@ -641,4 +667,24 @@ export const createMessage = async (userId, ticketId, content) => {
         },
     });
     return {...message, studentId: ticket.userId}
+};
+export const getImprovementRequestsByModel = async (appId, modelName) => {
+    try {
+        const improvementRequests = await prisma.improvementRequest.findMany({
+            where: {
+                applicationId: Number(appId),
+                modelName: modelName,
+                status: 'PENDING'
+            },
+            select: {
+                id: true,
+                arModelName: true,
+                arFieldName: true,
+                message: true,
+            },
+        });
+        return improvementRequests;
+    } catch (error) {
+        throw new Error(`Failed to retrieve improvement requests: ${error.message}`);
+    }
 };

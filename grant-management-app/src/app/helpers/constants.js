@@ -141,22 +141,135 @@ export const NotificationType = {
     PAYMENT_DUE: "موعد الدفع",
     PAYMENT_COMPLETED: "تم عملية دفع"
 };
+// Model names (both English and Arabic)
+export const ModelEnum = {
+    ScholarshipInfo: "ScholarshipInfo",
+    AcademicPerformance: "AcademicPerformance",
+    ResidenceInformation: "ResidenceInformation",
+    SupportingFiles: "SupportingFiles",
+    Sibling: "Sibling",
+};
 
+export const ArModelEnum = {
+    ScholarshipInfo: "معلومات المنحة",
+    AcademicPerformance: "الأداء الأكاديمي",
+    ResidenceInformation: "معلومات السكن",
+    SupportingFiles: "الملفات الداعمة",
+    Sibling: "الأشقاء",
+};
 
+// Fields for each model (both English and Arabic)
+export const FieldEnum = {
+
+    ScholarshipInfo: {
+        supportType: "supportType",
+        annualTuitionFee: "annualTuitionFee",
+        providedAmount: "providedAmount",
+        requestedAmount: "requestedAmount",
+    },
+    AcademicPerformance: {
+        typeOfStudy: "typeOfStudy",
+        gpaType: "gpaType",
+        gpaValue: "gpaValue",
+        transcript: "transcript", gradeRecords: "gradeRecords",
+    },
+    ResidenceInformation: {
+        residenceType: "residenceType",
+        fatherStatus: "fatherStatus",
+        fatherIncome: "fatherIncome",
+        motherStatus: "motherStatus",
+        motherIncome: "motherIncome",
+        familyIncome: "familyIncome",
+        city: "city",
+        country: "country",
+        address: "address",
+    },
+    SupportingFiles: {
+        personalId: "personalId",
+        studentDoc: "studentDoc",
+        medicalReport: "medicalReport",
+        personalPhoto: "personalPhoto",
+        proofOfAddress: "proofOfAddress",
+    },
+    Sibling: {
+        name: "name",
+        relation: "relation",
+        university: "university",
+        college: "college",
+        department: "department",
+        studyYear: "studyYear",
+        sourceOfStudy: "sourceOfStudy",
+        grantSource: "grantSource",
+        grantAmount: "grantAmount",
+        document: "document",
+    },
+};
+
+export const ArFieldEnum = {
+    Application: {
+        status: "حالة الطلب",
+        rejectReason: "سبب الرفض",
+        commitment: "التزام الطالب",
+        scholarshipTerms: "شروط المنحة",
+    },
+    ScholarshipInfo: {
+        supportType: "نوع الدعم",
+        annualTuitionFee: "الرسوم السنوية",
+        providedAmount: "المبلغ المقدم",
+        requestedAmount: "المبلغ المطلوب",
+    },
+    AcademicPerformance: {
+        typeOfStudy: "نوع الدراسة",
+        gpaType: "نوع المعدل",
+        gpaValue: "قيمة المعدل",
+        transcript: "كشف الدرجات", gradeRecords: "سجلات الدرجات", // Newly added
+
+    },
+    ResidenceInformation: {
+        residenceType: "نوع السكن",
+        fatherStatus: "حالة الأب",
+        fatherIncome: "دخل الأب",
+        motherStatus: "حالة الأم",
+        motherIncome: "دخل الأم",
+        familyIncome: "إجمالي دخل الأسرة",
+        city: "المدينة",
+        country: "الدولة",
+        address: "العنوان",
+    },
+    SupportingFiles: {
+        personalId: "رقم الهوية",
+        studentDoc: "وثيقة الطالب",
+        medicalReport: "التقرير الطبي",
+        personalPhoto: "الصورة الشخصية",
+        proofOfAddress: "إثبات العنوان",
+    },
+    Sibling: {
+        name: "الاسم",
+        relation: "العلاقة",
+        university: "الجامعة",
+        college: "الكلية",
+        department: "القسم",
+        studyYear: "سنة الدراسة",
+        sourceOfStudy: "مصدر تغطية الدراسة",
+        grantSource: "مصدر المنحة",
+        grantAmount: "قيمة المنحة",
+        document: "الوثيقة",
+    },
+};
 export const grantLinks = [
     {
-        href: "",
-        text: "البيانات الشخصية",
+        href: "application",
+        text: "الطلب",
         icon: <FaUser/>,
         meta: {
-            title: "البيانات الشخصية",
-            description: ""
+            title: "الطلب",
+            description: "عرض بيانات الطلب الأساسية"
         }
     },
     {
         href: "scholarship-info",
         text: "معلومات المنحة",
-        icon: <FaGraduationCap/>,  // Scholarship Info Icon
+        icon: <FaGraduationCap/>,
         meta: {
             title: "معلومات المنحة",
             description: "توفير كافة المعلومات المتعلقة بالمنحة"
@@ -165,7 +278,7 @@ export const grantLinks = [
     {
         href: "academic-performance",
         text: "الأداء الأكاديمي",
-        icon: <FaBook/>,  // Academic Performance Icon
+        icon: <FaBook/>,
         meta: {
             title: "الأداء الأكاديمي",
             description: "إدخال بيانات الأداء الأكاديمي الخاص بك"
@@ -173,26 +286,26 @@ export const grantLinks = [
     },
     {
         href: "residence-info",
-        text: "معلومات الإقامة",
-        icon: <FaHome/>,  // Residence Info Icon
+        text: "معلومات السكن",
+        icon: <FaHome/>,
         meta: {
-            title: "معلومات الإقامة",
+            title: "معلومات السكن",
             description: "تفاصيل الإقامة المتعلقة بك"
         }
     },
     {
         href: "siblings",
-        text: "معلومات الأقارب",
-        icon: <FaUsers/>,  // Siblings Info Icon
+        text: "الأشقاء",
+        icon: <FaUsers/>,
         meta: {
-            title: "معلومات الاخوة",
-            description: "تفاصيل عن الاخوة"
+            title: "الأشقاء",
+            description: "تفاصيل عن الأشقاء"
         }
     },
     {
         href: "supporting-files",
         text: "الملفات الداعمة",
-        icon: <FaFileAlt/>,  // Supporting Files Icon
+        icon: <FaFileAlt/>,
         meta: {
             title: "الملفات الداعمة",
             description: "رفع جميع الملفات التي تدعم طلبك"
@@ -219,7 +332,7 @@ export const grantLinks = [
     {
         href: "faq",
         text: "الأسئلة الشائعة",
-        icon: <FaQuestionCircle/>,  //
+        icon: <FaQuestionCircle/>,
         meta: {
             title: "الأسئلة الشائعة",
             description: "عرض الأسئلة الشائعة عن المنحة"

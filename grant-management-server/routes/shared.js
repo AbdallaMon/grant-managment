@@ -5,7 +5,6 @@ import {
     handlePrismaError,
     verifyTokenAndHandleAuthorization
 } from "../services/utility.js";
-import prisma from '../prisma/prisma.js';
 
 import {
     approveApplication,

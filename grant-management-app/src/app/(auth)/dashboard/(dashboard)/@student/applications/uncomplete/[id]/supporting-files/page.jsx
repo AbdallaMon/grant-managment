@@ -2,6 +2,9 @@
 import {GrantDraftFrom} from "@/app/UiComponents/formComponents/forms/GrantDraftFrom";
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
+import ImprovementRequestsByModel
+    from "@/app/(auth)/dashboard/(dashboard)/@student/applications/uncomplete/ImprovementRequest";
+import React from "react";
 
 const inputs = [
     {
@@ -87,16 +90,19 @@ export default function SupportingFiles({params: {id}}) {
     }
 
     return (
-          <GrantDraftFrom inputs={inputs} appId={id} current={"supportingFiles"}
-                          next={{url: "siblings", text: "مليء بيانات  الاقارب "}}
-                          handleBeforeUpdate={handleBeforeUpdate}
-                          uncomplete={true}
-                          formProps={{
-                              formTitle:
-                                    "الملفات الداعمة",
-                              btnText: "حفظ",
-                              variant: "outlined"
-                          }}/>
+          <>
+              <ImprovementRequestsByModel appId={id}/>
+              <GrantDraftFrom inputs={inputs} appId={id} current={"supportingFiles"}
+                              next={{url: "siblings", text: "مليء بيانات  الاقارب "}}
+                              handleBeforeUpdate={handleBeforeUpdate}
+                              uncomplete={true}
+                              formProps={{
+                                  formTitle:
+                                        "الملفات الداعمة",
+                                  btnText: "حفظ",
+                                  variant: "outlined"
+                              }}/>
+          </>
 
     )
 }

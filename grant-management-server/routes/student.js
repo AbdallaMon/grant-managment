@@ -10,10 +10,10 @@ import {
     createNewApplication, createNewUpdate, createTicket,
     deleteDraftApplication,
     deleteSibling,
-    getApplicationModel, getMessagesByTicket,
+    getApplicationModel, getImprovementRequestsByModel, getMessagesByTicket,
     getPendingFieldsAndRequests,
     getPersonalInfo,
-    getStudentApplications, getTicketsByUser,
+    getStudentApplications, getTicketsByUser, handleUpdateUnCompletedFields,
     submitApplication,
     updateApplicationModel,
     updateAskedFieldsAndImprovementRequests,
@@ -130,6 +130,11 @@ router.post('/applications/draft/:appId', async (req, res) => {
         }
 
         const createdData = await createDraftApplicationModel(appId, model, inputData);
+        if (model === "siblings") {
+
+            await handleUpdateUnCompletedFields(appId, model)
+        }
+
         res.status(200).json({message: "تم حفظ البيانات بنجاح", data: createdData});
     } catch (error) {
         console.log(error, "خطأ في تحديث بيانات نموذج طلب المسودة");
@@ -148,6 +153,9 @@ router.put('/applications/draft/:appId', async (req, res) => {
             return res.status(400).json({message: "بيانات المدخلات مطلوبة"});
         }
         const updatedData = await updateApplicationModel(appId, model, inputData);
+
+        await handleUpdateUnCompletedFields(appId, model)
+
         res.status(200).json({
             message: "تم تحديث البيانات بنجاح",
             data: model === "siblings" ? updatedData : updatedData[model]
@@ -166,6 +174,9 @@ router.put('/applications/draft/apps/siblings/:siblingId', async (req, res) => {
             return res.status(400).json({message: "بيانات المدخلات مطلوبة"});
         }
         const updatedData = await updateApplicationModel(siblingId, "siblings", inputData);
+        console.log("are we siblingId")
+        await handleUpdateUnCompletedFields(updatedData.applicationId, "siblings")
+
         res.status(200).json({message: "تم تحديث البيانات بنجاح", data: updatedData});
     } catch (error) {
         console.log(error, "خطأ في تحديث بيانات نموذج طلب المسودة");
@@ -176,7 +187,10 @@ router.put('/applications/draft/apps/siblings/:siblingId', async (req, res) => {
 router.delete('/applications/draft/apps/siblings/:siblingId', async (req, res) => {
     const {siblingId} = req.params;
     try {
+        console.log("did w e delete")
         const updatedData = await deleteSibling(siblingId);
+        await handleUpdateUnCompletedFields(updatedData.applicationId, "siblings")
+
         res.status(200).json({message: "تمت عملية الحذف بنجاح", data: updatedData});
     } catch (error) {
         console.log(error, "خطأ في تحديث بيانات نموذج طلب المسودة");
@@ -212,6 +226,21 @@ router.get('/applications/:appId/submit/uncomplete', async (req, res) => {
         res.status(500).json({message: 'حدث خطأ', error: error.message});
     }
 });
+router.get('/applications/:appId/improvement-requests-model/:model', async (req, res) => {
+    const {appId, model} = req.params;
+    try {
+        const improvementRequests = await getImprovementRequestsByModel(appId, model);
+
+        if (!improvementRequests.length) {
+            return res.status(200).json({message: 'لا توجد طلبات تحسين لهذا النموذج.', data: []});
+        }
+        res.status(200).json({message: 'تم جلب طلبات التحسين بنجاح.', data: improvementRequests});
+
+
+    } catch (error) {
+        res.status(500).json({message: 'حدث خطأ', error: error.message});
+    }
+});
 router.post('/applications/:appId/submit', async (req, res) => {
     const {appId} = req.params;
 
@@ -241,7 +270,7 @@ router.post('/applications/:appId/submit/uncomplete', async (req, res) => {
     const {appId} = req.params;
     const body = req.body
     try {
-        const submittedApplication = await updateAskedFieldsAndImprovementRequests(appId, body.askedFields, body.improvementRequests);
+        const submittedApplication = await updateAskedFieldsAndImprovementRequests(appId, body.askedFields);
         const supervisorId = await getSuperVisorIdByAppId(appId)
         const studentId = await getStudentIdByAppId(appId)
 

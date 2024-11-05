@@ -56,7 +56,7 @@ export default function ApplicationDataView({application}) {
         return direction === "left" ? "left" : "right";
     };
     return (
-          <Card variant="outlined" sx={{p: {xs: 1, md: 2}, borderRadius: '12px', mt: 2}}>
+          <Card variant="outlined" sx={{p: {xs: 0, md: 2}, borderRadius: '12px', mt: 2}}>
               <CardContent>
                   <Typography variant="h5" fontWeight="bold" sx={{mb: 2}}>
                       بيانات الطلب
@@ -136,8 +136,10 @@ export default function ApplicationDataView({application}) {
                                               label: 'كشف الدرجات',
                                               value: renderFileLink(academicPerformance?.transcript, ''),
                                           },
+
                                       ]}
                                 />
+                                <GradeRecordsInfo gradeRecords={academicPerformance?.gradeRecords || []}/>
                             </Section>
                         </TabPanel>
                   )}
@@ -383,5 +385,70 @@ function SiblingsInfo({siblings}) {
                   </TableBody>
               </Table>
           </TableContainer>
+    );
+}
+
+function GradeRecordsInfo({gradeRecords}) {
+    return (<div>
+              <Typography variant="h6" sx={{mb: 2, fontWeight: 'bold', color: '#495057'}}>
+                  جدول سجلات الدرجات الأكاديمية
+              </Typography>
+              <TableContainer
+                    component={Paper}
+                    sx={{
+                        backgroundColor: '#ffffff',
+                        borderRadius: 2,
+                        boxShadow: 3,  // Adds shadow for depth
+                        overflowX: 'auto',
+                    }}
+              >
+                  <Table>
+                      <TableHead>
+                          <TableRow>
+                              {['الوصف', 'الرابط'].map((header, index) => (
+                                    <TableCell
+                                          key={index}
+                                          align="center"
+                                          sx={{
+                                              fontWeight: 'bold',
+                                              backgroundColor: '#f8f9fa',
+                                              color: '#495057',
+                                              padding: '10px 20px',
+                                              borderBottom: '2px solid #dee2e6',
+                                          }}
+                                    >
+                                        {header}
+                                    </TableCell>
+                              ))}
+                          </TableRow>
+                      </TableHead>
+                      <TableBody>
+                          {gradeRecords.length > 0 ? (
+                                gradeRecords.map((record, index) => (
+                                      <TableRow
+                                            key={record.uniqueId || index}
+                                            sx={{
+                                                '&:nth-of-type(odd)': {backgroundColor: '#fdfdfd'},
+                                                '&:nth-of-type(even)': {backgroundColor: '#f7f7f7'},
+                                            }}
+                                      >
+                                          <TableCell align="center">{record.description || 'غير متوفر'}</TableCell>
+                                          <TableCell align="center">
+                                              {record.url ? renderFileLink(record.url, 'عرض الملف') : 'غير متوفر'}
+                                          </TableCell>
+                                      </TableRow>
+                                ))
+                          ) : (
+                                <TableRow>
+                                    <TableCell colSpan={3} align="center"
+                                               sx={{padding: '20px', fontSize: '16px', color: '#6c757d'}}>
+                                        لا يوجد معلومات عن سجلات الدرجات
+                                    </TableCell>
+                                </TableRow>
+                          )}
+                      </TableBody>
+                  </Table>
+              </TableContainer>
+          </div>
     );
 }

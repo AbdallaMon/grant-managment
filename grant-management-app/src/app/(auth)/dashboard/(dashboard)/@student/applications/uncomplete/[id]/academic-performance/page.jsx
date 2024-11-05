@@ -3,6 +3,8 @@ import {GrantDraftFrom} from "@/app/UiComponents/formComponents/forms/GrantDraft
 import {handleRequestSubmit} from "@/app/helpers/functions/handleSubmit";
 import {useToastContext} from "@/app/providers/ToastLoadingProvider";
 import {GradeRecords} from "@/app/UiComponents/formComponents/CustomInputs/GradeRecords";
+import ImprovementRequestsByModel
+    from "@/app/(auth)/dashboard/(dashboard)/@student/applications/uncomplete/ImprovementRequest";
 
 
 const inputs = [
@@ -142,16 +144,19 @@ export default function AcademicPerformance({params: {id}}) {
     }
 
     return (
-          <GrantDraftFrom inputs={inputs} appId={id} current={"academicPerformance"}
-                          next={{url: "residence-info", text: "مليء بيانات معلومات الاقامة "}}
-                          handleBeforeUpdate={handleBeforeUpdate}
-                          uncomplete={true}
-                          formProps={{
-                              formTitle:
-                                    "الاداء الاكاديمي",
-                              btnText: "حفظ",
-                              variant: "outlined"
-                          }}/>
+          <>
+              <ImprovementRequestsByModel appId={id}/>
+              <GrantDraftFrom inputs={inputs} appId={id} current={"academicPerformance"}
+                              next={{url: "residence-info", text: "مليء بيانات معلومات الاقامة "}}
+                              handleBeforeUpdate={handleBeforeUpdate}
+                              uncomplete={true}
+                              formProps={{
+                                  formTitle:
+                                        "الاداء الاكاديمي",
+                                  btnText: "حفظ",
+                                  variant: "outlined"
+                              }}/>
+          </>
 
     )
 }
