@@ -8,6 +8,7 @@ import {v4 as uuidv4} from 'uuid';
 import axios from "axios";
 import prisma from "../prisma/prisma.js";
 import {getIo} from "./socket.js";
+import {sendEmail} from "./sendMail.js";
 //
 // const __filename = fileURLToPath(import.meta.url);
 // const __dirname = path.dirname(__filename);
@@ -560,8 +561,27 @@ export async function getStudentIdByAppId(appId) {
     return student.studentId
 }
 
+export const NotificationType = {
+    MESSAGE: "رسالة جديدة",
+    APPLICATION_APPROVED: "تمت الموافقة على طلب المنحة",
+    APPLICATION_REJECTED: "تم رفض طلب المنحة",
+    APPLICATION_UPDATE: "تحديث على طلب المنحة",
+    APPLICATION_UN_COMPLETE: "طلب المنحة غير مكتمل",
+    APPLICATION_RESPONSE: "رد على طلب المنحة",
+    APPLICATION_NEW: "طلب منحة جديد",
+    APPLICATION_UNDER_REVIEW: "طلب المنحة قيد المراجعة",
+    APPLICATION_COMPLETED: "تم اكتمال طلب المنحة",
+    NEW_TICKET: "تذكرة دعم جديدة",
+    TICKET_UPDATE: "تحديث على التذكرة",
+    TASK_ASSIGNED: "تم تعيين مهمة جديدة",
+    TASK_COMPLETED: "تم إكمال المهمة",
+    PAYMENT_DUE: "تذكير بموعد الدفع",
+    PAYMENT_COMPLETED: "تم تأكيد عملية الدفع"
+};
+
+
 export async function createNotification(userId, content, href, type, isAdmin) {
-    const io = getIo(); // Get the initialized socket.io instance
+    const io = getIo(); // Socket instance for real-time notifications
     const notification = await prisma.notification.create({
         data: {
             userId: userId || null, // Null for admin notifications
@@ -571,8 +591,19 @@ export async function createNotification(userId, content, href, type, isAdmin) {
             isAdmin: isAdmin || false,
         },
     });
+
+    const emailSubject = NotificationType[type];
+    const link = href ? `<a href="${process.env.ORIGIN}${href}" style="color: #1a73e8; text-decoration: none;">اضغط هنا لرؤية التفاصيل</a>` : '';
+    const emailContent = `
+        <div style="font-family: Arial, sans-serif; color: #333; direction: rtl; text-align: right;">
+            <h2 style="color: #444; margin-bottom: 16px;">${emailSubject}</h2>
+            <p style="font-size: 16px; line-height: 1.5;">${content}</p>
+            ${link ? `<p>${link}</p>` : ''}
+        </div>
+    `;
+
     if (isAdmin) {
-        const adminUsers = await prisma.user.findMany({where: {role: 'ADMIN'}, select: {id: true}});
+        const adminUsers = await prisma.user.findMany({where: {role: 'ADMIN'}, select: {id: true, email: true}});
         await prisma.adminNotification.createMany({
             data: adminUsers.map((admin) => ({
                 adminId: admin.id,
@@ -580,11 +611,31 @@ export async function createNotification(userId, content, href, type, isAdmin) {
                 isRead: false,
             })),
         });
+
+        // Notify each admin user and defer emails
         adminUsers.forEach((admin) => {
             io.to(admin.id.toString()).emit('notification', notification);
+            if (admin.email) {
+                setImmediate(() => {
+                    sendEmail(admin.email, emailSubject, emailContent).catch(error => {
+                        console.error(`Failed to send email to admin ${admin.id}:`, error);
+                    });
+                });
+            }
         });
     } else if (userId) {
         io.to(userId.toString()).emit('notification', notification);
+
+        const user = await prisma.user.findUnique({where: {id: userId}, select: {email: true}});
+        if (user && user.email) {
+            setImmediate(() => {
+                sendEmail(user.email, emailSubject, emailContent).catch(error => {
+                    console.error(`Failed to send email to user ${userId}:`, error);
+                });
+            });
+        }
     }
+
+    // Return the notification immediately
     return notification;
-}// Model names (both English and Arabic)
+}

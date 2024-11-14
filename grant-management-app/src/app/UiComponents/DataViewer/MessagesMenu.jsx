@@ -11,14 +11,19 @@ import {
     Divider,
     Box,
     Link as MuiLink,
-    Typography,
+    Typography, Button,
 } from '@mui/material';
-import {FaEnvelope} from 'react-icons/fa';
+import {FaClock, FaEnvelope} from 'react-icons/fa';
 import Link from 'next/link';
 import io from 'socket.io-client';
 import {useAuth} from '@/app/providers/AuthProvider';
 import {useSearchParams} from "next/navigation";
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/ar';
 
+dayjs.extend(relativeTime);
+dayjs.locale('ar');
 const url = process.env.NEXT_PUBLIC_URL;
 
 const MessagesIcon = () => {
@@ -124,62 +129,95 @@ const MessagesIcon = () => {
 
     return (
           <>
+
               <IconButton color="primary" onClick={handleOpen}>
                   <Badge badgeContent={unreadCount} color="error">
                       <FaEnvelope size={24}/>
                   </Badge>
               </IconButton>
-              <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-                  <List sx={{width: '350px'}}>
-                      {!messages || messages.length === 0 ? (
+              <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}
+                    sx={{
+                        "& .MuiList-root": {
+                            py: 0
+                        }
+                        , "& .MuiPaper-root": {
+                            width: '350px',
+                            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                            borderRadius: '8px', p: 0,
+                        }
+                    }}
+
+              >
+                  <List sx={{maxHeight: '400px', overflowY: 'auto', p: 0,}}>
+                      {messages.length === 0 ? (
                             <MenuItem>لا يوجد رسائل جديدة</MenuItem>
                       ) : (
-                            messages.map((message) => (
-                                  <React.Fragment key={message.id}>
-                                      <MenuItem
-                                            component={Link}
-                                            href={`/dashboard/chats?userId=${message.senderId}`}
-                                            onClick={handleClose}
-                                            sx={{
-                                                transition: 'background-color 0.3s ease',
-                                                '&:hover': {
-                                                    backgroundColor: 'rgba(30, 96, 145, 0.05)',
-                                                },
-                                            }}
-                                      >
-                                          <ListItemAvatar>
-                                              <Avatar>
-                                                  {getSenderDisplayName(message.sender)[0]}
-                                              </Avatar>
-                                          </ListItemAvatar>
-                                          <ListItemText
-                                                primary={
-                                                    <Typography variant="subtitle1" fontWeight="bold">
-                                                        {getSenderDisplayName(message.sender)}
-                                                    </Typography>
-                                                }
-                                                secondary={
-                                                    <Typography
-                                                          variant="body2"
-                                                          sx={{color: 'text.secondary'}}
-                                                          noWrap
-                                                    >
-                                                        {message.content}
-                                                    </Typography>
-                                                }
-                                          />
-                                      </MenuItem>
-                                      <Divider/>
-                                  </React.Fragment>
-                            ))
+                            messages.map((message) => {
+                                const messageTime = dayjs(message.createdAt);
+                                const displayTime = messageTime.isBefore(dayjs().subtract(1, 'day'))
+                                      ? messageTime.format('DD/MM/YYYY HH:mm')
+                                      : messageTime.fromNow();
+
+                                return (
+                                      <React.Fragment key={message.id}>
+                                          <MenuItem
+                                                component={Link}
+                                                href={`/dashboard/chats?userId=${message.senderId}`}
+                                                onClick={handleClose}
+                                                sx={{
+                                                    '&:hover': {backgroundColor: 'rgba(30, 96, 145, 0.05)'},
+                                                    padding: '12px 16px',
+                                                    borderBottom: '1px solid #e0e0e0',
+                                                    backgroundColor: message.isRead ? 'inherit' : '#f5f5f5',
+                                                }}
+                                          >
+                                              <ListItemAvatar>
+                                                  <Avatar>{getSenderDisplayName(message.sender)[0]}</Avatar>
+                                              </ListItemAvatar>
+                                              <ListItemText
+                                                    primary={
+                                                        <Typography
+                                                              variant="subtitle1"
+                                                              fontWeight={message.isRead ? 'normal' : 'bold'}
+                                                        >
+                                                            {getSenderDisplayName(message.sender)}
+                                                        </Typography>
+                                                    }
+                                                    secondary={
+                                                        <>
+                                                            <Typography variant="body2" sx={{color: 'text.secondary'}}
+                                                                        noWrap>
+                                                                {message.content}
+                                                            </Typography>
+                                                            <Box display="flex" alignItems="center" mt={0.5}
+                                                                 color="text.secondary">
+                                                                <FaClock size={12} style={{marginRight: 4}}/>
+                                                                <Typography variant="caption">{displayTime}</Typography>
+                                                            </Box>
+                                                        </>
+                                                    }
+                                              />
+                                          </MenuItem>
+                                      </React.Fragment>
+                                );
+                            })
                       )}
                   </List>
-                  <Divider/>
-                  <Box textAlign="center" p={1}>
-                      <MuiLink component={Link} href="/dashboard/chats" onClick={handleClose}>
-                          عرض جميع المحادثات
-                      </MuiLink>
-                  </Box>
+                  <Button sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      p: '8px 16px',
+                      color: '#1a73e8',
+                      fontWeight: 'bold',
+                      backgroundColor: "white"
+                  }}
+                          component={Link} href="/dashboard/chats"
+                          onClick={handleClose}
+                  >
+
+                      عرض جميع الإشعارات
+                  </Button>
+
               </Menu>
           </>
     );

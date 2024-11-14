@@ -1,10 +1,29 @@
+"use client"
 import React, {useState, useEffect} from 'react';
-import {Badge, IconButton, Menu, MenuItem, List, ListItem, ListItemText, Button, Typography, Box} from '@mui/material';
-import {FaBell} from 'react-icons/fa';
+import {
+    Badge,
+    IconButton,
+    Menu,
+    MenuItem,
+    List,
+    ListItem,
+    ListItemText,
+    Button,
+    Typography,
+    Box,
+    ListItemIcon
+} from '@mui/material';
+import {FaBell, FaClock} from 'react-icons/fa';
 import Link from 'next/link';
 import io from 'socket.io-client';
 import {useAuth} from "@/app/providers/AuthProvider";
 import {NotificationType} from "@/app/helpers/constants";
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/ar';
+
+dayjs.extend(relativeTime);
+dayjs.locale('ar');
 
 const url = process.env.NEXT_PUBLIC_URL;
 
@@ -19,10 +38,17 @@ const NotificationsIcon = () => {
     useEffect(() => {
         const fetchUnreadNotifications = async () => {
             try {
-                const response = await fetch(`${url}/utility/notification/unread/?userId=${user.id}&isAdmin=${user.role === "ADMIN"}`);
+                const response = await fetch(`${url}/utility/notification?isAdmin=${user.role === "ADMIN"}&userId=${user.id}&`);
                 const res = await response.json();
                 setNotifications(res.data);
-                setUnreadCount(res.data.length);
+                if (user.role === "ADMIN") {
+                    const response = await fetch(`${url}/utility/notification/unread/?userId=${user.id}&isAdmin=${user.role === "ADMIN"}`);
+                    const adminRes = await response.json();
+                    setUnreadCount(adminRes.data.length)
+                } else {
+                    setUnreadCount(res.data.filter((notification) => !notification.isRead).length);
+                }
+                console.log(notifications, "noti")
             } catch (error) {
                 console.error('Error fetching unread notifications:', error);
             }
@@ -110,78 +136,144 @@ const NotificationsIcon = () => {
                     id="basic-menu"
                     open={open}
                     onClose={handleClose}
-                    PaperProps={{
-                        style: {
-                            maxHeight: '500px',
+                    sx={{
+                        "& .MuiList-root": {
+                            py: 0
+                        }
+                        , "& .MuiPaper-root": {
                             width: '350px',
-                            overflowY: 'auto', // Add scrolling
-                        },
+                            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                            borderRadius: '8px', p: 0,
+                        }
                     }}
+
               >
-                  <List sx={{padding: 0}}>
+                  <List sx={{
+                      maxHeight: '400px', p: 0,
+                      overflowY: "auto"
+
+                  }}>
                       {notifications.length === 0 ? (
                             <Typography textAlign="center" sx={{padding: '16px'}}>لا يوجد إشعارات جديدة</Typography>
                       ) : (
-                            notifications.map((notification) => (
-                                  notification.href ? (
-                                        <ListItem
-                                              key={notification.id}
-                                              button
-                                              component={Link}
-                                              href={notification.href || '#'}
-                                              sx={{
-                                                  '&:hover': {
-                                                      backgroundColor: '#f0f4f8',
-                                                  },
-                                                  padding: '12px 16px',
-                                              }}
-                                        >
-                                            <ListItemText
-                                                  primary={
-                                                      <Typography
-                                                            component="span"
-                                                            sx={{color: 'primary.main', fontWeight: 'bold'}}
-                                                      >
-                                                          {NotificationType[notification.type]}
-                                                      </Typography>
-                                                  }
-                                                  secondary={renderNotificationContent(notification.content)}
-                                            />
-                                        </ListItem>
-                                  ) : (
-                                        <ListItem
-                                              key={notification.id}
-                                              sx={{
-                                                  '&:hover': {
-                                                      backgroundColor: '#f0f4f8',
-                                                  },
-                                                  padding: '12px 16px',
-                                              }}
-                                        >
-                                            <ListItemText
-                                                  primary={
-                                                      <Typography
-                                                            component="span"
-                                                            sx={{color: 'primary.main', fontWeight: 'bold'}}
-                                                      >
-                                                          {NotificationType[notification.type]}
-                                                      </Typography>
-                                                  }
-                                                  secondary={renderNotificationContent(notification.content)}
-                                            />
-                                        </ListItem>
-                                  )
-                            ))
+                            <>
+                                {notifications.map((notification) => {
+                                    const notificationTime = dayjs(notification.createdAt);
+                                    const displayTime = notificationTime.isBefore(dayjs().subtract(1, 'day'))
+                                          ? notificationTime.format('DD/MM/YYYY HH:mm')
+                                          : notificationTime.fromNow();
+
+                                    return (
+                                          notification.href ? (
+                                                <ListItem
+                                                      key={notification.id}
+                                                      button
+                                                      component={Link}
+                                                      href={notification.href || '#'}
+                                                      sx={{
+                                                          '&:hover': {
+                                                              backgroundColor: '#f0f4f8',
+                                                          },
+                                                          padding: '12px 16px',
+                                                          borderBottom: '1px solid #e0e0e0',
+                                                          backgroundColor: notification.isRead ? 'inherit' : '#f5f5f5',
+                                                      }}
+                                                >
+                                                    <ListItemIcon sx={{minWidth: 36}}>
+                                                        <FaBell
+                                                              style={{color: notification.isRead ? '#9e9e9e' : '#1a73e8'}}/>
+                                                    </ListItemIcon>
+                                                    <ListItemText
+                                                          primary={
+                                                              <Typography
+                                                                    component="span"
+                                                                    sx={{
+                                                                        color: 'primary.main',
+                                                                        fontWeight: notification.isRead ? 'normal' : 'bold'
+                                                                    }}
+                                                              >
+                                                                  {NotificationType[notification.type]}
+                                                              </Typography>
+                                                          }
+                                                          secondary={
+                                                              <>
+                                                                  <span>{renderNotificationContent(notification.content)}</span>
+                                                                  <Box display="flex" alignItems="center"
+                                                                       color="text.secondary" mt={1} gap={1}>
+                                                                      <FaClock/>
+                                                                      <Typography
+                                                                            variant="caption">{displayTime}</Typography>
+                                                                  </Box>
+                                                              </>
+                                                          }
+                                                    />
+                                                </ListItem>
+                                          ) : (
+                                                <ListItem
+                                                      key={notification.id}
+                                                      sx={{
+                                                          '&:hover': {
+                                                              backgroundColor: '#f0f4f8',
+                                                          },
+                                                          padding: '12px 16px',
+                                                          borderBottom: '1px solid #e0e0e0',
+                                                          backgroundColor: notification.isRead ? 'inherit' : '#f5f5f5',
+                                                      }}
+                                                >
+                                                    <ListItemIcon sx={{minWidth: 36}}>
+                                                        <FaBell
+                                                              style={{color: notification.isRead ? '#9e9e9e' : '#1a73e8'}}/>
+                                                    </ListItemIcon>
+                                                    <ListItemText
+                                                          primary={
+                                                              <Typography
+                                                                    component="span"
+                                                                    sx={{
+                                                                        color: 'primary.main',
+                                                                        fontWeight: notification.isRead ? 'normal' : 'bold'
+                                                                    }}
+                                                              >
+                                                                  {NotificationType[notification.type]}
+                                                              </Typography>
+                                                          }
+                                                          secondary={
+                                                              <>
+                                                                  <span>{renderNotificationContent(notification.content)}</span>
+                                                                  <Box display="flex" alignItems="center"
+                                                                       color="text.secondary" mt={0.5}>
+                                                                      <FaClock style={{marginRight: 4}}/>
+                                                                      <Typography
+                                                                            variant="caption">{displayTime}</Typography>
+                                                                  </Box>
+                                                              </>
+                                                          }
+                                                    />
+                                                </ListItem>
+                                          )
+                                    );
+                                })}
+                            </>
                       )}
                   </List>
-                  <MenuItem>
-                      <Button fullWidth component={Link} href="/dashboard/notifications">
-                          عرض جميع الإشعارات
-                      </Button>
-                  </MenuItem>
+                  {notifications.length > 0 && (
+                        <Button sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            p: '8px 16px',
+                            color: '#1a73e8',
+                            fontWeight: 'bold',
+                            backgroundColor: "white"
+                        }}
+                                component={Link}
+                                href="/dashboard/notifications"
+
+                        >
+
+                            عرض جميع الإشعارات
+                        </Button>
+                  )}
               </Menu>
-          </>
-    );
+          </>);
 };
 
 export default NotificationsIcon;

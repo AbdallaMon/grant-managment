@@ -16,7 +16,13 @@ import {
 } from "../services/adminServices.js";
 import {getPersonalInfo} from "../services/studentsServices.js";
 import {createNotification} from "../services/utility.js";
-import {createUserGrant, getPendingPaymentsByMonth, getUserGrants, processPayment} from "../services/shared.js";
+import {
+    createUserGrant, getInvoiceById,
+    getInvoices,
+    getPendingPaymentsByMonth,
+    getUserGrants,
+    processPayment
+} from "../services/shared.js";
 import dayjs from "dayjs";
 
 const router = Router();
@@ -303,12 +309,11 @@ router.post('/grants/applications/student/:appId/user-grant', async (req, res) =
     }
 })
 router.get('/payments', async (req, res) => {
-    const {month, userId} = req.query;
+    const {month, userId, paymentId, status} = req.query;
     const startOfMonth = dayjs(month).startOf('month').toDate();
     const endOfMonth = dayjs(month).endOf('month').toDate();
-
     try {
-        const payments = await getPendingPaymentsByMonth(startOfMonth, endOfMonth, null, userId);
+        const payments = await getPendingPaymentsByMonth(startOfMonth, endOfMonth, status, userId, paymentId);
         if (!payments) {
             return res.status(404).json({message: 'لا يوجد دفعات'});
         }
@@ -336,6 +341,27 @@ router.put('/payments/pay/:paymentId', async (req, res) => {
     } catch (error) {
         console.error('Error processing payment:', error);
         return res.status(500).json({message: error.message});
+    }
+});
+
+router.get('/invoices', async (req, res) => {
+    const filters = req.query;
+    const userId = req.user.id;
+    const invoices = await getInvoices(filters, filters.pageNumber, filters.size, userId);
+    res.json(invoices);
+});
+
+// Route to fetch a single invoice by ID
+router.get('/invoices/:id', async (req, res) => {
+    const invoiceId = parseInt(req.params.id, 10);
+    const filters = req.query;
+
+    const userId = req.user?.id;
+    const invoice = await getInvoiceById(invoiceId, userId, filters.role);
+    if (invoice) {
+        res.json(invoice);
+    } else {
+        res.status(404).send('Invoice not found');
     }
 });
 

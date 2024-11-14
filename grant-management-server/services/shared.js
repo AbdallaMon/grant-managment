@@ -1,22 +1,39 @@
 // payments
 import prisma from '../prisma/prisma.js';
+import dayjs from "dayjs";
 
-export async function getPendingPaymentsByMonth(startOfMonth, endOfMonth, status, userId) {
-    const where = {
-        dueDate: {
-            gte: new Date(startOfMonth),
-            lte: new Date(endOfMonth)
+export async function getPendingPaymentsByMonth(startOfMonth, endOfMonth, status = null, userId, paymentId = null) {
+    const today = dayjs().startOf('day'); // Current date without time for strict comparison
+    if (!status || status === "ALL") status = undefined
+    await prisma.payment.updateMany({
+        where: {
+            dueDate: {
+                lt: today.toDate()
+            },
+            status: "PENDING",
+            OR: [
+                {amountPaid: {lt: prisma.payment.fields.amount}},
+                {amountPaid: null}
+            ]
+        },
+        data: {
+            status: "OVERDUE" // Mark as overdue
         }
-    }
+    });
+    const where = paymentId
+          ? {id: Number(paymentId)}
+          : {
+              dueDate: {
+                  gte: new Date(startOfMonth),
+                  lte: new Date(endOfMonth)
+              },
+              status: status
+          };
+
     if (userId) {
         where.userGrant = {
             supervisorId: Number(userId)
-        }
-    }
-    if (status) {
-        where.status = status
-    } else {
-        where.status = "PENDING"
+        };
     }
     const payments = await prisma.payment.findMany({
         where,
@@ -44,9 +61,7 @@ export async function getPendingPaymentsByMonth(startOfMonth, endOfMonth, status
                 }
             }
         },
-        orderBy: {
-            dueDate: 'asc'
-        }
+        orderBy: {dueDate: 'asc'}
     });
     return payments;
 }
@@ -188,3 +203,132 @@ export async function createUserGrant(body, appId) {
     return userGrant
 }
 
+// Optimized getInvoices with select and pagination
+export const getInvoices = async (filters, page = 1, pageSize = 2, userId) => {
+    const {dueDateFrom, dueDateTo, role} = filters;
+    const where = {
+        AND: [
+            dueDateFrom && {dueDate: {gte: new Date(dueDateFrom)}},
+            dueDateTo && {dueDate: {lte: new Date(dueDateTo)}}
+        ].filter(Boolean)
+    };
+    // Add specific filter for supervisor's userId if the role is SUPERVISOR
+    if (role === "SUPERVISOR" && userId) {
+        where.AND.push({payment: {userGrant: {supervisorId: Number(userId)}}});
+    }
+    console.log(where.AND, "where")
+
+    try {
+        const invoices = await prisma.invoice.findMany({
+            where,
+            select: {
+                id: true,
+                invoiceNumber: true,
+                dueDate: true,
+                amount: true,
+                paidAt: true,
+                payment: {
+                    select: {
+                        id: true,
+                        userGrant: {
+                            select: {
+                                grant: {select: {name: true}},
+                                user: {
+                                    select: {
+                                        personalInfo: {
+                                            select: {
+                                                basicInfo: {
+                                                    select: {
+                                                        name: true,
+                                                        familyName: true,
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            orderBy: [{paidAt: 'desc'}, {id: 'asc'}],  // Use combined ordering
+            skip: (Number(page) - 1) * Number(pageSize),
+            take: Number(pageSize),
+        });
+        const totalInvoices = await prisma.invoice.count({where});
+        return {
+            invoices,
+            total: totalInvoices,
+            page: Number(page),
+            pageSize: Number(pageSize),
+        };
+    } catch (error) {
+        console.error('Error fetching invoices:', error);
+        throw new Error('Failed to fetch invoices');
+    }
+};
+
+
+// Enhanced getInvoiceById for detailed single invoice view
+export const getInvoiceById = async (invoiceId, userId = null, role) => {
+    const invoice = await prisma.invoice.findFirst({
+        where: {
+            id: invoiceId,
+            ...(role === 'SUPERVISOR' && userId && { // Apply supervisor filter only if role is SUPERVISOR
+                payment: {
+                    userGrant: {
+                        supervisorId: userId,
+                    },
+                },
+            }),
+        },
+        select: {
+            id: true,
+            invoiceNumber: true,
+            dueDate: true,
+            amount: true,
+            paidAt: true,
+            createdAt: true,
+            payment: {
+                select: {
+                    amountPaid: true,
+                    status: true,
+                    userGrant: {
+                        select: {
+                            applicationId: true,
+                            grant: {
+                                select: {
+                                    name: true,
+                                    type: true,
+                                },
+                            },
+                            user: {
+                                select: {
+                                    personalInfo: {
+                                        select: {
+                                            basicInfo: {
+                                                select: {
+                                                    name: true,
+                                                    familyName: true,
+                                                    nationality: true,
+                                                    birthDate: true,
+                                                },
+                                            },
+                                            contactInfo: {
+                                                select: {
+                                                    phone: true,
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    });
+    return invoice;
+};

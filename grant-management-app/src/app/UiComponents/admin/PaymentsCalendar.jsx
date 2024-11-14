@@ -1,6 +1,6 @@
 "use client";
 import React, {useState, useEffect} from 'react';
-import {Box, Button, Typography, Badge, Container} from '@mui/material';
+import {Box, Button, Typography, Container, Select, MenuItem} from '@mui/material';
 import {Calendar as BigCalendar, momentLocalizer} from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -8,6 +8,7 @@ import {getData} from "@/app/helpers/functions/getData";
 import AdminTable from "@/app/UiComponents/DataViewer/AdminTable";
 import {useAuth} from "@/app/providers/AuthProvider";
 import {useRouter, useSearchParams} from "next/navigation";
+import {PaymentStatus} from "@/app/helpers/constants";
 
 const localizer = momentLocalizer(moment);
 
@@ -26,6 +27,7 @@ const inputs = [
     , {
         data: {id: "studentId", key: "userGrant.userId", type: "number"}, sx: {display: "none"}
     }
+
 ]
 const columns = [
     {name: "id", label: "رقم الدفعة"},
@@ -42,6 +44,8 @@ const columns = [
     {name: "amount", label: "المبلغ"},
     {name: "amountPaid", label: "المبلغ المدفوع من هذه الدفعه"},
     {name: "dueDate", label: "ميعاد الدفع"},
+    {name: "paidAt", label: "مدفوعة بتاريخ", type: "date"},
+    {name: "status", label: "حالة الدفع", type: "enum", enum: PaymentStatus}
 ];
 const PaymentCalendar = () => {
     const {user} = useAuth();
@@ -49,29 +53,49 @@ const PaymentCalendar = () => {
     const [payments, setPayments] = useState([]); // Payments fetched from the API
     const [filteredPayments, setFilteredPayments] = useState([]); // Payments filtered by selected date
     const [loading, setLoading] = useState(true); // Loading state for data fetching
-    const router = useRouter();
     const searchParams = useSearchParams()
     const paymentId = searchParams.get("paymentId")
-    const fetchPayments = async (month) => {
+    const router = useRouter()
+    const [status, setStatus] = useState("ALL");
+    const fetchPayments = async (month, paymentId = null) => {
         const extraParams = user.role !== "ADMIN" ? `userId=${user.id}&` : "";
-        const response = await getData({
-            url: `shared/payments?month=${month.format('YYYY-MM')}&${extraParams}`,
-            setLoading
-        });
-        setPayments(response.data || []);
+        let response;
         if (paymentId) {
-            setFilteredPayments(response.data.filter((payment) => payment.id == paymentId))
-            const newSearchParams = new URLSearchParams(searchParams);
-            newSearchParams.delete("paymentId");
-            router.replace(`?${newSearchParams.toString()}`);
+            // Fetch specific payment by `paymentId`
+            response = await getData({url: `shared/payments?paymentId=${paymentId}&`, setLoading});
+            const payment = response.data ? response.data[0] : null;
+
+            if (payment) {
+                const paymentMonth = moment(payment.dueDate);
+                if (!currentMonth.isSame(paymentMonth, 'month')) {
+                    setCurrentMonth(paymentMonth); // Set current month only if different
+                }
+                setFilteredPayments([payment]); // Filter by specific payment
+            }
         } else {
-            setFilteredPayments(response.data || []);
+            // Fetch all payments for the specified month
+            response = await getData({
+                url: `shared/payments?month=${month.format('YYYY-MM')}&status=${status}&${extraParams}`,
+                setLoading
+            });
+            setPayments(response.data || []);
+            setFilteredPayments(response.data || []); // Set filtered payments to all if no `paymentId`
         }
     };
-
     useEffect(() => {
-        fetchPayments(currentMonth); // Fetch payments when the month changes
-    }, [currentMonth]);
+        if (paymentId) {
+            fetchPayments(currentMonth, paymentId);
+        } else {
+            fetchPayments(currentMonth);
+        }
+    }, [currentMonth, status, paymentId]);
+
+    const handleStatusChange = (event) => {
+        setStatus(event.target.value);
+    };
+    const handleResetFilter = () => {
+        router.push("/dashboard/payments")
+    };
     const handleDateSelect = (slotInfo) => {
         const selectedDateString = moment(slotInfo.start).format('YYYY-MM-DD');
         const filtered = payments.filter(payment => moment(payment.dueDate).format('YYYY-MM-DD') === selectedDateString);
@@ -136,8 +160,22 @@ const PaymentCalendar = () => {
                         toolbar={false}
                   />
               </Box>
+              <Box mb={3} display="flex" justifyContent="space-between" alignItems="center">
 
-              {/* Payment Table */}
+                  <Button variant="outlined" onClick={handleResetFilter}>إعادة تعيين التصفية</Button>
+                  <Select
+                        value={status}
+                        onChange={handleStatusChange}
+                        displayEmpty
+                        inputProps={{'aria-label': 'Filter by status'}}
+                  >
+                      <MenuItem value="ALL">جميع الحالات</MenuItem>
+                      <MenuItem value="PENDING">قيد الانتظار</MenuItem>
+                      <MenuItem value="PAID">مدفوع</MenuItem>
+                      <MenuItem value="OVERDUE">متأخر</MenuItem>
+                  </Select>
+              </Box>
+
               <AdminTable
                     data={filteredPayments} // Use filtered payments based on selected date
                     columns={columns}

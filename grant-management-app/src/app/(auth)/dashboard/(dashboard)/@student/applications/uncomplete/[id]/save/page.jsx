@@ -141,82 +141,89 @@ export default function ReviewSubmissionPage({params: {id}}) {
                     </Box>
               ) : (
                     <Box>
-                        <Alert severity="error" sx={{mb: 3}}>
-                            {message}
-                        </Alert>
-                        <Typography variant="h5" my={3}>
-                            من فضلك قم بملء البيانات التالية
-                        </Typography>
+                        {askedFields.length > 0 && groupedRequests.length > 0 &&
+                              <>
+                                  <Alert severity="error" sx={{mb: 3}}>
+                                      {message}
+                                  </Alert>
+                                  <Typography variant="h5" my={3}>
+                                      من فضلك قم بملء البيانات التالية
+                                  </Typography>
+                              </>
+                        }
 
                         {/* Asked Fields Section */}
-                        <Box mb={4}>
-                            <Card elevation={3}>
-                                <CardContent>
-                                    <Typography variant="h6" mb={2}>الحقول المطلوبة</Typography>
-                                    {askedFields.map((field, index) => (
-                                          <Box key={index} sx={{mb: 3}}>
-                                              <Typography variant="subtitle1"
-                                                          fontWeight="bold">{field.title}</Typography>
-                                              <Typography variant="body2"
-                                                          color="textSecondary">{field.message}</Typography>
-                                              {field.type === "TEXT" && (
-                                                    <TextField
-                                                          label="أدخل القيمة"
-                                                          fullWidth
-                                                          value={field.value || ""}
-                                                          onChange={(e) => handleAskedFieldChange(index, e.target.value)}
-                                                          sx={{my: 2}}
-                                                    />
-                                              )}
-                                              {field.type === "FILE" && (
-                                                    <TextField
-                                                          type="file"
-                                                          fullWidth
-                                                          onChange={(e) => handleAskedFieldChange(index, e.target.files)}
-                                                          sx={{my: 2}}
-                                                    />
-                                              )}
-                                          </Box>
-                                    ))}
-                                </CardContent>
-                            </Card>
-                        </Box>
-
+                        {askedFields.length > 0 &&
+                              <Box mb={4}>
+                                  <Card elevation={3}>
+                                      <CardContent>
+                                          <Typography variant="h6" mb={2}>الحقول المطلوبة</Typography>
+                                          {askedFields.map((field, index) => (
+                                                <Box key={index} sx={{mb: 3}}>
+                                                    <Typography variant="subtitle1"
+                                                                fontWeight="bold">{field.title}</Typography>
+                                                    <Typography variant="body2"
+                                                                color="textSecondary">{field.message}</Typography>
+                                                    {field.type === "TEXT" && (
+                                                          <TextField
+                                                                label="أدخل القيمة"
+                                                                fullWidth
+                                                                value={field.value || ""}
+                                                                onChange={(e) => handleAskedFieldChange(index, e.target.value)}
+                                                                sx={{my: 2}}
+                                                          />
+                                                    )}
+                                                    {field.type === "FILE" && (
+                                                          <TextField
+                                                                type="file"
+                                                                fullWidth
+                                                                onChange={(e) => handleAskedFieldChange(index, e.target.files)}
+                                                                sx={{my: 2}}
+                                                          />
+                                                    )}
+                                                </Box>
+                                          ))}
+                                      </CardContent>
+                                  </Card>
+                              </Box>
+                        }
                         {/* Grouped Improvement Requests Section */}
-                        <Box mb={4}>
-                            <Card elevation={3}>
-                                <CardContent>
-                                    <Typography variant="h6" mb={2}>طلبات تحسين الحقول</Typography>
-                                    {Object.keys(groupedRequests).map((modelName) => (
-                                          <Box key={modelName} sx={{mb: 3}}>
-                                              <Typography variant="subtitle1" fontWeight="bold">{modelName}</Typography>
-                                              {groupedRequests[modelName].map((request, index) => (
-                                                    <Typography variant="body2" color="textSecondary" key={index}
-                                                                sx={{pl: 2, mb: 1}}>
-                                                        - {request.arFieldName}: {request.message}
-                                                    </Typography>
-                                              ))}
-                                              <Button
-                                                    variant="outlined"
-                                                    color="primary"
-                                                    component={Link}
-                                                    href={getLinkForRequest(modelName)}
-                                                    sx={{mt: 1}}
-                                              >
-                                                  الذهاب إلى الصفحة المطلوبة
-                                              </Button>
-                                          </Box>
-                                    ))}
-                                </CardContent>
-                            </Card>
-                        </Box>
-
+                        {groupedRequests.length > 0 &&
+                              <Box mb={4}>
+                                  <Card elevation={3}>
+                                      <CardContent>
+                                          <Typography variant="h6" mb={2}>طلبات تحسين الحقول</Typography>
+                                          {Object.keys(groupedRequests).map((modelName) => (
+                                                <Box key={modelName} sx={{mb: 3}}>
+                                                    <Typography variant="subtitle1"
+                                                                fontWeight="bold">{modelName}</Typography>
+                                                    {groupedRequests[modelName].map((request, index) => (
+                                                          <Typography variant="body2" color="textSecondary" key={index}
+                                                                      sx={{pl: 2, mb: 1}}>
+                                                              - {request.arFieldName}: {request.message}
+                                                          </Typography>
+                                                    ))}
+                                                    <Button
+                                                          variant="outlined"
+                                                          color="primary"
+                                                          component={Link}
+                                                          href={getLinkForRequest(modelName)}
+                                                          sx={{mt: 1}}
+                                                    >
+                                                        الذهاب إلى الصفحة المطلوبة
+                                                    </Button>
+                                                </Box>
+                                          ))}
+                                      </CardContent>
+                                  </Card>
+                              </Box>
+                        }
                         <Button
                               variant="contained"
                               color="primary"
                               fullWidth
                               onClick={handleSaveAndSubmit}
-                              sx={{mt: 2}}
+                              sx={{mt: 2, maxWidth: 300, py: 2, mx: "auto"}}
                               disabled={!isFormValid}
                         >
                             حفظ البيانات وارسالها للمراجعة

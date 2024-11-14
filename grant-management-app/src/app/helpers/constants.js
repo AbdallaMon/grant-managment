@@ -39,6 +39,11 @@ export const ApplicationStatus = {
     APPROVED: "مقبول",
     REJECTED: "مرفوض"
 };
+export const PaymentStatus = {
+    PENDING: "قيد الانتظار",
+    PAID: "مدفوع"
+    , OVERDUE: "دفعة متاخره"
+}
 export const StatusColor = {
     DRAFT: "info",
     PENDING: "warning",
@@ -125,22 +130,23 @@ export const PayEveryENUM = {
     ONE_YEAR: "كل سنه",
 };
 export const NotificationType = {
-    MESSAGE: "رسالة",
-    APPLICATION_APPROVED: "تمت الموافقة على الطلب",
-    APPLICATION_REJECTED: "تم رفض الطلب",
-    APPLICATION_UPDATE: "تحديث الطلب",
-    APPLICATION_UN_COMPLETE: "الطلب غير مكتمل",
-    APPLICATION_RESPONSE: "رد على الطلب",
-    APPLICATION_NEW: "طلب جديد",
-    APPLICATION_UNDER_REVIEW: "الطلب قيد المراجعة",
-    APPLICATION_COMPLETED: "تم اكتمال الطلب",
-    NEW_TICKET: "تذكرة جديدة",
-    TICKET_UPDATE: "تحديث التذكرة",
-    TASK_ASSIGNED: "تم تعيين مهمة",
-    TASK_COMPLETED: "تم الانتهاء من المهمة",
-    PAYMENT_DUE: "موعد الدفع",
-    PAYMENT_COMPLETED: "تم عملية دفع"
+    MESSAGE: "رسالة جديدة",
+    APPLICATION_APPROVED: "تمت الموافقة على طلب المنحة",
+    APPLICATION_REJECTED: "تم رفض طلب المنحة",
+    APPLICATION_UPDATE: "تحديث على طلب المنحة",
+    APPLICATION_UN_COMPLETE: "طلب المنحة غير مكتمل",
+    APPLICATION_RESPONSE: "رد على طلب المنحة",
+    APPLICATION_NEW: "طلب منحة جديد",
+    APPLICATION_UNDER_REVIEW: "طلب المنحة قيد المراجعة",
+    APPLICATION_COMPLETED: "تم اكتمال طلب المنحة",
+    NEW_TICKET: "تذكرة دعم جديدة",
+    TICKET_UPDATE: "تحديث على التذكرة",
+    TASK_ASSIGNED: "تم تعيين مهمة جديدة",
+    TASK_COMPLETED: "تم إكمال المهمة",
+    PAYMENT_DUE: "تذكير بموعد الدفع",
+    PAYMENT_COMPLETED: "تم تأكيد عملية الدفع"
 };
+
 // Model names (both English and Arabic)
 export const ModelEnum = {
     ScholarshipInfo: "ScholarshipInfo",
