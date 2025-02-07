@@ -147,7 +147,6 @@ export default function SuperVisorPage() {
                       />
                   </div>
                   <div>
-
                       <FilterSelect options={accountStatus} label={"نوع الحساب"}
                                     loading={false}
                                     param={"role"}
@@ -155,7 +154,6 @@ export default function SuperVisorPage() {
                       />
                   </div>
                   <div>
-
                       <CreateModal
                             label={"انشاء حساب داعم"}
                             inputs={inputs}

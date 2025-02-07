@@ -126,9 +126,10 @@ const NotificationsIcon = () => {
                     aria-controls={open ? 'basic-menu' : undefined}
                     aria-haspopup="true"
                     aria-expanded={open ? 'true' : undefined}
+                    mr={2}
               >
                   <Badge badgeContent={unreadCount} color="error">
-                      <FaBell size={24}/>
+                      <FaBell size={20}/>
                   </Badge>
               </IconButton>
               <Menu

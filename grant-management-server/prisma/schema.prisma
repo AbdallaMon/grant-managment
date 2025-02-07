@@ -14,6 +14,10 @@ enum MessageStatus {
   DELIVERED
   READ
 }
+enum FixedDataTypes{
+  COMMITMENT
+  GRANTTERMS
+}
 enum Role {
   ADMIN
   SUPERVISOR
@@ -22,11 +26,6 @@ enum Role {
   INDIVIDUAL
 }
 
-enum TaskStatus {
-  PENDING
-  IN_PROGRESS
-  COMPLETED
-}
 
 enum ApplicationStatus {
   DRAFT
@@ -60,8 +59,6 @@ enum NotificationType {
   APPLICATION_COMPLETED
   NEW_TICKET
   TICKET_UPDATE
-  TASK_ASSIGNED
-  TASK_COMPLETED
   PAYMENT_DUE
   PAYMENT_COMPLETED
 }
@@ -136,7 +133,6 @@ model User {
   reviewedApps     Application[]     @relation("Review")
   superVisorGrants       UserGrant[]  @relation("GrantSuperVisor")
   tickets          Ticket[]
-  tasks            Task[]
   messages         Message[]
   userGrants       UserGrant[]
   viewGrants       Grant[]           @relation("GrantViewAccess")
@@ -153,10 +149,12 @@ model PersonalInfo {
   basicInfoId      Int?               @unique
   contactInfoId    Int?               @unique
   studyInfoId      Int?               @unique
+  avatar           String?
 
   basicInfo        BasicInfo?         @relation(fields: [basicInfoId], references: [id])
   contactInfo      ContactInfo?       @relation(fields: [contactInfoId], references: [id])
   studyInfo        StudyInformation?  @relation(fields: [studyInfoId], references: [id])
+  bankInfos        BankInfo[]
 }
 
 model BasicInfo {
@@ -198,12 +196,38 @@ model StudyInformation {
   personalInfo     PersonalInfo?
 }
 
+model BankInfo {
+  id               Int                @id @default(autoincrement())
+  beneficiaryName  String
+  bankName         String
+  branchCode       String
+  bankAddress      String
+  accountNumber    String
+  currency         Currency
+  iban             String
+  personalInfoId   Int
+
+  personalInfo     PersonalInfo       @relation(fields: [personalInfoId], references: [id])
+  application  Application? 
+ }
+
+enum Currency {
+  USD
+  EUR
+  TRY
+  SYP
+  EGP
+  GBP
+}
+
 // Application Models
 
 model Application {
   id                Int               @id @default(autoincrement())
   studentId         Int
   supervisorId      Int?
+  bankInfoId        Int?              @unique 
+  
   status            ApplicationStatus @default(PENDING)
   rejectReason      String?
   scholarshipInfo   ScholarshipInfo?
@@ -222,6 +246,7 @@ model Application {
   askedFields       AskedField[]
   improvementRequests ImprovementRequest[]
   userGrants        UserGrant[]
+  bankInfo          BankInfo?         @relation(fields: [bankInfoId], references: [id])
 }
 
 model ScholarshipInfo {
@@ -433,24 +458,6 @@ model DirectMessage {
   receiver         User               @relation("ReceivedMessages", fields: [receiverId], references: [id])
 }
 
-model Task {
-  id               Int                @id @default(autoincrement())
-  description      String
-  status           TaskStatus         @default(PENDING)
-  supervisorId     Int
-  supervisor       User               @relation(fields: [supervisorId], references: [id])
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-}
-
-model FAQ {
-  id               Int                @id @default(autoincrement())
-  question         String
-  answer           String
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-}
-
 model File {
   id               Int                @id @default(autoincrement())
   title            String?
@@ -463,4 +470,29 @@ model File {
 
   academicPerformanceId Int?               // Foreign key to AcademicPerformance
   academicPerformance   AcademicPerformance? @relation(fields: [academicPerformanceId], references: [id])
+}
+
+model FAQ {
+  id               Int                @id @default(autoincrement())
+  question         String
+  answer           String             @db.Text 
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+}
+
+
+model FixedData{
+  id               Int                @id @default(autoincrement())
+  content          String             @db.Text 
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  type FixedDataTypes @default(COMMITMENT)
+}
+
+model FixedFiles{
+  id               Int                @id @default(autoincrement())
+  title            String?
+  description      String?
+  url              String @unique
+  createdAt        DateTime           @default(now())
 }

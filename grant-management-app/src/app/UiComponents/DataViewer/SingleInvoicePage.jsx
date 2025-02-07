@@ -155,12 +155,20 @@ const SingleInvoicePage = ({invoiceId, supervisor}) => {
     if (error) return <Alert severity="error" sx={{mt: 2}}>{error}</Alert>;
 
     // Render if no invoice is found
-    if (!invoice) return <Typography variant="h6" color="error">فاتورة غير موجودة</Typography>;
+    if (!invoice) return (
 
+          <Box display="flex" justifyContent="space-between" p={3} alignItems="center" mb={2}>
+              <Button display="flex" variant="outlined" onClick={() => router.push("/dashboard/invoices")}>الذهاب الي
+                  الفواتير</Button>
+              <Typography variant="h6" color="error">فاتورة غير موجودة</Typography>;
+          </Box>
+
+    )
     return (
           <Container sx={{maxWidth: "750px", mx: "auto", mt: 4, padding: 2}}>
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-                  <Button variant="outlined" onClick={() => router.back()}>رجوع</Button>
+                  <Button variant="outlined" onClick={() => router.push("/dashboard/invoices")}>الذهاب الي
+                      الفواتير</Button>
                   <Button variant="contained" onClick={handlePrint}>طباعة الفاتورة</Button>
               </Box>
               <Divider sx={{mb: 3}}/>

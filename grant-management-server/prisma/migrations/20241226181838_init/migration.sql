@@ -222,10 +222,13 @@ CREATE TABLE `Invoice` (
 -- CreateTable
 CREATE TABLE `ImprovementRequest` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `title` VARCHAR(191) NOT NULL,
     `message` VARCHAR(191) NOT NULL,
     `status` ENUM('PENDING', 'COMPLETED') NOT NULL DEFAULT 'PENDING',
     `applicationId` INTEGER NOT NULL,
+    `modelName` VARCHAR(191) NOT NULL,
+    `fieldName` VARCHAR(191) NOT NULL,
+    `arModelName` VARCHAR(191) NOT NULL,
+    `arFieldName` VARCHAR(191) NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -333,7 +336,9 @@ CREATE TABLE `File` (
     `url` VARCHAR(191) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `applicationId` INTEGER NULL,
+    `academicPerformanceId` INTEGER NULL,
 
+    UNIQUE INDEX `File_url_key`(`url`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -432,6 +437,9 @@ ALTER TABLE `Task` ADD CONSTRAINT `Task_supervisorId_fkey` FOREIGN KEY (`supervi
 
 -- AddForeignKey
 ALTER TABLE `File` ADD CONSTRAINT `File_applicationId_fkey` FOREIGN KEY (`applicationId`) REFERENCES `Application`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `File` ADD CONSTRAINT `File_academicPerformanceId_fkey` FOREIGN KEY (`academicPerformanceId`) REFERENCES `AcademicPerformance`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `_GrantViewAccess` ADD CONSTRAINT `_GrantViewAccess_A_fkey` FOREIGN KEY (`A`) REFERENCES `Grant`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
