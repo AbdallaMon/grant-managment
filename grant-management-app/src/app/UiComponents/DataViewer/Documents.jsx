@@ -17,7 +17,6 @@ import {
 import { MdFileCopy, MdInfo, MdQuestionAnswer } from "react-icons/md";
 import { getData } from "@/app/helpers/functions/getData";
 import CreateModal from "../models/CreateModal";
-import { bankInfoInputs } from "@/app/helpers/constants";
 import EditModal from "../models/EditModal";
 import { handleRequestSubmit } from "@/app/helpers/functions/handleSubmit";
 import { FaEye } from "react-icons/fa";
@@ -32,14 +31,14 @@ const DocumentsPanel = ({ isAdmin }) => {
   return (
     <Box sx={{ width: "100%", typography: "body1" }}>
       <Tabs value={activeTab} onChange={handleChange} centered>
+        <Tab icon={<MdFileCopy />} label="ملفات الموقع" isAdmin={isAdmin} />
+        <Tab icon={<MdInfo />} label="التعهد" isAdmin={isAdmin} />
+        <Tab icon={<MdInfo />} label="شروط المنحه" isAdmin={isAdmin} />
         <Tab
-          icon={<MdFileCopy />}
-          label="Website Documents"
+          icon={<MdQuestionAnswer />}
+          label="الاسئلة الشائعة"
           isAdmin={isAdmin}
         />
-        <Tab icon={<MdInfo />} label="Commitment" isAdmin={isAdmin} />
-        <Tab icon={<MdInfo />} label="Grant Terms" isAdmin={isAdmin} />
-        <Tab icon={<MdQuestionAnswer />} label="FAQ" isAdmin={isAdmin} />
       </Tabs>
 
       <Box sx={{ p: 3 }}>
@@ -305,7 +304,7 @@ const FAQ = () => {
   useEffect(() => {
     async function getFaq() {
       const request = await getData({
-        url: "shared/faq",
+        url: "shared/faqs",
         setLoading,
       });
       console.log(request, "request");
@@ -327,17 +326,17 @@ const FAQ = () => {
           textAlign="center"
           fontWeight={600}
         >
-          {type === "COMMITMENT" ? "تعهد" : "شروط المنحه"}
+          الاسئلة الشائعة
         </Typography>
         <List>
           {faqList?.map((faq) => (
             <ListItem
-              key={item.id}
+              key={faq.id}
               divider
               secondaryAction={
                 <EditModal
                   editButtonText="تعديل"
-                  href="admin/faq"
+                  href="admin/faqs"
                   inputs={faqInputs}
                   item={faq}
                   setData={setFaqList}
@@ -362,7 +361,7 @@ const FAQ = () => {
         </List>
         <Box display="flex" justifyContent="center" mt={3}>
           <CreateModal
-            href={`admin/faq`}
+            href={`admin/faqs`}
             inputs={faqInputs}
             setData={setFaqList}
             extraProps={{

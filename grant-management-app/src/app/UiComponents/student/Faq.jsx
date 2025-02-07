@@ -13,6 +13,7 @@ import {
 import Link from "next/link";
 import { MdOutlineExpandLess, MdOutlineExpandMore } from "react-icons/md";
 import FullScreenLoader from "../feedback/loaders/FullscreenLoader";
+import { getData } from "@/app/helpers/functions/getData";
 
 // Fake FAQ Data
 const faqData = [
@@ -49,7 +50,7 @@ export default function FAQPage({ id, route = "drafts" }) {
   useEffect(() => {
     const fetchData = async () => {
       const dataRequest = await getData({
-        url: "student/faq",
+        url: "student/faqs",
         setLoading,
       });
       if (dataRequest.status === 200) {

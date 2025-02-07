@@ -721,7 +721,7 @@ export async function deleteDocument(documentId) {
   });
 }
 export async function createNewFAQ(faq) {
-  return await prisma.faq.create({
+  return await prisma.FAQ.create({
     data: {
       question: faq.question,
       answer: faq.answer,
@@ -729,7 +729,7 @@ export async function createNewFAQ(faq) {
   });
 }
 export async function editFAQ(faqId, faq) {
-  return await prisma.faq.update({
+  return await prisma.FAQ.update({
     where: { id: Number(faqId) },
     data: {
       question: faq.question,
@@ -738,7 +738,7 @@ export async function editFAQ(faqId, faq) {
   });
 }
 export async function deleteFAQ(faqId) {
-  return await prisma.faq.delete({
+  return await prisma.FAQ.delete({
     where: { id: Number(faqId) },
   });
 }

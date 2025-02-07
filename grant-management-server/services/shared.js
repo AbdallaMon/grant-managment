@@ -375,6 +375,6 @@ export async function getDocuments() {
 }
 
 export async function getFAQ() {
-  const faq = await prisma.faq.findMany();
+  const faq = await prisma.FAQ.findMany();
   return faq;
 }
