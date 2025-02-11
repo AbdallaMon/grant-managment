@@ -247,6 +247,8 @@ model Application {
   improvementRequests ImprovementRequest[]
   userGrants        UserGrant[]
   bankInfo          BankInfo?         @relation(fields: [bankInfoId], references: [id])
+
+  acceptedAt       DateTime?
 }
 
 model ScholarshipInfo {

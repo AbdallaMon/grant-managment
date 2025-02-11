@@ -1,113 +1,146 @@
 "use client";
 
-import React, {useState, useEffect} from "react";
-import {TextField, Box, CircularProgress} from "@mui/material";
-import Autocomplete from '@mui/material/Autocomplete';
-import {getPropertyValue, handleSearchParamsChange} from "@/app/helpers/functions/utility";
-import {useRouter, useSearchParams} from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { TextField, Box, CircularProgress } from "@mui/material";
+import Autocomplete from "@mui/material/Autocomplete";
+import {
+  getPropertyValue,
+  handleSearchParamsChange,
+} from "@/app/helpers/functions/utility";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const SearchComponent = ({
-                             apiEndpoint,
-                             setFilters,
-                             inputLabel,
-                             renderKeys,
-                             mainKey,
-                             resetTrigger,
-                             localFilters,
-                             restOtherFilters = false,
-                             withParamsChange = false
-                         }) => {
-    const [searchTerm, setSearchTerm] = useState("");
-    const [searchResults, setSearchResults] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [selectedItem, setSelectedItem] = useState(null);
-    const searchParams = useSearchParams()
-    const router = useRouter()
-    const fetchSearchResults = async (query) => {
-        setLoading(true);
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/utility/${apiEndpoint}&query=${query}&filters=${JSON.stringify(localFilters)}`, {credentials: "include"});
-            const result = await response.json();
-            setSearchResults(result.data);
-        } catch (error) {
-            console.error("Error fetching search results:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+  apiEndpoint,
+  setFilters,
+  inputLabel,
+  renderKeys,
+  mainKey,
+  resetTrigger,
+  localFilters,
+  restOtherFilters = false,
+  withParamsChange = false,
+  functionSearch,
+  fullWidth = false,
+  sx,
+}) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const fetchSearchResults = async (query) => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_URL
+        }/utility/${apiEndpoint}&query=${query}&filters=${JSON.stringify(
+          localFilters
+        )}`,
+        { credentials: "include" }
+      );
+      const result = await response.json();
+      setSearchResults(result.data);
+    } catch (error) {
+      console.error("Error fetching search results:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
+    if (searchTerm) {
+      fetchSearchResults(searchTerm);
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchTerm]);
 
-    useEffect(() => {
-        if (searchTerm) {
-            fetchSearchResults(searchTerm);
-        } else {
-            setSearchResults([]);
-        }
-    }, [searchTerm]);
+  const handleSelect = (event, newValue) => {
+    setSelectedItem(newValue);
+    if (withParamsChange) {
+      const param = { target: { value: newValue && newValue.id } };
+      handleSearchParamsChange(param, "userId", searchParams, router);
+    }
+    if (newValue) {
+      setSearchTerm(newValue[mainKey] || "");
+      if (functionSearch) {
+        functionSearch(newValue);
+        return;
+      }
+      if (restOtherFilters) {
+        setFilters({ query: newValue });
+      } else {
+        setFilters((prevFilters) => ({
+          ...prevFilters,
+          query: newValue,
+        }));
+      }
+    } else {
+      setSearchTerm("");
+      if (functionSearch) {
+        functionSearch(null);
+        return;
+      }
+      setFilters((prevFilters) => ({ ...prevFilters, query: null }));
+    }
+  };
 
-    const handleSelect = (event, newValue) => {
-        setSelectedItem(newValue);
-        if (withParamsChange) {
-            const param = {target: {value: newValue && newValue.id}}
-            handleSearchParamsChange(param, "userId", searchParams, router)
-        }
-        if (newValue) {
-            setSearchTerm(newValue[mainKey] || "");
-            if (restOtherFilters) {
-                setFilters({query: newValue})
-            } else {
-                setFilters((prevFilters) => ({
-                    ...prevFilters,
-                    query: newValue
-                }));
-            }
-        } else {
-            setSearchTerm("");
-            setFilters((prevFilters) => ({...prevFilters, query: null}));
-        }
-    };
+  useEffect(() => {
+    if (resetTrigger !== null && resetTrigger !== undefined) {
+      setSearchTerm("");
+      setSelectedItem(null);
+    }
+  }, [resetTrigger]);
 
-    useEffect(() => {
-        if (resetTrigger !== null && resetTrigger !== undefined) {
-            setSearchTerm("");
-            setSelectedItem(null);
+  return (
+    <Box
+      sx={{
+        position: "relative",
+        display: "flex",
+        alignItems: "center",
+        width: fullWidth && "100%",
+        ...sx,
+      }}
+    >
+      <Autocomplete
+        options={searchResults}
+        getOptionLabel={(option) =>
+          renderKeys.map((key) => getPropertyValue(option, key)).join(" - ")
         }
-    }, [resetTrigger]);
-
-    return (
-          <Box sx={{position: "relative", display: "flex", alignItems: "center"}}>
-              <Autocomplete
-                    options={searchResults}
-                    getOptionLabel={(option) => renderKeys.map((key) => getPropertyValue(option, key)).join(" - ")}
-                    loading={loading}
-                    value={selectedItem}
-                    sx={{
-                        minWidth: 300,
-                    }}
-                    onChange={handleSelect}
-                    onInputChange={(event, newInputValue) => {
-                        setSearchTerm(newInputValue);
-                    }}
-                    renderInput={(params) => (
-                          <TextField
-                                {...params}
-                                label={inputLabel}
-                                variant="outlined"
-                                fullWidth
-                                InputProps={{
-                                    ...params.InputProps,
-                                    endAdornment: (
-                                          <>
-                                              {loading ? <CircularProgress color="inherit" size={20}/> : null}
-                                              {params.InputProps.endAdornment}
-                                          </>
-                                    ),
-                                }}
-                          />
-                    )}
-              />
-          </Box>
-    );
+        loading={loading}
+        value={selectedItem}
+        sx={{
+          minWidth: 300,
+          width: fullWidth && "100%",
+        }}
+        onChange={handleSelect}
+        onInputChange={(event, newInputValue) => {
+          setSearchTerm(newInputValue);
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label={inputLabel}
+            variant="outlined"
+            fullWidth
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {loading ? (
+                    <CircularProgress color="inherit" size={20} />
+                  ) : null}
+                  {params.InputProps.endAdornment}
+                </>
+              ),
+            }}
+          />
+        )}
+      />
+    </Box>
+  );
 };
 
 export default SearchComponent;

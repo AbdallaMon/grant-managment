@@ -38,6 +38,14 @@ export const ApplicationStatus = {
   APPROVED: "مقبول",
   REJECTED: "مرفوض",
 };
+export const ApplicationStatusOptions = [
+  { name: "معلق", value: "PENDING" },
+  { name: "تحت المراجعة", value: "UNDER_REVIEW" },
+  { name: "غير مكتمل", value: "UN_COMPLETE" },
+  { name: "محدث", value: "UPDATED" },
+  { name: "مقبول", value: "APPROVED" },
+  { name: "مرفوض", value: "REJECTED" },
+];
 export const PaymentStatus = {
   PENDING: "قيد الانتظار",
   PAID: "مدفوع",
@@ -262,11 +270,11 @@ export const ArFieldEnum = {
 };
 export const grantLinks = [
   {
-    href: "application",
-    text: "الطلب",
+    href: "/",
+    text: "البيانات الشخصية",
     icon: <FaUser />,
     meta: {
-      title: "الطلب",
+      title: "البيانات الشخصية",
       description: "عرض بيانات الطلب الأساسية",
     },
   },

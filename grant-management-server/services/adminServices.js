@@ -540,6 +540,7 @@ export async function getApplicationById(appId) {
       residenceInfo: true,
       supportingFiles: true,
       siblings: true,
+      bankInfo: true,
     },
   });
 }

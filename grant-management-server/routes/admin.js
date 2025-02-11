@@ -34,6 +34,7 @@ import {
   createMessage,
   getMessagesByTicket,
 } from "../services/studentsServices.js";
+import { getGrantReport } from "../services/reports.js";
 
 const router = Router();
 
@@ -616,7 +617,6 @@ router.post("/fixed-data", async (req, res) => {
     const type = req.query.type;
     req.body.type = type;
     const data = await createNewFixedData(req.body);
-    console.log(data, "data");
     res.status(200).json({ data, message: "تم انشاء البيانات بنجاح" });
   } catch (error) {
     console.log(error, "error");
@@ -626,7 +626,6 @@ router.post("/fixed-data", async (req, res) => {
 router.put("/fixed-data/:dataId", async (req, res) => {
   try {
     const data = await editFixedData(parseInt(req.params.dataId), req.body);
-    console.log(data, "data");
 
     res.status(200).json({ data, message: "تم تعديل البيانات بنجاح" });
   } catch (error) {
@@ -658,5 +657,8 @@ router.delete("/faqs/:faqId", async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "حدث خطأ أثناء حذف السؤال" });
   }
+});
+router.get("/reports", async (req, res) => {
+  await getGrantReport(req, res);
 });
 export default router;

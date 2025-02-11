@@ -12,9 +12,16 @@ import {
   List,
   ListItem,
   ListItemText,
+  IconButton,
+  Snackbar,
 } from "@mui/material";
 
-import { MdFileCopy, MdInfo, MdQuestionAnswer } from "react-icons/md";
+import {
+  MdContentCopy,
+  MdFileCopy,
+  MdInfo,
+  MdQuestionAnswer,
+} from "react-icons/md";
 import { getData } from "@/app/helpers/functions/getData";
 import CreateModal from "../models/CreateModal";
 import EditModal from "../models/EditModal";
@@ -83,6 +90,33 @@ const documentsInputs = [
     },
   },
 ];
+function CopyTextButton({ text }) {
+  const [open, setOpen] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setOpen(true);
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
+  };
+
+  return (
+    <>
+      <IconButton onClick={handleCopy} color="primary">
+        <MdContentCopy size={24} />
+      </IconButton>
+      <Snackbar
+        open={open}
+        autoHideDuration={2000}
+        onClose={() => setOpen(false)}
+        message="تم نسخ النص!"
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      />
+    </>
+  );
+}
 const WebsiteDocuments = () => {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -136,6 +170,7 @@ const WebsiteDocuments = () => {
               divider
               secondaryAction={
                 <Box display="flex" gap={0.5}>
+                  <CopyTextButton text={file.url} />
                   <Button
                     variant="outlined"
                     color="primary"

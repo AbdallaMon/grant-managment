@@ -22,6 +22,7 @@ import {
   getPendingFieldsAndRequests,
   getPersonalInfo,
   getStudentApplications,
+  getStudentBanksByStudentId,
   getTicketsByUser,
   handleUpdateUnCompletedFields,
   submitApplication,
@@ -85,7 +86,14 @@ router.put("/personal/:userId", async (req, res) => {
     res.status(500).json({ message: "حدث خطأ أثناء تحديث المعلومات الشخصية" });
   }
 });
-
+router.get("/banks", async (req, res) => {
+  try {
+    const banks = await getStudentBanksByStudentId(req.user.id);
+    res.json({ data: banks });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 router.put("/personal/bankinfo/:bankId", async (req, res) => {
   const { bankId } = req.params;
   const data = req.body; // model can be 'basicInfo', 'contactInfo', or 'studyInfo'
@@ -242,7 +250,6 @@ router.put("/applications/draft/apps/siblings/:siblingId", async (req, res) => {
       "siblings",
       inputData
     );
-    console.log("are we siblingId");
     await handleUpdateUnCompletedFields(updatedData.applicationId, "siblings");
 
     res
@@ -259,7 +266,6 @@ router.delete(
   async (req, res) => {
     const { siblingId } = req.params;
     try {
-      console.log("did w e delete");
       const updatedData = await deleteSibling(siblingId);
       await handleUpdateUnCompletedFields(
         updatedData.applicationId,
@@ -345,7 +351,10 @@ router.post("/applications/:appId/submit", async (req, res) => {
       });
     }
 
-    const submittedApplication = await submitApplication(appId);
+    const submittedApplication = await submitApplication(
+      appId,
+      req.body.bankId
+    );
     const studentId = await getStudentIdByAppId(appId);
     await createNotification(
       null,

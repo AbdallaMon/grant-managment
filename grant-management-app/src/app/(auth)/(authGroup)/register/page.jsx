@@ -29,6 +29,7 @@ import { useToastContext } from "@/app/providers/ToastLoadingProvider";
 import ResidenceAndNationalitySelectors from "@/app/UiComponents/formComponents/CustomInputs/ResidenceAndNationalitySelectors";
 import DisabilityInput from "@/app/UiComponents/formComponents/CustomInputs/DisabilityInput";
 import Link from "next/link";
+import { bankInfoInputs } from "@/app/helpers/constants";
 
 const locales = ["ar/EG"];
 

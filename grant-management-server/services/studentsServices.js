@@ -481,9 +481,6 @@ export const updatePersonalInfo = async (userId, model, updateData) => {
   if (updateData.birthDate) {
     updateData.birthDate = new Date(updateData.birthDate).toISOString();
   }
-  console.log(updateData, "updaeData");
-  console.log(model, "model");
-  console.log(userId, "userId");
   if (model === "avatar") {
     updateFields.avatar = updateData.avatar;
   } else if (model === "basicInfo") {
@@ -575,11 +572,12 @@ export const checkIfFieldsAreEmpty = async (appId) => {
   return missingFields;
 };
 
-export const submitApplication = async (appId) => {
+export const submitApplication = async (appId, bankId) => {
   const updatedApplication = await prisma.application.update({
     where: { id: Number(appId) },
     data: {
       status: "PENDING",
+      bankInfoId: Number(bankId),
       createdAt: new Date(),
     },
   });
@@ -797,3 +795,13 @@ export const getImprovementRequestsByModel = async (appId, modelName) => {
     );
   }
 };
+
+export async function getStudentBanksByStudentId(userId) {
+  return await prisma.bankInfo.findMany({
+    where: {
+      personalInfo: {
+        userId: Number(userId),
+      },
+    },
+  });
+}

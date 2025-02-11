@@ -42,7 +42,6 @@ app.use("/uploads", express.static("uploads")); // Serve static files
 app.post("/upload", verifyTokenUsingReq, async (req, res) => {
   try {
     const fileUrls = await uploadFiles(req, res);
-    console.log("files uploaded");
     res.status(200).json({
       data: fileUrls,
       message: "تم رفع ملفاتك جاري اتمام عملية التخزين",

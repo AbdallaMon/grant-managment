@@ -240,7 +240,6 @@ export const getInvoices = async (filters, page = 1, pageSize = 2, userId) => {
       payment: { userGrant: { supervisorId: Number(userId) } },
     });
   }
-  console.log(where.AND, "where");
 
   try {
     const invoices = await prisma.invoice.findMany({

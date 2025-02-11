@@ -203,7 +203,7 @@ export default function UserProfile({ isApplication, id }) {
             <Tab label="المعلومات الاساسية" />
             <Tab label="معلومات الدراسة" />
             <Tab label="معلومات الاتصال" />
-            <Tab label="البيانات النبكية" />
+            <Tab label="البيانات البنكية" />
           </Tabs>
 
           {activeTab === 0 && (
