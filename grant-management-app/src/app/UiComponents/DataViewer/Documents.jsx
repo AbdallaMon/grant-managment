@@ -27,6 +27,7 @@ import CreateModal from "../models/CreateModal";
 import EditModal from "../models/EditModal";
 import { handleRequestSubmit } from "@/app/helpers/functions/handleSubmit";
 import { FaEye } from "react-icons/fa";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 const DocumentsPanel = ({ isAdmin }) => {
   const [activeTab, setActiveTab] = useState(0);
@@ -120,6 +121,7 @@ function CopyTextButton({ text }) {
 const WebsiteDocuments = () => {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
   async function handleBeforeSubmit(data) {
     if (Object.values(data.url).length === 0) {
       delete data.url;
@@ -143,7 +145,6 @@ const WebsiteDocuments = () => {
         url: "shared/documents",
         setLoading,
       });
-      console.log(request, "request");
       if (request.status === 200) {
         setFiles(request.data);
       }
@@ -181,14 +182,16 @@ const WebsiteDocuments = () => {
                   >
                     Preview
                   </Button>
-                  <EditModal
-                    editButtonText="تعديل"
-                    handleBeforeSubmit={handleBeforeSubmit}
-                    href="admin/documents"
-                    inputs={documentsInputs}
-                    item={file}
-                    setData={setFiles}
-                  />
+                  {user.role === "ADMIN" && (
+                    <EditModal
+                      editButtonText="تعديل"
+                      handleBeforeSubmit={handleBeforeSubmit}
+                      href="admin/documents"
+                      inputs={documentsInputs}
+                      item={file}
+                      setData={setFiles}
+                    />
+                  )}
                 </Box>
               }
             >
@@ -196,19 +199,21 @@ const WebsiteDocuments = () => {
             </ListItem>
           ))}
         </List>
-        <Box display="flex" justifyContent="center" mt={3}>
-          <CreateModal
-            href="admin/documents"
-            handleBeforeSubmit={handleBeforeSubmit}
-            inputs={documentsInputs}
-            setData={setFiles}
-            extraProps={{
-              formTitle: "اضافة ملف جديد",
-              btnText: "اضافة",
-            }}
-            label="اضف ملف جديد"
-          />
-        </Box>
+        {user.role === "ADMIN" && (
+          <Box display="flex" justifyContent="center" mt={3}>
+            <CreateModal
+              href="admin/documents"
+              handleBeforeSubmit={handleBeforeSubmit}
+              inputs={documentsInputs}
+              setData={setFiles}
+              extraProps={{
+                formTitle: "اضافة ملف جديد",
+                btnText: "اضافة",
+              }}
+              label="اضف ملف جديد"
+            />
+          </Box>
+        )}
       </Paper>
     </Container>
   );
@@ -229,14 +234,13 @@ const fixedDataInputs = [
 const CommitmentGrantTerms = ({ type }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const { user } = useAuth();
   useEffect(() => {
     async function getTerms() {
       const request = await getData({
         url: "shared/fixed-data?type=" + type + "&",
         setLoading,
       });
-      console.log(request, "request");
       if (request.status === 200) {
         setData(request.data);
       }
@@ -263,13 +267,17 @@ const CommitmentGrantTerms = ({ type }) => {
               key={item.id}
               divider
               secondaryAction={
-                <EditModal
-                  editButtonText="تعديل"
-                  href="admin/fixed-data"
-                  inputs={fixedDataInputs}
-                  item={item}
-                  setData={setData}
-                />
+                <>
+                  {user.role === "ADMIN" && (
+                    <EditModal
+                      editButtonText="تعديل"
+                      href="admin/fixed-data"
+                      inputs={fixedDataInputs}
+                      item={item}
+                      setData={setData}
+                    />
+                  )}
+                </>
               }
             >
               <ListItemText
@@ -287,22 +295,26 @@ const CommitmentGrantTerms = ({ type }) => {
             </ListItem>
           ))}
         </List>
-        <Box display="flex" justifyContent="center" mt={3}>
-          {data.length === 0 && (
-            <CreateModal
-              href={`admin/fixed-data?type=${type}&`}
-              inputs={fixedDataInputs}
-              setData={setData}
-              extraProps={{
-                formTitle: `اضافة ${
+        {user.role === "ADMIN" && (
+          <Box display="flex" justifyContent="center" mt={3}>
+            {data.length === 0 && (
+              <CreateModal
+                href={`admin/fixed-data?type=${type}&`}
+                inputs={fixedDataInputs}
+                setData={setData}
+                extraProps={{
+                  formTitle: `اضافة ${
+                    type === "COMMITMENT" ? "تعهد" : "شروط المنحه"
+                  }`,
+                  btnText: "اضافة",
+                }}
+                label={`اضافة ${
                   type === "COMMITMENT" ? "تعهد" : "شروط المنحه"
-                }`,
-                btnText: "اضافة",
-              }}
-              label={`اضافة ${type === "COMMITMENT" ? "تعهد" : "شروط المنحه"}`}
-            />
-          )}
-        </Box>
+                }`}
+              />
+            )}
+          </Box>
+        )}
       </Paper>
     </Container>
   );
@@ -336,13 +348,13 @@ const FAQ = () => {
   const [faqList, setFaqList] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const { user } = useAuth();
   useEffect(() => {
     async function getFaq() {
       const request = await getData({
         url: "shared/faqs",
         setLoading,
       });
-      console.log(request, "request");
       if (request.status === 200) {
         setFaqList(request.data);
       }
@@ -369,13 +381,17 @@ const FAQ = () => {
               key={faq.id}
               divider
               secondaryAction={
-                <EditModal
-                  editButtonText="تعديل"
-                  href="admin/faqs"
-                  inputs={faqInputs}
-                  item={faq}
-                  setData={setFaqList}
-                />
+                <>
+                  {user.role === "ADMIN" && (
+                    <EditModal
+                      editButtonText="تعديل"
+                      href="admin/faqs"
+                      inputs={faqInputs}
+                      item={faq}
+                      setData={setFaqList}
+                    />
+                  )}
+                </>
               }
             >
               <ListItemText
@@ -394,18 +410,20 @@ const FAQ = () => {
             </ListItem>
           ))}
         </List>
-        <Box display="flex" justifyContent="center" mt={3}>
-          <CreateModal
-            href={`admin/faqs`}
-            inputs={faqInputs}
-            setData={setFaqList}
-            extraProps={{
-              formTitle: "اضافة سؤال جديد",
-              btnText: "اضافة",
-            }}
-            label="اضافة سؤال جديد"
-          />
-        </Box>
+        {user.role === "ADMIN" && (
+          <Box display="flex" justifyContent="center" mt={3}>
+            <CreateModal
+              href={`admin/faqs`}
+              inputs={faqInputs}
+              setData={setFaqList}
+              extraProps={{
+                formTitle: "اضافة سؤال جديد",
+                btnText: "اضافة",
+              }}
+              label="اضافة سؤال جديد"
+            />
+          </Box>
+        )}
       </Paper>
     </Container>
   );

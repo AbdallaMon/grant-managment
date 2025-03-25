@@ -338,7 +338,6 @@ function RenderField({
       content = "لا";
     }
   }
-  console.log(editMode, "editMode");
   return (
     <Fragment>
       <ListItem
@@ -403,7 +402,6 @@ function EditableAvatar({ personalInfo, setPersonalInfo }) {
   };
   const { setLoading } = useToastContext();
   const handleFileChange = async (event) => {
-    console.log(event.avatar[0]);
     const file = event.avatar[0];
     const formData = new FormData();
     formData.append("avatar", file);
@@ -435,7 +433,6 @@ function EditableAvatar({ personalInfo, setPersonalInfo }) {
     }
     setEditMode(false);
   };
-  console.log(personalInfo, "personalInfo");
   return (
     <Box sx={{ position: "relative", mb: 3 }}>
       <Box

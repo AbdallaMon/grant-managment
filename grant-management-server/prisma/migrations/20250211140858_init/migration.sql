@@ -20,6 +20,7 @@ CREATE TABLE `PersonalInfo` (
     `basicInfoId` INTEGER NULL,
     `contactInfoId` INTEGER NULL,
     `studyInfoId` INTEGER NULL,
+    `avatar` VARCHAR(191) NULL,
 
     UNIQUE INDEX `PersonalInfo_userId_key`(`userId`),
     UNIQUE INDEX `PersonalInfo_basicInfoId_key`(`basicInfoId`),
@@ -71,17 +72,35 @@ CREATE TABLE `StudyInformation` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `BankInfo` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `beneficiaryName` VARCHAR(191) NOT NULL,
+    `bankName` VARCHAR(191) NOT NULL,
+    `branchCode` VARCHAR(191) NOT NULL,
+    `bankAddress` VARCHAR(191) NOT NULL,
+    `accountNumber` VARCHAR(191) NOT NULL,
+    `currency` ENUM('USD', 'EUR', 'TRY', 'SYP', 'EGP', 'GBP') NOT NULL,
+    `iban` VARCHAR(191) NOT NULL,
+    `personalInfoId` INTEGER NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `Application` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `studentId` INTEGER NOT NULL,
     `supervisorId` INTEGER NULL,
+    `bankInfoId` INTEGER NULL,
     `status` ENUM('DRAFT', 'PENDING', 'UNDER_REVIEW', 'UN_COMPLETE', 'UPDATED', 'APPROVED', 'REJECTED') NOT NULL DEFAULT 'PENDING',
     `rejectReason` VARCHAR(191) NULL,
     `commitment` BOOLEAN NULL,
     `scholarshipTerms` BOOLEAN NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
+    `acceptedAt` DATETIME(3) NULL,
 
+    UNIQUE INDEX `Application_bankInfoId_key`(`bankInfoId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -251,7 +270,7 @@ CREATE TABLE `Notification` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `content` VARCHAR(191) NOT NULL,
     `href` VARCHAR(191) NULL,
-    `type` ENUM('MESSAGE', 'APPLICATION_APPROVED', 'APPLICATION_REJECTED', 'APPLICATION_UPDATE', 'APPLICATION_UN_COMPLETE', 'APPLICATION_RESPONSE', 'APPLICATION_NEW', 'APPLICATION_UNDER_REVIEW', 'APPLICATION_COMPLETED', 'NEW_TICKET', 'TICKET_UPDATE', 'TASK_ASSIGNED', 'TASK_COMPLETED', 'PAYMENT_DUE', 'PAYMENT_COMPLETED') NOT NULL,
+    `type` ENUM('MESSAGE', 'APPLICATION_APPROVED', 'APPLICATION_REJECTED', 'APPLICATION_UPDATE', 'APPLICATION_UN_COMPLETE', 'APPLICATION_RESPONSE', 'APPLICATION_NEW', 'APPLICATION_UNDER_REVIEW', 'APPLICATION_COMPLETED', 'NEW_TICKET', 'TICKET_UPDATE', 'PAYMENT_DUE', 'PAYMENT_COMPLETED') NOT NULL,
     `isRead` BOOLEAN NOT NULL DEFAULT false,
     `userId` INTEGER NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -306,29 +325,6 @@ CREATE TABLE `DirectMessage` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Task` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `description` VARCHAR(191) NOT NULL,
-    `status` ENUM('PENDING', 'IN_PROGRESS', 'COMPLETED') NOT NULL DEFAULT 'PENDING',
-    `supervisorId` INTEGER NOT NULL,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
-
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `FAQ` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `question` VARCHAR(191) NOT NULL,
-    `answer` VARCHAR(191) NOT NULL,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
-
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
 CREATE TABLE `File` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(191) NULL,
@@ -339,6 +335,40 @@ CREATE TABLE `File` (
     `academicPerformanceId` INTEGER NULL,
 
     UNIQUE INDEX `File_url_key`(`url`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `FAQ` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `question` VARCHAR(191) NOT NULL,
+    `answer` TEXT NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `FixedData` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `content` TEXT NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+    `type` ENUM('COMMITMENT', 'GRANTTERMS') NOT NULL DEFAULT 'COMMITMENT',
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `FixedFiles` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(191) NULL,
+    `description` VARCHAR(191) NULL,
+    `url` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `FixedFiles_url_key`(`url`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -364,10 +394,16 @@ ALTER TABLE `PersonalInfo` ADD CONSTRAINT `PersonalInfo_contactInfoId_fkey` FORE
 ALTER TABLE `PersonalInfo` ADD CONSTRAINT `PersonalInfo_studyInfoId_fkey` FOREIGN KEY (`studyInfoId`) REFERENCES `StudyInformation`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `BankInfo` ADD CONSTRAINT `BankInfo_personalInfoId_fkey` FOREIGN KEY (`personalInfoId`) REFERENCES `PersonalInfo`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `Application` ADD CONSTRAINT `Application_studentId_fkey` FOREIGN KEY (`studentId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Application` ADD CONSTRAINT `Application_supervisorId_fkey` FOREIGN KEY (`supervisorId`) REFERENCES `User`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Application` ADD CONSTRAINT `Application_bankInfoId_fkey` FOREIGN KEY (`bankInfoId`) REFERENCES `BankInfo`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `ScholarshipInfo` ADD CONSTRAINT `ScholarshipInfo_applicationId_fkey` FOREIGN KEY (`applicationId`) REFERENCES `Application`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -431,9 +467,6 @@ ALTER TABLE `DirectMessage` ADD CONSTRAINT `DirectMessage_senderId_fkey` FOREIGN
 
 -- AddForeignKey
 ALTER TABLE `DirectMessage` ADD CONSTRAINT `DirectMessage_receiverId_fkey` FOREIGN KEY (`receiverId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `Task` ADD CONSTRAINT `Task_supervisorId_fkey` FOREIGN KEY (`supervisorId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `File` ADD CONSTRAINT `File_applicationId_fkey` FOREIGN KEY (`applicationId`) REFERENCES `Application`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;

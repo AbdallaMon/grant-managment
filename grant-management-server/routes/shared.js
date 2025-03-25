@@ -27,6 +27,8 @@ import {
   getFixedData,
   getInvoiceById,
   getInvoices,
+  getListOfPaymentInvoices,
+  getPaymentsByStatus,
   getPendingPaymentsByMonth,
   getUserGrants,
   processPayment,
@@ -438,6 +440,47 @@ router.get("/payments", async (req, res) => {
   } catch (error) {
     console.error("Error fetching :", error);
     res.status(500).json({ message: "حدث خطأ أثناء جلب الدفعات  " });
+  }
+});
+router.get("/payments/status", async (req, res) => {
+  let { status, filters } = req.query;
+
+  if (JSON.parse(filters).status) {
+    status = JSON.parse(filters).status;
+  }
+  const { limit, skip } = getPagination(req);
+  const user = req.cookies.token;
+  let userId = null;
+  if (user.role !== "ADMIN") {
+    userId = user.id;
+  }
+  try {
+    const payments = await getPaymentsByStatus({
+      status,
+      limit: Number(limit),
+      skip: Number(skip),
+      userId,
+    });
+    if (!payments) {
+      return res.status(404).json({ message: "لا يوجد دفعات" });
+    }
+    res.status(200).json(payments);
+  } catch (error) {
+    console.error("Error fetching :", error);
+    res.status(500).json({ message: "حدث خطأ أثناء جلب الدفعات  " });
+  }
+});
+router.get("/payments/:paymentId/invoices", async (req, res) => {
+  const { paymentId } = req.params;
+  try {
+    const invoices = await getListOfPaymentInvoices(Number(paymentId));
+
+    return res.status(200).json({
+      data: invoices,
+    });
+  } catch (error) {
+    console.error("Error getting payment:", error);
+    return res.status(500).json({ message: error.message });
   }
 });
 router.put("/payments/pay/:paymentId", async (req, res) => {

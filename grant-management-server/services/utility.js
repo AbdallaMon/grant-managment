@@ -16,185 +16,46 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // local file delete
-export const deleteFiles = (fileUrls) => {
-  return new Promise((resolve, reject) => {
-    const baseUploadPath = path.join(__dirname, "../uploads/");
-    let deletedFiles = [];
-    let failedFiles = [];
-
-    fileUrls.forEach((url) => {
-      try {
-        // Extract file name from the URL
-        const fileName = url.split("/").pop();
-        const filePath = path.join(baseUploadPath, fileName);
-
-        // Check if file exists
-        if (fs.existsSync(filePath)) {
-          // Delete the file
-          fs.unlinkSync(filePath);
-          deletedFiles.push(fileName);
-        } else {
-          failedFiles.push(fileName);
-        }
-      } catch (error) {
-        failedFiles.push(fileName);
-      }
-    });
-
-    if (failedFiles.length > 0) {
-      reject({
-        message: "بعض الملفات لم يتم العثور عليها أو لم يتم حذفها",
-        failedFiles,
-      });
-    } else {
-      resolve({
-        message: "تم حذف الملفات بنجاح",
-        deletedFiles,
-      });
-    }
-  });
-};
-
-// next cloud delete files
-// export async function deleteFiles(files) {
-//     const nextcloudUrlBase = process.env.NEXTCLOUD_URL;
-//     const nextcloudUsername = process.env.NEXTCLOUD_USERNAME;
-//     const nextcloudPassword = process.env.NEXTCLOUD_PASSWORD;
-//
-//     for (const fileUrl of files) {
-//         const parsedUrl = new URL(fileUrl);
-//         const name = parsedUrl.pathname.split('/').pop(); // Get the file name from URL
-//
-//         const deleteUrl = `${nextcloudUrlBase}/${name}`;
-//
-//         const response = await axios.delete(deleteUrl, {
-//             auth: {
-//                 username: nextcloudUsername,
-//                 password: nextcloudPassword,
-//             },
-//         });
-//
-//
-//     }
-// }
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, "../uploads/");
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = uuidv4() + path.extname(file.originalname);
-    cb(null, uniqueSuffix);
-  },
-});
-
-// Set up multer for multiple files, allow up to 10 files
-const upload = multer({ storage }).any();
-// Function to handle file upload
-// local uploads
-export const uploadFiles = (req, res) => {
-  return new Promise((resolve, reject) => {
-    upload(req, res, (err) => {
-      if (err) {
-        reject(err);
-      } else {
-        if (!req.files || req.files.length === 0) {
-          return reject(new Error("No files uploaded."));
-        }
-        const fileUrls = {};
-
-        req.files.forEach((file) => {
-          const fieldName = file.fieldname; // e.g., 'file_transiction'
-          const fileUrl = `${req.protocol}://${req.get("host")}/uploads/${
-            file.filename
-          }`;
-
-          if (fieldName) {
-            fileUrls[fieldName] = fileUrl;
-          }
-        });
-
-        resolve(fileUrls);
-      }
-    });
-  });
-};
-// next cloud uploads
-// const upload = multer({ storage: multer.memoryStorage() }).any();
-
-// export const uploadFiles = async (req, res) => {
+// export const deleteFiles = (fileUrls) => {
 //   return new Promise((resolve, reject) => {
-//     // Use the Multer upload middleware
-//     upload(req, res, async (err) => {
-//       if (err) {
-//         return reject(err);
-//       }
+//     const baseUploadPath = path.join(__dirname, "../uploads/");
+//     let deletedFiles = [];
+//     let failedFiles = [];
 
-//       if (!req.files || req.files.length === 0) {
-//         return reject(new Error("No files uploaded."));
-//       }
-
+//     fileUrls.forEach((url) => {
 //       try {
-//         const results = {};
-//         const nextcloudUrlBase = process.env.NEXTCLOUD_URL;
-//         const nextcloudUsername = process.env.NEXTCLOUD_USERNAME;
-//         const nextcloudPassword = process.env.NEXTCLOUD_PASSWORD;
-//         for (const file of req.files) {
-//           const uniqueName = uuidv4() + "-" + file.originalname;
-//           const nextcloudUrl = `${nextcloudUrlBase}/${uniqueName}`;
+//         // Extract file name from the URL
+//         const fileName = url.split("/").pop();
+//         const filePath = path.join(baseUploadPath, fileName);
 
-//           // Upload the file to Nextcloud
-//           const buffer = Buffer.from(file.buffer);
-//           await axios.put(nextcloudUrl, buffer, {
-//             auth: {
-//               username: nextcloudUsername,
-//               password: nextcloudPassword,
-//             },
-//             headers: {
-//               "Content-Type": file.mimetype,
-//             },
-//           });
-
-//           // Generate a public share link for the uploaded file
-//           const shareUrl = `${nextcloudUrlBase.replace(
-//             "/remote.php/webdav",
-//             ""
-//           )}/ocs/v2.php/apps/files_sharing/api/v1/shares`;
-//           const shareResponse = await axios.post(
-//             shareUrl,
-//             `path=/${uniqueName}&shareType=3&permissions=1`,
-//             {
-//               auth: {
-//                 username: nextcloudUsername,
-//                 password: nextcloudPassword,
-//               },
-//               headers: {
-//                 "OCS-APIREQUEST": "true",
-//                 "Content-Type": "application/x-www-form-urlencoded",
-//               },
-//             }
-//           );
-//           const publicUrl =
-//             shareResponse.data.ocs.data.url +
-//             (file.mimetype === "application/pdf"
-//               ? `?type=pdf&name=${uniqueName}`
-//               : `/preview?name=${uniqueName}`);
-
-//           results[file.fieldname] = publicUrl.startsWith("http://")
-//             ? publicUrl.replace("http://", "https://")
-//             : publicUrl;
+//         // Check if file exists
+//         if (fs.existsSync(filePath)) {
+//           // Delete the file
+//           fs.unlinkSync(filePath);
+//           deletedFiles.push(fileName);
+//         } else {
+//           failedFiles.push(fileName);
 //         }
-//         resolve(results); // <-- Resolving with the results
 //       } catch (error) {
-//         reject(new Error("حدث خطاء اثناء رفع الملفات"));
+//         failedFiles.push(fileName);
 //       }
 //     });
+
+//     if (failedFiles.length > 0) {
+//       reject({
+//         message: "بعض الملفات لم يتم العثور عليها أو لم يتم حذفها",
+//         failedFiles,
+//       });
+//     } else {
+//       resolve({
+//         message: "تم حذف الملفات بنجاح",
+//         deletedFiles,
+//       });
+//     }
 //   });
 // };
 
+// next cloud delete files
 // export async function deleteFiles(files) {
 //   const nextcloudUrlBase = process.env.NEXTCLOUD_URL;
 //   const nextcloudUsername = process.env.NEXTCLOUD_USERNAME;
@@ -214,6 +75,148 @@ export const uploadFiles = (req, res) => {
 //     });
 //   }
 // }
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     const uploadPath = path.join(__dirname, "../uploads/");
+//     if (!fs.existsSync(uploadPath)) {
+//       fs.mkdirSync(uploadPath, { recursive: true });
+//     }
+//     cb(null, uploadPath);
+//   },
+//   filename: (req, file, cb) => {
+//     const uniqueSuffix = uuidv4() + path.extname(file.originalname);
+//     cb(null, uniqueSuffix);
+//   },
+// });
+
+// // Set up multer for multiple files, allow up to 10 files
+// const upload = multer({ storage }).any();
+// // Function to handle file upload
+// // local uploads
+// export const uploadFiles = (req, res) => {
+//   return new Promise((resolve, reject) => {
+//     upload(req, res, (err) => {
+//       if (err) {
+//         reject(err);
+//       } else {
+//         if (!req.files || req.files.length === 0) {
+//           return reject(new Error("No files uploaded."));
+//         }
+//         const fileUrls = {};
+
+//         req.files.forEach((file) => {
+//           const fieldName = file.fieldname; // e.g., 'file_transiction'
+//           const fileUrl = `${req.protocol}://${req.get("host")}/uploads/${
+//             file.filename
+//           }`;
+
+//           if (fieldName) {
+//             fileUrls[fieldName] = fileUrl;
+//           }
+//         });
+
+//         resolve(fileUrls);
+//       }
+//     });
+//   });
+// };
+
+// next cloud uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 100 * 1024 * 1024 }, // 500MB limit
+}).any();
+
+export const uploadFiles = async (req, res) => {
+  return new Promise((resolve, reject) => {
+    // Use the Multer upload middleware
+    upload(req, res, async (err) => {
+      if (err) {
+        return reject(err);
+      }
+
+      if (!req.files || req.files.length === 0) {
+        return reject(new Error("No files uploaded."));
+      }
+
+      try {
+        const results = {};
+        const nextcloudUrlBase = process.env.NEXTCLOUD_URL;
+        const nextcloudUsername = process.env.NEXTCLOUD_USERNAME;
+        const nextcloudPassword = process.env.NEXTCLOUD_PASSWORD;
+        for (const file of req.files) {
+          const uniqueName = uuidv4() + "-" + file.originalname;
+          const nextcloudUrl = `${nextcloudUrlBase}/${uniqueName}`;
+
+          // Upload the file to Nextcloud
+          const buffer = Buffer.from(file.buffer);
+          await axios.put(nextcloudUrl, buffer, {
+            auth: {
+              username: nextcloudUsername,
+              password: nextcloudPassword,
+            },
+            headers: {
+              "Content-Type": file.mimetype,
+            },
+          });
+
+          // Generate a public share link for the uploaded file
+          const shareUrl = `${nextcloudUrlBase.replace(
+            "/remote.php/webdav",
+            ""
+          )}/ocs/v2.php/apps/files_sharing/api/v1/shares`;
+          const shareResponse = await axios.post(
+            shareUrl,
+            `path=/${uniqueName}&shareType=3&permissions=1`,
+            {
+              auth: {
+                username: nextcloudUsername,
+                password: nextcloudPassword,
+              },
+              headers: {
+                "OCS-APIREQUEST": "true",
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+            }
+          );
+          const publicUrl =
+            shareResponse.data.ocs.data.url +
+            (file.mimetype === "application/pdf"
+              ? `?type=pdf&name=${uniqueName}`
+              : `/preview?name=${uniqueName}`);
+
+          results[file.fieldname] = publicUrl.startsWith("http://")
+            ? publicUrl.replace("http://", "https://")
+            : publicUrl;
+        }
+        resolve(results); // <-- Resolving with the results
+      } catch (error) {
+        console.log(error, "error");
+        reject(new Error("حدث خطاء اثناء رفع الملفات"));
+      }
+    });
+  });
+};
+
+export async function deleteFiles(files) {
+  const nextcloudUrlBase = process.env.NEXTCLOUD_URL;
+  const nextcloudUsername = process.env.NEXTCLOUD_USERNAME;
+  const nextcloudPassword = process.env.NEXTCLOUD_PASSWORD;
+
+  for (const fileUrl of files) {
+    const parsedUrl = new URL(fileUrl);
+    const name = parsedUrl.pathname.split("/").pop(); // Get the file name from URL
+
+    const deleteUrl = `${nextcloudUrlBase}/${name}`;
+
+    const response = await axios.delete(deleteUrl, {
+      auth: {
+        username: nextcloudUsername,
+        password: nextcloudPassword,
+      },
+    });
+  }
+}
 
 // minio upload
 // const upload = multer({storage: multer.memoryStorage()}).any();

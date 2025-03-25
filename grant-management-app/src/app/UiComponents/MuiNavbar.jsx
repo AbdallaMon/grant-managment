@@ -79,7 +79,6 @@ export default function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [links, setLinks] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false); // State for the large-screen drawer
-  console.log(role, "role");
   // Manage links based on role
   useEffect(() => {
     if (isLoggedIn) {

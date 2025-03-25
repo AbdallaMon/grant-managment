@@ -1,5 +1,5 @@
 import DocumentsPanel from "@/app/UiComponents/DataViewer/Documents";
 
 export default function page() {
-  return <DocumentsPanel />;
+  return <DocumentsPanel isAdmin={false} />;
 }

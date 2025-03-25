@@ -351,6 +351,7 @@ model UserGrant {
   application      Application        @relation(fields: [applicationId], references: [id])
 }
 
+
 model Payment {
   id               Int                @id @default(autoincrement())
   userGrantId      Int

@@ -23,8 +23,14 @@ export default function MuiFileField({
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setError(null); // Reset error on new file selection
-
+    const MAX_FILE_SIZE = 20 * 1024 * 1024;
     if (file) {
+      if (file.size > MAX_FILE_SIZE) {
+        setError(`حجم الملف يجب الا يتخطي 20 ميجا`);
+        setPreview(null);
+        setFileName("");
+        return;
+      }
       if (input.acceptOnly === "pdf" && file.type !== "application/pdf") {
         setError("الملف يجب أن يكون بصيغة PDF فقط");
         setValue(id, null);

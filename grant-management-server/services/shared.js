@@ -71,6 +71,80 @@ export async function getPendingPaymentsByMonth(
   });
   return payments;
 }
+export async function getPaymentsByStatus({
+  limit = 1,
+  skip = 10,
+  status,
+  userId,
+}) {
+  let where = {};
+  if (userId) {
+    where.userGrant = {
+      supervisorId: Number(userId),
+    };
+  }
+  if (!status || status === "ALL") {
+  } else {
+    where = {
+      status: status,
+    };
+  }
+  console.log(where, "where");
+
+  let pagination = { skip, take: limit };
+  const payments = await prisma.payment.findMany({
+    where,
+    ...pagination,
+    include: {
+      userGrant: {
+        select: {
+          id: true,
+          applicationId: true,
+          endDate: true,
+          userId: true,
+          grant: {
+            select: { name: true },
+          },
+          user: {
+            select: {
+              personalInfo: {
+                select: {
+                  basicInfo: {
+                    select: { name: true },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    orderBy: { dueDate: "asc" },
+  });
+  const total = await prisma.payment.count({ where });
+  const totalPages = Math.ceil(total / limit);
+  return {
+    data: payments,
+    total,
+    totalPages,
+  };
+}
+export async function getListOfPaymentInvoices(paymentId) {
+  return await prisma.invoice.findMany({
+    where: {
+      paymentId: Number(paymentId),
+    },
+    orderBy: {
+      paidAt: "desc",
+    },
+    select: {
+      paidAt: true,
+      createdAt: true,
+      amount: true,
+      invoiceNumber: true,
+    },
+  });
+}
 
 export async function processPayment(paymentId, amount, paidAt) {
   const payment = await prisma.payment.findUnique({
@@ -83,13 +157,13 @@ export async function processPayment(paymentId, amount, paidAt) {
 
   const pendingAmount = payment.amount - (payment.amountPaid || 0);
 
-  if (amount > pendingAmount) {
+  if (Number(amount) > pendingAmount) {
     throw new Error(
       `المبلغ الوارد يتجاوز المبلغ المتبقي. المبلغ المتبقي للدفع هو ${pendingAmount}.`
     );
   }
 
-  const newAmountPaid = (payment.amountPaid || 0) + amount;
+  const newAmountPaid = Number(payment.amountPaid || 0) + Number(amount);
   const isFullyPaid = newAmountPaid >= payment.amount;
 
   await prisma.payment.update({

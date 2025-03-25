@@ -36,7 +36,7 @@ initSocket(httpServer); // Initialize socket.io with the server
 
 app.use(express.json());
 app.use(cookieParser());
-app.use("/uploads", express.static("uploads")); // Serve static files
+// app.use("/uploads", express.static("uploads")); // Serve static files
 
 // Routes
 app.post("/upload", verifyTokenUsingReq, async (req, res) => {
@@ -49,7 +49,7 @@ app.post("/upload", verifyTokenUsingReq, async (req, res) => {
   } catch (err) {
     console.log(err, "Error uploading files");
     res.status(500).json({
-      message: "حدثت مشكلة غير متوفعة حاول مره اخري بعد قليل",
+      message: "حدثت مشكلة غير متوفعة حاول مره اخري بعد قليل" + err,
       error: err.message,
     });
   }

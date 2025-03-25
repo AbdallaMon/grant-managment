@@ -10,7 +10,6 @@ import Image from "next/image";
 export default function HandleAuth({ children }) {
   const { isLoggedIn } = useAuth();
   const pathName = usePathname();
-  console.log(pathName, "pathName");
   const router = useRouter();
   useEffect(() => {
     function handleRedirect() {
