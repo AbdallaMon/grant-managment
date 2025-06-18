@@ -16,18 +16,18 @@ router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   try {
     const { user, token } = await loginUser(email, password);
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-      path: "/",
-    });
     // res.cookie("token", token, {
     //   httpOnly: true,
     //   secure: true,
-    //   // sameSite: "None",
     //   path: "/",
-    //   // domain: process.env.SERVER,
     // });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      path: "/",
+      domain: process.env.SERVER,
+    });
     res.status(200).json({
       status: 200,
       message: "تم تسجيل الدخول بنجاح جاري اعادة التوجيه",
