@@ -80,6 +80,15 @@ app.post("/delete-files", async (req, res) => {
       .json({ message: err.message, failedFiles: err.failedFiles });
   }
 });
+app.get("/client", async (req, res) => {
+  try {
+    res.status(200).json({ data: "text" });
+  } catch (err) {
+    console.log(err, "Error  ");
+    res.status(500).json({ message: err.message });
+  }
+});
+
 app.use("/auth", authRoutes);
 app.use("/student", studentRoutes);
 app.use("/supervisor", supervisorRoutes);
