@@ -23,11 +23,23 @@ import {
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
+const allowedOrigins = [
+  "https://scholarships.onsur.org", // Your production frontend domain
+  "https://www.scholarships.onsur.org", // In case you use www (add if applicable)
+];
 app.use(
   cors({
-    origin: process.env.ORIGIN,
-    credentials: true,
+    origin: function (origin, callback) {
+      // allow requests with no origin (like mobile apps, curl, or same-origin requests from tools)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
+        console.log(msg);
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+    credentials: true, // Important if your frontend sends cookies, auth headers, etc.
   })
 );
 
@@ -83,4 +95,6 @@ app.use("/utility", utilityRoutes); // Use utility routes
 
 httpServer.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is allowedOrigins ${allowedOrigins}`);
+  console.log(`Server is allowedOrigins ${process.env.SERVER}`);
 });
