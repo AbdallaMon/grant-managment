@@ -86,7 +86,7 @@ export const uploadFiles = async (req, res) => {
               // Upload file buffer to FTP server
               await uploadToFTP(file.path, remotePath);
 
-              const fileUrl = `${process.env.SERVER}/uploads/${uniqueFilename}`;
+              const fileUrl = `${process.env.FTP_HOST}/uploads/${uniqueFilename}`;
               const fieldName = file.fieldname;
 
               // Group file URLs by field name
