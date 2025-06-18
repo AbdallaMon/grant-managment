@@ -7,7 +7,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { v4 as uuidv4 } from "uuid";
 import { Client } from "basic-ftp";
-
+import { URL } from "url";
 import axios from "axios";
 import prisma from "../prisma/prisma.js";
 import { getIo } from "./socket.js";
@@ -114,6 +114,47 @@ export const uploadFiles = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+async function deleteFromFTP(remoteFilePath) {
+  const client = new Client();
+  try {
+    await client.access(ftpConfig);
+    await client.remove(remoteFilePath);
+    console.log(`Successfully deleted file from FTP: ${remoteFilePath}`);
+  } catch (err) {
+    console.error(`Failed to delete ${remoteFilePath} from FTP:`, err.message);
+    // Depending on your error handling strategy, you might want to re-throw or return false.
+    // For now, we'll just log and continue to try deleting other files.
+  } finally {
+    client.close();
+  }
+}
+export async function deleteFiles(fileUrls) {
+  if (!fileUrls || fileUrls.length === 0) {
+    console.log("No file URLs provided for deletion.");
+    return;
+  }
+
+  for (const fileUrl of fileUrls) {
+    try {
+      const parsedUrl = new URL(fileUrl);
+      const filename = path.basename(parsedUrl.pathname); // Gets 'myimage.jpg' from '/uploads/myimage.jpg'
+
+      // Construct the remote path on the FTP server
+      // Assuming 'public_html/uploads/' is your base upload directory on FTP
+      const remotePath = `public_html/uploads/${filename}`;
+
+      await deleteFromFTP(remotePath);
+    } catch (error) {
+      console.error(
+        `Error processing URL ${fileUrl} for deletion:`,
+        error.message
+      );
+      // Continue to the next file even if one fails
+    }
+  }
+  console.log("Finished attempting to delete files from FTP.");
+}
 // export const uploadFiles = async (req, res) => {
 //   return new Promise((resolve, reject) => {
 //     // Use the Multer upload middleware
